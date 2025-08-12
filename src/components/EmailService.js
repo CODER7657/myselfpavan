@@ -41,12 +41,12 @@ class EmailService {
 
         try {
             const templateParams = {
-                from_name: formData.name,
-                from_email: formData.email,
-                subject: formData.subject,
-                message: formData.message,
+                from_name: formData.name || '(No Name Provided)',
+                from_email: formData.email || '(No Email Provided)',
+                subject: formData.subject || '(No Subject)',
+                message: `Sender Name: ${formData.name || '(No Name Provided)'}\nSender Email: ${formData.email || '(No Email Provided)'}\nSubject: ${formData.subject || '(No Subject)'}\nMessage: ${formData.message || '(No Message)'}\n`,
                 to_email: 'pavanpatela5598@gmail.com',
-                reply_to: formData.email,
+                reply_to: formData.email || '',
                 timestamp: new Date().toLocaleString()
             };
 
