@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pavan Patel | Cybersecurity & Blockchain Developer</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Matrix Rain Background -->
+    <canvas id="matrix-rain"></canvas>
+    
+    <!-- Boot Sequence -->
+    <div id="boot-sequence" class="boot-overlay">
+        <div class="boot-content">
+            <pre id="ascii-art">
+    ____                          ____        __       __
+   / __ \____ __   ______ _____  / __ \____ _/ /____  / /
+  / /_/ / __ `/ | / / __ `/ __ \/ /_/ / __ `/ __/ _ \/ / 
+ / ____/ /_/ /| |/ / /_/ / / / / ____/ /_/ / /_/  __/ /  
+/_/    \__,_/ |___/\__,_/_/ /_/_/    \__,_/\__/\___/_/   
+                                                         
+        CYBERSECURITY & BLOCKCHAIN DEVELOPER
+            </pre>
+            <div class="loading-bar">
+                <div class="loading-fill"></div>
+            </div>
+            <div id="loading-text">INITIALIZING SYSTEM...</div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="terminal-nav hidden">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="nav-prompt">root@pavanpatel:~$</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">./home</a></li>
+                <li><a href="#about" class="nav-link">./about</a></li>
+                <li><a href="#skills" class="nav-link">./skills</a></li>
+                <li><a href="#projects" class="nav-link">./projects</a></li>
+                <li><a href="#terminal" class="nav-link">./terminal</a></li>
+                <li><a href="#contact" class="nav-link">./contact</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home" class="section home-section">
+        <div class="container">
+            <div class="home-content">
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <span class="btn-close"></span>
+                            <span class="btn-minimize"></span>
+                            <span class="btn-maximize"></span>
+                        </div>
+                        <div class="terminal-title">pavan@cybersec:~</div>
+                    </div>
+                    <div class="terminal-body">
+                        <div class="terminal-line">
+                            <span class="prompt">root@pavanpatel:~$</span>
+                            <span id="typed-text"></span>
+                            <span class="cursor"></span>
+                        </div>
+                        <div class="terminal-output">
+                            <p class="output-line">Hello! I'm <span class="highlight">Pavan Patel</span></p>
+                            <p class="output-line">Cybersecurity & Blockchain Developer</p>
+                            <p class="output-line">Specializing in Quantum-Resistant Cryptography</p>
+                            <p class="output-line">1 Year experience | Available Globally</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section about-section">
+        <div class="container">
+            <h2 class="section-title">./about <span class="cursor-blink">_</span></h2>
+            <div class="about-content">
+                <div class="about-info">
+                    <div class="info-card">
+                        <div class="card-header">user_info.json</div>
+                        <div class="card-body">
+                            <div class="info-item">
+                                <span class="key">"name":</span>
+                                <span class="value">"Pavan Patel"</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="key">"role":</span>
+                                <span class="value">"Cybersecurity & Blockchain Developer"</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="key">"experience":</span>
+                                <span class="value">"1 Year"</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="key">"location":</span>
+                                <span class="value">"Gujarat, India"</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="key">"focus":</span>
+                                <span class="value">"Quantum-Resistant Cryptography"</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="key">"education_1":</span>
+                                <span class="value">"BS Computer Science, BITS PILANI (2024-2027)"</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="key">"education_2":</span>
+                                <span class="value">"BTech CSE (Data Science), NEW LJIET (2024-2028)"</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="key">"email":</span>
+                                <span class="value">"pavanpatela5598@gmail.com"</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-description">
+                    <div class="description-card">
+                        <div class="card-header">description.md</div>
+                        <div class="card-body">
+                            <p>Passionate about technology | Pursuing dual degree</p>
+                            <p>I specialize in building secure, scalable solutions that protect against both current and future threats. My work spans from penetration testing and security audits to developing smart contracts and DeFi protocols.</p>
+                            <p>With a strong foundation in both offensive and defensive security, I bridge the gap between traditional cybersecurity practices and cutting-edge blockchain technology.</p>
+                            <div class="social-links">
+                                <a href="https://github.com/CODER7657" target="_blank" class="social-link">
+                                    <span>GitHub</span>
+                                </a>
+                                <a href="https://www.linkedin.com/in/pavan-patel-559195261" target="_blank" class="social-link">
+                                    <span>LinkedIn</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section skills-section">
+        <div class="container">
+            <h2 class="section-title">./skills <span class="cursor-blink">_</span></h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <div class="category-header">
+                        <h3>cybersecurity.py</h3>
+                    </div>
+                    <div class="skill-list">
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">Penetration Testing</span>
+                                <span class="skill-level">76%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="76"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">Network Security</span>
+                                <span class="skill-level">81%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="81"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">Cryptography</span>
+                                <span class="skill-level">67%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="67"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">Vulnerability Assessment</span>
+                                <span class="skill-level">62%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="62"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="skill-category">
+                    <div class="category-header">
+                        <h3>blockchain.sol</h3>
+                    </div>
+                    <div class="skill-list">
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">Smart Contracts</span>
+                                <span class="skill-level">67%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="67"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">Solidity</span>
+                                <span class="skill-level">56%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="56"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">Web3.js</span>
+                                <span class="skill-level">64%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="64"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">DeFi Protocols</span>
+                                <span class="skill-level">54%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="54"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="skill-category">
+                    <div class="category-header">
+                        <h3>programming.js</h3>
+                    </div>
+                    <div class="skill-list">
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">Python</span>
+                                <span class="skill-level">84%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="84"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">JavaScript</span>
+                                <span class="skill-level">78%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="78"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">Node.js</span>
+                                <span class="skill-level">69%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="69"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">React</span>
+                                <span class="skill-level">67%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="67"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section projects-section">
+        <div class="container">
+            <h2 class="section-title">./projects <span class="cursor-blink">_</span></h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="card-header">
+                        <h3>QuantumChat</h3>
+                        <span class="project-type">Cryptography</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Real-time messaging application demonstrating post-quantum cryptography using simulated Kyber-1024 algorithm</p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Cryptography</span>
+                            <span class="tech-tag">Kyber-1024</span>
+                            <span class="tech-tag">WebSocket</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="https://github.com/CODER7657/quantum_crypto" target="_blank" class="btn btn--primary">View Code</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="card-header">
+                        <h3>VortiFiBlockchain</h3>
+                        <span class="project-type">DApp</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Decentralized application built with Hardhat framework showcasing blockchain development skills</p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Solidity</span>
+                            <span class="tech-tag">Hardhat</span>
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">Web3.js</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="https://github.com/CODER7657/VortiFi" target="_blank" class="btn btn--primary">View Code</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="card-header">
+                        <h3>VeriServeVerification</h3>
+                        <span class="project-type">Blockchain</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Blockchain-based certificate verification system with wallet connectivity</p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Smart Contracts</span>
+                            <span class="tech-tag">IPFS</span>
+                            <span class="tech-tag">MetaMask</span>
+                            <span class="tech-tag">Node.js</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="https://github.com/CODER7657/VeriServe_block" target="_blank" class="btn btn--primary">View Code</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="card-header">
+                        <h3>CyberToolkitSecurity</h3>
+                        <span class="project-type">Security</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Comprehensive basic python scripts</p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Pytorch</span>
+                            <span class="tech-tag">API</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="https://github.com/CODER7657/codes-" target="_blank" class="btn btn--primary">View Code</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Terminal Section -->
+    <section id="terminal" class="section terminal-section">
+        <div class="container">
+            <h2 class="section-title">./interactive_terminal <span class="cursor-blink">_</span></h2>
+            <div class="terminal-workspace">
+                <div class="terminal-window-large">
+                    <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <span class="btn-close"></span>
+                            <span class="btn-minimize"></span>
+                            <span class="btn-maximize"></span>
+                        </div>
+                        <div class="terminal-title">pavan@cybersec: Interactive Terminal</div>
+                    </div>
+                    <div class="terminal-content">
+                        <div id="terminal-output">
+                            <div class="terminal-line">
+                                <span class="output-text">Welcome to Pavan's Interactive Terminal!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="output-text">Type 'help' to see available commands.</span>
+                            </div>
+                        </div>
+                        <div class="terminal-input-line">
+                            <span class="prompt">root@pavanpatel:~$</span>
+                            <input type="text" id="terminal-input" class="terminal-input" autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section contact-section">
+        <div class="container">
+            <h2 class="section-title">./contact <span class="cursor-blink">_</span></h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <div class="card-header">contact_info.json</div>
+                        <div class="card-body">
+                            <div class="contact-item">
+                                <span class="key">"email":</span>
+                                <span class="value">"pavanpatela5598@gmail.com"</span>
+                            </div>
+                            <div class="contact-item">
+                                <span class="key">"linkedin":</span>
+                                <span class="value">"linkedin.com/in/pavan-patel-559195261"</span>
+                            </div>
+                            <div class="contact-item">
+                                <span class="key">"github":</span>
+                                <span class="value">"github.com/CODER7657"</span>
+                            </div>
+                            <div class="contact-item">
+                                <span class="key">"status":</span>
+                                <span class="value status--success">"Available for Projects"</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <div class="form-card">
+                        <div class="card-header">send_message.py</div>
+                        <div class="card-body">
+                            <form id="contact-form">
+                                <div class="form-group">
+                                    <label for="name" class="form-label">Name:</label>
+                                    <input type="text" id="name" name="name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email" class="form-label">Email:</label>
+                                    <input type="email" id="email" name="email" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="subject" class="form-label">Subject:</label>
+                                    <input type="text" id="subject" name="subject" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="message" class="form-label">Message:</label>
+                                    <textarea id="message" name="message" class="form-control" rows="5" required placeholder="Your message will be sent directly to my email..."></textarea>
+                                </div>
+                                <div class="form-info">
+                                </div>
+                                <button type="submit" class="btn btn--primary btn--full-width">
+                                    Execute send_message()
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-text">
+                    <p>© 2025 Pavan Patel. Securing the digital future, one line of code at a time.</p>
+                </div>
+                <div class="footer-command">
+                    <span class="prompt">root@pavanpatel:~$</span>
+                    <span class="command">exit</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
