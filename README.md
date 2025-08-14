@@ -33,19 +33,54 @@ This portfolio website now features a fully functional contact form that sends r
 1. Sign up for a free EmailJS account at [emailjs.com](https://www.emailjs.com/)
 2. Create a new email service (Gmail, Outlook, etc.)
 3. Create an email template with the following variables:
-   - `{{from_name}}` - Sender's name
-   - `{{from_email}}` - Sender's email
-   - `{{subject}}` - Email subject
-   - `{{message}}` - Email message
-   - `{{to_email}}` - Your email (pavanpatela5598@gmail.com)
-4. Update the EmailJS configuration in `src/components/EmailService.js`:
+   - {{from_name}} - Sender's name
+   - {{from_email}} - Sender's email
+   - {{subject}} - Email subject
+   - {{message}} - Email message
+   - {{to_email}} - Your email (pavanpatela5598@gmail.com)
+4. Update the EmailJS configuration in **src/components/EmailService.js**:
    ```javascript
    this.serviceId = 'your_service_id';
    this.templateId = 'your_template_id';
    this.publicKey = 'your_public_key';
    ```
 
-### File Structure
+**Important**: The serviceId, templateId, and publicKey should be set in **src/components/EmailService.js**. If moving to a server-side/secure environment in the future, it's recommended not to expose secret keys and to use .env files and server logic instead.
+
+## Vercel Deployment
+
+To deploy this portfolio on Vercel:
+
+1. **Connect GitHub Repository**: 
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "New Project" and import your GitHub repository
+   - Select the `myselfpavan` repository
+
+2. **Configure Build Settings**:
+   - **Root Directory**: `.` (root directory)
+   - **Build Command**: `npm run build` (if applicable)
+   - **Output Directory**: `dist/` or as per your project setup
+
+3. **Environment Variables** (if needed):
+   - Add any environment variables in Vercel dashboard
+   - For EmailJS, the keys are configured in the client-side code
+
+4. **Automatic Deployments**:
+   - Deployments are automatic on push to the main branch
+   - Preview deployments are created for pull requests
+
+## Scripts
+
+Available npm/yarn scripts:
+
+- `npm start` — Starts the development server
+- `npm run build` — Builds the project for production
+- `npm run dev` — Starts development server (alternative)
+- `npm run preview` — Previews the production build locally
+- `npm run lint` — Runs linting checks (if configured)
+- `npm test` — Runs tests (if configured)
+
+## File Structure
 ```
 ├── src/
 │   ├── components/
@@ -56,6 +91,7 @@ This portfolio website now features a fully functional contact form that sends r
 │   └── theme.ts                  # MUI theme configuration
 ├── app.js                        # Main application logic
 ├── index.html                    # Main HTML file
+├── package.json                  # Dependencies and scripts
 ├── style.css                     # Styles
 └── index.css                     # Global CSS imports
 ```
@@ -90,6 +126,7 @@ This portfolio website now features a fully functional contact form that sends r
 ## Usage
 
 The contact form is now fully functional and will:
+
 1. Validate all form fields in real-time
 2. Send actual emails to pavanpatela5598@gmail.com
 3. Show detailed success/error notifications
@@ -108,3 +145,15 @@ The contact form is now fully functional and will:
 - Form validation prevents spam and malicious inputs
 - Rate limiting handled by EmailJS service
 - No sensitive data stored client-side
+
+## Live Demo
+
+🌐 **Portfolio Website**: [myselfpavan.vercel.app](https://myselfpavan.vercel.app/)
+
+## Contributing
+
+Feel free to submit issues, fork the repository, and create pull requests for improvements.
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
