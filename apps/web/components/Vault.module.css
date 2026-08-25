@@ -66,3 +66,76 @@
 @media (max-width: 560px) {
   .grid { grid-template-columns: 1fr; }
 }
+
+/* ── withdrawn ────────────────────────────────────────────────────────────── */
+
+/* What the gate pulled. Deliberately plain: this is a footnote to the grid,
+   not a second gallery competing with it. */
+.withdrawn {
+  margin-top: var(--s-7);
+  padding-top: var(--s-5);
+  border-top: 1px dashed var(--rule-strong);
+}
+
+.withdrawnHead {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--warn);
+  margin: 0 0 var(--s-2);
+}
+
+.withdrawnNote {
+  font-size: var(--t-xs);
+  line-height: 1.7;
+  color: var(--ink-muted);
+  max-width: 62ch;
+  margin: 0 0 var(--s-4);
+}
+
+.withdrawnList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-3);
+}
+
+.withdrawnItem {
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) auto;
+  align-items: baseline;
+  gap: var(--s-2) var(--s-3);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.withdrawnItem a {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  color: var(--ink);
+  text-decoration-color: var(--warn);
+}
+
+.withdrawnScore {
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  color: var(--warn);
+  font-variant-numeric: tabular-nums;
+}
+
+.withdrawnWhy {
+  grid-column: 1 / -1;
+  font-size: var(--t-2xs);
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+
+@media (min-width: 720px) {
+  .withdrawnItem {
+    grid-template-columns: minmax(0, 12rem) 5rem minmax(0, 1fr);
+  }
+
+  .withdrawnWhy { grid-column: auto; }
+}

@@ -165,7 +165,19 @@
   z-index: 5;
 }
 
-.bandScore { font-variant-numeric: tabular-nums; }
+.bandScore { font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 0.4em; }
+
+/* How the score moved at the last assay. Drawn on the rarity band, so it sits
+   next to the number it changed rather than in a legend somewhere else. */
+.move {
+  font-variant-numeric: tabular-nums;
+  padding: 0 0.35em;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--paper) 26%, transparent);
+  letter-spacing: 0.06em;
+}
+
+.move[data-dir="down"] { background: color-mix(in srgb, var(--ink) 22%, transparent); }
 
 /* Says plainly that this rank was not earned from a score. */
 .provisional {
@@ -242,10 +254,15 @@
 
 /* The reverse carries more prose than the front, so it is the one face allowed
    to scroll — masked top and bottom so a clipped line reads as "more below"
-   rather than as a mistake. */
+   rather than as a mistake.
+
+   It must NOT contain its overscroll. `overscroll-behavior: contain` stops the
+   scroll chaining to the page, which turns a flipped card into a dead zone: the
+   reverse reaches its end after a hundred pixels and the wheel then does
+   nothing at all while the pointer stays over it. Chaining is the correct
+   behaviour — read the card, keep scrolling, carry on down the page. */
 .back .body {
   overflow-y: auto;
-  overscroll-behavior: contain;
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
@@ -376,7 +393,18 @@
   pointer-events: auto;
   touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+
+  /*
+   * Above the flip surface, which is z-index 6.
+   *
+   * `pointer-events: auto` alone was not enough: the surface is painted over
+   * the body, so every wheel and drag landed on a button instead of the
+   * scroller beneath it. The reverse said SCROLL FOR MORE and then refused to,
+   * and anything past the fold could not be read at all. Lifting the body over
+   * the surface is what makes that hint true — the edge around it still flips
+   * the card, which is what TAP EDGE TO CLOSE has always meant.
+   */
+  z-index: 7;
 }
 
 @media (prefers-reduced-motion: reduce) {

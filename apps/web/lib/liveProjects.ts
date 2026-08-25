@@ -1,5 +1,13 @@
 import { projects, type AgentId, type Project } from "@foundry/content";
-import type { Assay } from "@foundry/assay";
+import type { WrittenCard } from "@/lib/useCards";
+import {
+  CARD_TO_REPO,
+  NO_REPO,
+  movementFor,
+  placementFor,
+  type Assay,
+  type Movement,
+} from "@foundry/assay";
 
 /**
  * Marries the hand-written cards to the live assay.
@@ -16,21 +24,6 @@ import type { Assay } from "@foundry/assay";
  *      pretending to prose it does not have, and it is labelled as generated,
  *      because a card written by a script should say so.
  */
-
-/** Which curated card corresponds to which repository. */
-const CARD_TO_REPO: Record<string, string> = {
-  pramana: "pramana",
-  complylite: "complylite",
-  globetrotter: "globetrotter",
-  "pocso-shield": "CRAFTATHON",
-  vortifi: "VortiFi",
-  veriserve: "VeriServe_block",
-  "mental-wellness": "genex-prj",
-  "sole-vault": "shoes.store",
-};
-
-/** Cards with no repository of their own — an upstream filing, private work. */
-const NO_REPO = new Set(["ap2-findings", "raksha-ai"]);
 
 /* ── inference for generated cards ────────────────────────────────────────── */
 
@@ -91,7 +84,16 @@ function describeStructure(a: Assay): string {
   return "Ships with " + list + ".";
 }
 
-function synthesise(a: Assay): Project {
+/**
+ * Builds a card for a repository nobody has written up.
+ *
+ * `written` is the prose a model produced from this repository's own evidence,
+ * committed by the assay workflow. Where it exists it replaces the five prose
+ * fields and nothing else — the rank, the tier, the metrics and the bars are
+ * still computed here, from the assay. A model is trusted to write a sentence
+ * and never to decide a number.
+ */
+function synthesise(a: Assay, written?: WrittenCard): Project {
   const agent = inferAgent(a);
   const languages = a.evidence.topics.length
     ? a.evidence.topics.slice(0, 6)
@@ -103,18 +105,20 @@ function synthesise(a: Assay): Project {
   return {
     slug: "auto-" + a.name.toLowerCase(),
     name: titleCase(a.name),
-    classification: "Auto-assayed",
-    tagline: a.evidence.description ?? "No description set on the repository.",
+    classification: written?.classification ?? "Auto-assayed",
+    tagline: written?.tagline ?? a.evidence.description ?? "No description set on the repository.",
     /*
      * The README's opening paragraph beats the one-line GitHub description:
      * it is the author explaining the thing in their own words, which is the
      * closest an auto-generated card can get to being written.
      */
     plain:
+      written?.plain ??
       a.evidence.readmeLede ??
       a.evidence.description ??
       "Generated from the repository itself — it carries no description or README prose yet.",
     summary:
+      written?.summary ??
       "Promoted automatically by the assay at " +
       Math.round(a.score) +
       "/100. " +
@@ -127,11 +131,12 @@ function synthesise(a: Assay): Project {
       pushed +
       ".",
     highlight:
-      a.nextSteps.length > 0
+      written?.highlight ??
+      (a.nextSteps.length > 0
         ? "Written by a script, not by hand. To raise it: " +
           a.nextSteps[0]!.charAt(0).toLowerCase() +
           a.nextSteps[0]!.slice(1)
-        : "Written by a script, not by hand — it cleared every signal the rubric checks.",
+        : "Written by a script, not by hand — it cleared every signal the rubric checks."),
     rarity: a.tier,
     agent,
     stack: languages,
@@ -139,7 +144,7 @@ function synthesise(a: Assay): Project {
       { label: "Assay score", value: Math.round(a.score) + "/100" },
       { label: "Commits", value: String(commits) },
       { label: "Last push", value: pushed },
-      { label: "Origin", value: "Auto-generated" },
+      { label: "Origin", value: written ? "Machine-written" : "Auto-generated" },
     ],
     repo: a.url,
     demo: null,
@@ -161,6 +166,11 @@ export interface LiveProject extends Project {
   /** True when the whole card was generated rather than written. */
   generated?: boolean;
   /**
+   * Which model wrote the prose on a generated card, when one did. The card
+   * says so on its face: a card written by a machine should admit it.
+   */
+  writtenBy?: string;
+  /**
    * True when no assay could reach this project's repository — private work,
    * or a filing with no repository of its own. Its rank is the author's
    * estimate, and the card says so rather than passing it off as a score.
@@ -168,8 +178,33 @@ export interface LiveProject extends Project {
   provisional?: boolean;
   /** Why it could not be graded. */
   provisionalReason?: string;
+  /** How the score moved since the previous assay, where there is one to compare. */
+  movement?: Movement | null;
   /** What the vault orders by. Real score where one exists. */
   sortScore: number;
+}
+
+/**
+ * A card that used to be in the vault and no longer clears the gate.
+ *
+ * It is named rather than deleted. A portfolio that quietly drops the projects
+ * that stopped measuring up is one you cannot read anything into — the whole
+ * value of a gate is that it is visible when it bites.
+ */
+export interface WithdrawnCard {
+  slug: string;
+  name: string;
+  url: string;
+  score: number;
+  reason: string;
+  route: string | null;
+}
+
+export interface Catalogue {
+  /** Ranked, highest first. What the grid draws. */
+  vault: LiveProject[];
+  /** Pulled from the grid, listed underneath it with the reason. */
+  withdrawn: WithdrawnCard[];
 }
 
 /**
@@ -199,14 +234,36 @@ const PROVISIONAL_REASON: Record<string, string> = {
 };
 
 /**
- * Curated cards first, in their authored order, then anything the assay
- * promoted that nobody has written up. Ranks come from the assay wherever
- * one exists, so the vault reorders itself as the work improves.
+ * Builds the vault from the live assay.
+ *
+ * Three rules, and nothing else decides what a visitor sees:
+ *
+ *   1. A card exists because its repository cleared the gate — curated if
+ *      somebody wrote it, generated if not. Nobody adds one by editing a list.
+ *   2. Its rank is the score. A repository that improves climbs past one that
+ *      has not, on the next refresh, with nothing reordered by hand.
+ *   3. A card whose repository stops clearing the gate is withdrawn and said
+ *      to have been withdrawn.
+ *
+ * `previous` is the score at the last assay, keyed by lowercased repository
+ * name. It is optional — with no history, cards simply show no movement.
+ * `written` is the prose the workflow had a model produce for cards nobody has
+ * written by hand; it is equally optional, and its absence falls back to the
+ * template.
  */
-export function joinProjects(byName: Map<string, Assay>): LiveProject[] {
+export function joinProjects(
+  byName: Map<string, Assay>,
+  previous?: Map<string, number>,
+  written?: Map<string, WrittenCard>
+): Catalogue {
   const claimed = new Set<string>();
+  const vault: LiveProject[] = [];
+  const withdrawn: WithdrawnCard[] = [];
 
-  const curated: LiveProject[] = projects.map((p) => {
+  const movedBy = (a: Assay): Movement | null =>
+    previous ? movementFor(a.score, previous.get(a.name.toLowerCase())) : null;
+
+  for (const p of projects) {
     /*
      * The rank on a curated card is the assay's, not the author's.
      *
@@ -217,53 +274,88 @@ export function joinProjects(byName: Map<string, Assay>): LiveProject[] {
      * work the gate genuinely cannot see, and it is labelled when used.
      */
     if (NO_REPO.has(p.slug)) {
-      return {
+      vault.push({
         ...p,
         sortScore: anchorFor(p.rarity),
         provisional: true,
         provisionalReason: PROVISIONAL_REASON[p.slug] ?? "Not gradeable from a repository.",
-      };
+      });
+      continue;
     }
 
     const repoName = CARD_TO_REPO[p.slug];
     const assay = repoName ? byName.get(repoName.toLowerCase()) : undefined;
     if (!assay) {
-      return {
+      vault.push({
         ...p,
         sortScore: anchorFor(p.rarity),
         provisional: true,
         provisionalReason:
           PROVISIONAL_REASON[p.slug] ??
           "Repository is private, so the gate cannot reach it yet.",
-      };
+      });
+      continue;
     }
 
     claimed.add(repoName!.toLowerCase());
+
+    /*
+     * A curated card is not a permit. If the repository behind it stops
+     * clearing the gate, the card comes out of the grid — the same rule that
+     * let it in, applied in the other direction.
+     */
+    const placed = placementFor(assay);
+    if (placed.placement !== "vault") {
+      withdrawn.push({
+        slug: p.slug,
+        name: p.name,
+        url: assay.url,
+        score: assay.score,
+        reason: placed.reason ?? assay.reason ?? "No longer clears the gate.",
+        route: placed.route,
+      });
+      continue;
+    }
 
     /* Live numbers replace the ones typed in by hand. */
     const metrics = p.metrics.map((m) =>
       /^commits$/i.test(m.label) ? { ...m, value: String(assay.evidence.commits) } : m
     );
 
-    return {
+    vault.push({
       ...p,
       metrics,
       rarity: assay.tier,
       assay,
+      movement: movedBy(assay),
       sortScore: assay.score,
-    };
-  });
+    });
+  }
 
-  const generated: LiveProject[] = [...byName.values()]
-    .filter((a) => a.verdict === "promoted" && !claimed.has(a.name.toLowerCase()))
-    .map((a) => ({ ...synthesise(a), assay: a, generated: true, sortScore: a.score }));
+  /* Anything the gate promoted that nobody has written up gets a card of its own. */
+  for (const a of byName.values()) {
+    if (a.verdict !== "promoted") continue;
+    if (claimed.has(a.name.toLowerCase())) continue;
+
+    const prose = written?.get(a.name.toLowerCase());
+
+    vault.push({
+      ...synthesise(a, prose),
+      assay: a,
+      generated: true,
+      writtenBy: prose?.model,
+      movement: movedBy(a),
+      sortScore: a.score,
+    });
+  }
 
   /*
    * Ranked, not authored-order. The whole point of the gate is that position
    * is earned — a card that improves climbs past one that has not, on the next
    * refresh, with nobody reordering anything by hand.
    */
-  return [...curated, ...generated].sort(
-    (x, y) => y.sortScore - x.sortScore || x.name.localeCompare(y.name)
-  );
+  vault.sort((x, y) => y.sortScore - x.sortScore || x.name.localeCompare(y.name));
+  withdrawn.sort((x, y) => y.score - x.score || x.name.localeCompare(y.name));
+
+  return { vault, withdrawn };
 }

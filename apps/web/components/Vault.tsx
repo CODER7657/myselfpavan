@@ -2,10 +2,13 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { agents, projects, type AgentId } from "@foundry/content";
+import { agents, type AgentId } from "@foundry/content";
+import { PROMOTION_FLOOR } from "@foundry/assay";
 import { reveal } from "@/lib/gsap";
 import { useLiveRepos } from "@/lib/useLiveRepos";
 import { useAssay } from "@/lib/useAssay";
+import { useStandings } from "@/lib/useStandings";
+import { useCards } from "@/lib/useCards";
 import { joinProjects } from "@/lib/liveProjects";
 import { Card } from "./Card";
 import v from "./Vault.module.css";
@@ -17,10 +20,20 @@ export function Vault() {
   const [filter, setFilter] = useState<Filter>("all");
   const live = useLiveRepos();
   const assay = useAssay();
+  const standings = useStandings();
+  const written = useCards();
 
-  /* Curated cards, re-ranked from the live assay, plus a generated card for
-     anything the gate promoted that has not been written up. */
-  const catalogue = useMemo(() => joinProjects(assay.byName), [assay.byName]);
+  /*
+   * The grid is not a list somebody maintains. Every card in it is there
+   * because its repository cleared the gate on this page load — curated where
+   * one was written, generated where the gate promoted something nobody has
+   * written up — and anything that stopped clearing it is named underneath
+   * rather than quietly dropped.
+   */
+  const { vault: catalogue, withdrawn } = useMemo(
+    () => joinProjects(assay.byName, standings.previous, written),
+    [assay.byName, standings.previous, written]
+  );
 
   const shown = useMemo(
     () => (filter === "all" ? catalogue : catalogue.filter((p) => p.agent === filter)),
@@ -97,6 +110,35 @@ export function Vault() {
             </div>
           ))}
         </div>
+
+        {/* A demotion that hides itself is just a stale portfolio with extra
+            steps. What the gate pulled is listed, with the way back. */}
+        {withdrawn.length > 0 && (
+          <div className={v.withdrawn}>
+            <h3 className={v.withdrawnHead}>
+              Withdrawn by the gate · {withdrawn.length}
+            </h3>
+            <p className={v.withdrawnNote}>
+              These have cards written for them and are not in the vault, because they no
+              longer clear the floor of {PROMOTION_FLOOR}. They return on the next assay if
+              the repository does.
+            </p>
+            <ul className={v.withdrawnList}>
+              {withdrawn.map((w) => (
+                <li key={w.slug} className={v.withdrawnItem}>
+                  <a href={w.url} target="_blank" rel="noopener noreferrer">
+                    {w.name}
+                  </a>
+                  <span className={v.withdrawnScore}>{Math.round(w.score)}/100</span>
+                  <span className={v.withdrawnWhy}>
+                    {w.reason}
+                    {w.route ? " " + w.route : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   );

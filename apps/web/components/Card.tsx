@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { agentsById, type Project } from "@foundry/content";
-import type { Assay } from "@foundry/assay";
+import type { Assay, Movement } from "@foundry/assay";
 import { useFoundry } from "@/lib/store";
 import { Sigil } from "./Sigil";
 import s from "./Card.module.css";
@@ -39,12 +39,15 @@ export function Card({
     generated?: boolean;
     provisional?: boolean;
     provisionalReason?: string;
+    movement?: Movement | null;
+    writtenBy?: string;
   };
 }) {
   const [flipped, setFlipped] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const inspectCard = useFoundry((st) => st.inspectCard);
   const agent = agentsById[project.agent];
+  const move = project.movement ?? null;
 
   const frontBtn = useRef<HTMLButtonElement>(null);
   const backBtn = useRef<HTMLButtonElement>(null);
@@ -101,6 +104,19 @@ export function Card({
             {project.assay ? (
               <span className={s.bandScore} title="Assay score, recomputed on every page load">
                 {Math.round(project.assay.score)}/100
+                {move && !move.isNew && (
+                  <span
+                    className={s.move}
+                    data-dir={move.delta > 0 ? "up" : "down"}
+                    title={
+                      "Moved " + (move.delta > 0 ? "+" : "") + move.delta +
+                      " points since the previous assay"
+                    }
+                  >
+                    {move.delta > 0 ? "▲" : "▼"}
+                    {Math.abs(move.delta)}
+                  </span>
+                )}
               </span>
             ) : project.provisional ? (
               <span className={s.bandScore} title={project.provisionalReason}>
@@ -118,7 +134,9 @@ export function Card({
               </span>
               <span className={s.owner}>{agent.callsign}</span>
               <span className={s.classification}>
-                {project.generated ? "AUTO-ASSAYED" : project.classification}
+                {project.generated && !project.writtenBy
+                  ? "AUTO-ASSAYED"
+                  : project.classification}
               </span>
             </div>
             <div className={s.name}>{project.name}</div>
@@ -183,6 +201,24 @@ export function Card({
           <div className={s.body}>
             <p className={s.summary}>{project.summary}</p>
             <p className={s.highlight}>{project.highlight}</p>
+
+            {/* A card written by a machine says so, and names the machine. */}
+            {project.writtenBy && (
+              <p className={s.provisional}>
+                <b>Machine-written.</b> This card&rsquo;s prose was written by{" "}
+                {project.writtenBy} from the repository&rsquo;s own evidence, under rules
+                that forbid any claim the evidence does not carry. The score, the tier and
+                the numbers are the assay&rsquo;s, not the model&rsquo;s.
+              </p>
+            )}
+
+            {move?.from && move.to && (
+              <p className={s.provisional}>
+                <b>{move.delta > 0 ? "Promoted." : "Demoted."}</b> Moved from {move.from} to{" "}
+                {move.to} at the last assay, on {move.delta > 0 ? "a gain" : "a loss"} of{" "}
+                {Math.abs(move.delta)} points. Nobody edited this card.
+              </p>
+            )}
 
             {project.provisional && project.provisionalReason && (
               <p className={s.provisional}>
