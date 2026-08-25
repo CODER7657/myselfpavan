@@ -24,7 +24,7 @@ Built as a pnpm monorepo:
     packages/assay/           the grading rubric — the gate
     packages/content/         all your text, projects, skills, missions
     packages/tokens/          colours, type, spacing
-    tools/                    the art generator and the evidence collector
+    tools/                    the collector, the card writer, the art generator
     .github/workflows/        the daily re-grade
 
 ---
@@ -47,7 +47,11 @@ REAL:
 
 NOT REAL:
   - The sentences the agents "think" are written by hand and streamed
-    character by character. No language model is called anywhere on this site.
+    character by character. No language model is called when anyone visits the
+    site — a visitor never waits on one and there is nothing to rate-limit.
+    (One model does run, in the daily workflow, to write the prose on a card
+    for a newly promoted repository. That prose is committed as a file and
+    labelled machine-written on the card itself. See section 10.)
   - Some tools (`chain.verify`, `policy.eval`, `audit.write`, `contract.read`,
     `tx.trace`) return summaries computed from local content. They do not
     actually execute PRAMANA or read a contract on-chain.
@@ -129,6 +133,45 @@ Raksha AI and the AP2 filings show as PROVISIONAL, because the gate cannot
 reach a private repo or an upstream issue. The card says so on its face rather
 than passing an estimate off as a score.
 
+WHAT HAPPENS TO A CARD — THE RULES, IN FULL
+
+The rules live in `packages/assay/src/placement.ts`, in one place, so they can
+be read without opening a component. There are three outcomes and nothing else
+puts a card in the vault.
+
+  IN THE VAULT
+    Marked ready (or grandfathered), not a fork, not archived, not excluded,
+    and scoring 34 or above. A hand-written card is used where one exists; a
+    repo with no card gets one generated from its own evidence.
+
+  WITHDRAWN
+    It had a card and no longer clears the gate — it fell below 34, or the
+    `foundry-ready` topic came off. The card leaves the grid and is named
+    underneath it, with the score and the cheapest way back. A demotion that
+    hides itself is just a stale portfolio with extra steps.
+
+  UNLISTED
+    Never a card: forks, archives, coursework, infrastructure, and anything
+    nobody has marked ready. Unfinished work is not graded, so it is never
+    shown as having failed.
+
+RANK UP, RANK DOWN
+
+Position in the grid is the score, highest first, recomputed on every page
+load. Tier follows the same number. Nothing is ordered by hand, and a card
+cannot hold a rank it stopped earning.
+
+Movement is now visible. `apps/web/public/data/standings.json` keeps ONE
+previous standing, written by the workflow, and a card that moved shows the
+delta on its rarity band — ▲3.9, ▼1.7 — with a line on the reverse when it
+crossed a tier ("Moved from legendary to mythic at the last assay. Nobody
+edited this card."). Recency is scored in steps rather than by the day, so an
+untouched repo scores the same tomorrow: a delta always means work happened,
+never that time passed.
+
+VeriServe_block is the live example. It scores 21.1, so its card is out of the
+grid and listed as withdrawn — item (b) below decided itself.
+
 ---
 
 ## 6. HOW TO BEAT PRAMANA
@@ -196,15 +239,35 @@ Everything new goes through the switch.
 
     .github/workflows/assay.yml
 
+FIRST, A CORRECTION. The workflow as committed was not valid YAML — the commit
+message inside it began at column 0, which ends the shell block early and makes
+GitHub reject the whole file. An invalid workflow file never appears in the
+Actions list, so the daily run never ran and the button was never there to
+press. It is fixed and the file now parses; the button is real.
+
 Runs three ways:
   1. Every day at 03:20 UTC.
-  2. Whenever the rubric or the collector changes.
+  2. Whenever the rubric or any of the three tools change.
   3. MANUALLY — GitHub → Actions → "Assay repositories" → Run workflow.
 
-That third one is your button. Only you can press it, the repo is private, and
-there is no attack surface on the public site. It collects fresh evidence,
-commits it if anything actually changed (a timestamp alone does not count), and
-Vercel redeploys.
+That third one is your button. Only you can press it — the repo is private and
+`workflow_dispatch` needs write access — and there is no attack surface on the
+public site. It has two inputs: a reason, which is recorded in the run log, and
+a `force` tick that re-records the standings and rewrites every generated card
+even if nothing moved.
+
+What one press does, in order:
+
+  1. Collects fresh evidence from the GitHub API.
+  2. Puts the file back if only the timestamp moved, so the site does not
+     redeploy for a clock.
+  3. Records the standings, if any score actually changed.
+  4. Writes prose for anything newly promoted, if GROQ_API_KEY is set. This
+     step is allowed to fail without failing the run.
+  5. Commits whatever moved, which redeploys Vercel.
+  6. Writes the outcome into the run summary — the ranking, what moved, what
+     was withdrawn — so pressing the button tells you the result without
+     opening the site.
 
 Cards then re-rank themselves. A repo that improves climbs; one that stalls
 drops. Nobody edits the site.
@@ -217,11 +280,12 @@ drops. Nobody edits the site.
      private, so they show as PROVISIONAL. Make them public and press the
      button — they get real scores automatically, no code change.
 
-  b) `VeriServe_block` sits at 21 and is below the floor. It still has a
-     hand-written card. Decide: improve the repo, or drop the card.
+  b) DONE, by rule rather than by decision. `VeriServe_block` sits at 21.1,
+     below the floor, so its card is withdrawn from the grid and named under
+     it with the way back. Improve the repo above 34 and it returns by itself.
 
-  c) The generated card for a newly promoted repo uses template prose. It is
-     honest but flat. See section 10.
+  c) DONE. Generated cards now carry written prose when GROQ_API_KEY is set,
+     and fall back to the template when it is not. See section 10.
 
   d) `assay-probe` — the fixture I built to prove the pipeline end to end. It
      scored 69 and got promoted with a generated card, which was the point. It
@@ -229,7 +293,15 @@ drops. Nobody edits the site.
 
   e) Sound on events was requested and is not built yet.
 
-  f) The three deep-inspection agents were stopped mid-run. One useful finding
+  f) M-06 shared its mission id with M-03. Completing "RUN THE ASSAY" credited
+     M-03's 260 XP instead of 300 and marked both missions done. Fixed — M-06
+     is now `regrade`. If you had already completed either, the console will
+     offer M-06 again; that is the fix working.
+
+  g) `pnpm-workspace.yaml` carried an unanswered pnpm 11 build prompt, which
+     failed every install on a clean clone. Answered.
+
+  h) The three deep-inspection agents were stopped mid-run. One useful finding
      landed: genex-prj's workflow sits at `devops/.github/workflows/`, not the
      root, so GitHub never runs it. Moving it would earn +7. The rubric already
      scores that correctly as "no CI", which is a good sign the gate is not
@@ -237,57 +309,83 @@ drops. Nobody edits the site.
 
 ---
 
-## 10. THE GROQ IDEA — YES, THIS WORKS
+## 10. GROQ — BUILT. WHERE THE KEY GOES.
 
-You asked whether Groq could write the card content when a new repo is
-promoted, following my instructions. It can, and it is a good fit.
+It is built and tested. Without a key nothing changes; with one, a newly
+promoted repository arrives with prose that reads like the rest of the site
+instead of a filled-in form.
 
-WHY GROQ SPECIFICALLY
-  - The API is OpenAI-compatible at https://api.groq.com/openai/v1, so it is a
-    plain HTTP call from the workflow — no SDK needed.
-  - It is very fast and has a free tier, and this runs at most once a day over
-    a handful of repositories.
-  - It supports structured outputs, so it can be made to return strict JSON.
+WHERE YOU PUT THE KEY
 
-Current production models include `llama-3.3-70b-versatile`,
-`openai/gpt-oss-120b`, `openai/gpt-oss-20b` and `llama-3.1-8b-instant`.
-For prose quality, `llama-3.3-70b-versatile` or `openai/gpt-oss-120b`.
+  1. Create a key at https://console.groq.com/keys
+  2. Go to the repository → Settings → Secrets and variables → Actions
+  3. "New repository secret"
+        Name:   GROQ_API_KEY
+        Secret: the key
+  4. Save. That is the whole setup — the workflow already reads it.
 
-HOW IT WOULD FIT
+I never see or handle that key. The workflow passes it to the script as an
+environment variable and the script sends it to Groq and nowhere else. It is
+never written to a file, never logged, and never reaches the public site.
 
-    1. collect-evidence.mjs runs        (already built)
-    2. write-cards.mjs runs             (new)
-         - for each PROMOTED repo with no hand-written card
-         - sends: README, description, topics, languages, file tree summary,
-           and its full assay breakdown
-         - system prompt carries the house rules: British spelling, no
-           marketing language, no claim not present in the evidence, state
-           what is hard about the project rather than what it does
-         - returns strict JSON: classification, tagline, plain, summary,
-           highlight
-    3. writes apps/web/public/data/cards.json
-    4. the site prefers that prose over the template
-    5. the workflow commits it, Vercel redeploys
+Optionally, to change model without touching code: same page, "Variables" tab,
+new variable named GROQ_MODEL. Default is `llama-3.3-70b-versatile`.
 
-WHAT YOU WOULD NEED TO DO
-  Create a Groq API key and add it as a repository secret named GROQ_API_KEY
-  (Settings → Secrets and variables → Actions). I will never see or handle
-  that key — I only write the code that reads it from the environment.
+WHAT IT DOES
 
-THE HONEST CAVEATS
-  - A model can invent things. The prompt must forbid any claim not present in
-    the evidence, and the output should still be reviewed before it is trusted
-    on a page that represents you.
-  - Generated cards should stay labelled as machine-written. A card written by
-    a script should admit it.
-  - It adds a failure mode: if Groq is down or rate-limited, the step must fail
-    soft and fall back to the template rather than break the deploy.
-  - It costs nothing on the free tier at this volume, but that is a Groq policy
-    decision, not a guarantee.
+    tools/write-cards.mjs                    (new)
+    apps/web/public/data/cards.json          (written by it, committed)
+    apps/web/lib/useCards.ts                 (the site reads it)
 
-My recommendation: build it, but keep the template as the fallback and keep
-the "generated" label. The value is real — a new repo would arrive with prose
-that reads like the rest of the site instead of a filled-in form.
+For every promoted repository with no hand-written card, it sends the README,
+the description, topics, languages, the file tree summary and the full assay
+breakdown to Groq, and asks for five fields back as strict JSON:
+classification, tagline, plain, summary, highlight. The site uses that prose in
+place of the template. The score, the tier, the metrics and the bars are still
+the assay's — a model is trusted to write a sentence and never to decide a
+number.
+
+WHAT STOPS IT LYING
+
+Three things, and the numeric one is the one that matters.
+
+  - Every number in the returned prose must appear in the evidence the model
+    was shown. "Built over 214 commits" against evidence saying 42 is caught
+    and the card is thrown away.
+  - A marketing-word list (powerful, seamless, robust, cutting-edge,
+    showcase, …) rejects the card outright.
+  - Length limits per field, and every field required.
+
+A rejected card is not published. The template stands instead, and the run says
+why in the log.
+
+IT CANNOT BREAK THE DEPLOY
+
+The step is `continue-on-error`, and the script exits clean on every failure
+path: no key, wrong key, Groq down, rate limited, malformed JSON, timeout.
+Each of those was tested against a stand-in server, and in every one the
+previous cards.json was left untouched and the site fell back to the template.
+
+IT DOES NOT COST YOU A DAILY CALL
+
+Each card records a hash of the evidence it was written from. Unchanged
+evidence means no request, no cost and no diff — so the daily run is silent
+until a repository actually changes. Use the `force` tick on the button to
+rewrite them all deliberately.
+
+IT SAYS IT IS MACHINE-WRITTEN
+
+The card's metrics read "Origin: Machine-written", and the reverse carries:
+"This card's prose was written by llama-3.3-70b-versatile from the
+repository's own evidence, under rules that forbid any claim the evidence does
+not carry. The score, the tier and the numbers are the assay's, not the
+model's."
+
+THE HONEST CAVEAT THAT REMAINS
+
+The guards catch invented numbers and brochure language. They cannot catch a
+sentence that is plausible, unverifiable and wrong. Read a new card once before
+you send the link to anyone — it is five sentences.
 
 ---
 
@@ -310,8 +408,16 @@ that reads like the rest of the site instead of a filled-in form.
     pnpm build
     pnpm start
 
-    node tools/collect-evidence.mjs      refresh the evidence locally
-                                          (set GITHUB_TOKEN first)
+    pnpm assay               the whole gate locally: collect, record the
+                             standings, print the ranking
+                             (set GITHUB_TOKEN first)
+    pnpm assay:report        re-print the ranking from the file on disk
+    pnpm assay:score NAME    the full band-by-band breakdown for one repo
+
+    node tools/collect-evidence.mjs      just the collection step
+    node --experimental-strip-types tools/write-cards.mjs --dry-run
+                                          shows exactly what would be sent to
+                                          Groq, and sends nothing
     pnpm gen:mountains                   regenerate the procedural engraving
     pnpm gen:ridge                       re-extract the ridge plate
                                           (needs: npm i --no-save sharp)
