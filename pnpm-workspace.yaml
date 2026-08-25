@@ -1,3 +1,10 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# sharp is an optional dependency of Next.js (image optimisation) and ships a
+# native post-install script, which pnpm blocks by default on CI. Approving it
+# here is what keeps `--frozen-lockfile` from failing with
+# ERR_PNPM_IGNORED_BUILDS. Mirrored in package.json#pnpm for pnpm 10.
+onlyBuiltDependencies:
+  - sharp
