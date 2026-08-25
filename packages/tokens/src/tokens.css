@@ -1,0 +1,164 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   INK & OXIDE — the design system for PAVAN//FOUNDRY.
+
+   A letterpress palette: bone paper, iron-gall ink, and four pigments a
+   19th-century press actually stocked (oxide red, verdigris, indigo, ochre).
+   Maximalism comes from density and layering, not from neon.
+
+   Light is the canonical theme. Dark redefines only the tokens, never the roles.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── surface ─────────────────────────────────────────────────────────── */
+  --paper: #f4f1e8;
+  --paper-raised: #efeade;
+  --paper-sunken: #e6e0d0;
+  --paper-inverse: #14110e;
+
+  /* ── ink ─────────────────────────────────────────────────────────────── */
+  --ink: #14110e;
+  --ink-soft: #3b352c;
+  --ink-muted: #5f574a;
+  --ink-faint: #756c5e;
+  --ink-inverse: #f4f1e8;
+
+  /* ── rules & edges ───────────────────────────────────────────────────── */
+  --rule: rgba(20, 17, 14, 0.16);
+  --rule-strong: rgba(20, 17, 14, 0.42);
+  --rule-hair: rgba(20, 17, 14, 0.08);
+
+  /* ── pigments ────────────────────────────────────────────────────────── */
+  --oxide: #b03a26;
+  --oxide-soft: rgba(176, 58, 38, 0.12);
+  --verdigris: #2c6b5f;
+  --verdigris-soft: rgba(44, 107, 95, 0.12);
+  --indigo: #26356b;
+  --indigo-soft: rgba(38, 53, 107, 0.12);
+  --ochre: #8a6216;
+  --ochre-soft: rgba(138, 98, 22, 0.14);
+  --plum: #6b2b54;
+  --plum-soft: rgba(107, 43, 84, 0.12);
+
+  /* ── semantic ────────────────────────────────────────────────────────── */
+  --accent: var(--oxide);
+  --accent-soft: var(--oxide-soft);
+  --ok: var(--verdigris);
+  --warn: var(--ochre);
+  --info: var(--indigo);
+  --danger: var(--oxide);
+
+  /* ── agent identity ──────────────────────────────────────────────────── */
+  --agent-cipher: var(--indigo);
+  --agent-ledger: var(--ochre);
+  --agent-oracle: var(--plum);
+  --agent-forge: var(--oxide);
+  --agent-warden: var(--verdigris);
+  --agent-atlas: var(--ink-soft);
+
+  /* ── rarity ──────────────────────────────────────────────────────────── */
+  --rarity-common: var(--ink-muted);
+  --rarity-rare: var(--indigo);
+  --rarity-epic: var(--plum);
+  --rarity-legendary: var(--ochre);
+  --rarity-mythic: var(--oxide);
+
+  /* ── engraving ───────────────────────────────────────────────────────── */
+  --engrave-ink: #14110e;
+  --engrave-fill: #f4f1e8;
+
+  /* ── type ────────────────────────────────────────────────────────────── */
+  --font-pixel: "Pixelify Sans", ui-monospace, monospace;
+  --font-micro: "Silkscreen", ui-monospace, monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+
+  /* A 1.25 minor-third scale, clamped for fluid type. */
+  --t-2xs: clamp(0.62rem, 0.6rem + 0.1vw, 0.68rem);
+  --t-xs: clamp(0.72rem, 0.69rem + 0.14vw, 0.8rem);
+  --t-sm: clamp(0.84rem, 0.8rem + 0.2vw, 0.94rem);
+  --t-base: clamp(0.96rem, 0.92rem + 0.24vw, 1.08rem);
+  --t-lg: clamp(1.16rem, 1.08rem + 0.4vw, 1.4rem);
+  --t-xl: clamp(1.5rem, 1.32rem + 0.8vw, 2rem);
+  --t-2xl: clamp(2rem, 1.6rem + 1.8vw, 3.2rem);
+  --t-3xl: clamp(2.8rem, 2rem + 3.6vw, 5.4rem);
+  --t-4xl: clamp(3.6rem, 2.2rem + 6.4vw, 9rem);
+
+  /* ── space ───────────────────────────────────────────────────────────── */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+  --s-10: 9rem;
+
+  /* ── structure ───────────────────────────────────────────────────────── */
+  --gutter: clamp(1rem, 4vw, 4rem);
+  --measure: 68ch;
+  --column: 1400px;
+
+  /* Pixel-art UI wants hard corners; only the card gets a hair of softness. */
+  --radius-0: 0px;
+  --radius-1: 2px;
+  --radius-2: 4px;
+
+  --shadow-cut: 3px 3px 0 var(--ink);
+  --shadow-cut-lg: 6px 6px 0 var(--ink);
+  --shadow-plate: 0 1px 0 var(--rule), 0 18px 40px -28px rgba(20, 17, 14, 0.5);
+
+  --dur-fast: 140ms;
+  --dur: 260ms;
+  --dur-slow: 620ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-step: steps(6, end);
+
+  --z-hud: 60;
+  --z-modal: 80;
+  --z-boot: 100;
+
+  color-scheme: light;
+}
+
+/* ── dark: same roles, inverted stock ──────────────────────────────────── */
+:root[data-theme="dark"] {
+  --paper: #100e0c;
+  --paper-raised: #171512;
+  --paper-sunken: #0a0908;
+  --paper-inverse: #f4f1e8;
+
+  --ink: #ece5d6;
+  --ink-soft: #c4bcab;
+  --ink-muted: #a89f8d;
+  --ink-faint: #857d6d;
+  --ink-inverse: #100e0c;
+
+  --rule: rgba(236, 229, 214, 0.18);
+  --rule-strong: rgba(236, 229, 214, 0.45);
+  --rule-hair: rgba(236, 229, 214, 0.09);
+
+  /* Pigments lift in value so they hold contrast against near-black stock. */
+  --oxide: #e2674a;
+  --oxide-soft: rgba(226, 103, 74, 0.16);
+  --verdigris: #4fb0a0;
+  --verdigris-soft: rgba(79, 176, 160, 0.16);
+  --indigo: #7d92e0;
+  --indigo-soft: rgba(125, 146, 224, 0.16);
+  --ochre: #dcae4e;
+  --ochre-soft: rgba(220, 174, 78, 0.18);
+  --plum: #c07aa2;
+  --plum-soft: rgba(192, 122, 162, 0.16);
+
+  --agent-atlas: var(--ink-soft);
+
+  --engrave-ink: #ece5d6;
+  --engrave-fill: #100e0c;
+
+  --shadow-cut: 3px 3px 0 var(--ink);
+  --shadow-cut-lg: 6px 6px 0 var(--ink);
+  --shadow-plate: 0 1px 0 var(--rule), 0 18px 40px -22px rgba(0, 0, 0, 0.9);
+
+  color-scheme: dark;
+}

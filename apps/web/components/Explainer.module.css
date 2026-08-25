@@ -1,0 +1,85 @@
+/* Set on the inverse stock so it reads as an interruption — this is the one
+   block on the page that everybody is meant to stop and read. */
+.strip {
+  background: var(--paper-inverse);
+  color: var(--ink-inverse);
+  border-top: 1px solid var(--rule-strong);
+  padding-block: clamp(3rem, 7vh, 5.5rem);
+}
+
+.head { margin-bottom: var(--s-6); }
+
+.title {
+  font-family: var(--font-pixel);
+  font-size: var(--t-2xl);
+  line-height: 0.98;
+  margin-bottom: var(--s-3);
+  max-width: 22ch;
+}
+
+.title em { font-style: normal; color: var(--oxide); }
+
+.lede {
+  font-family: var(--font-serif);
+  font-size: var(--t-lg);
+  line-height: 1.34;
+  max-width: 48ch;
+  opacity: 0.82;
+}
+
+.steps {
+  list-style: none;
+  margin: 0 0 var(--s-6);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0;
+  border-top: 1px solid currentColor;
+  border-left: 1px solid currentColor;
+}
+
+.step {
+  padding: var(--s-5);
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  display: grid;
+  align-content: start;
+  gap: var(--s-2);
+}
+
+.num {
+  font-family: var(--font-pixel);
+  font-size: var(--t-xl);
+  line-height: 1;
+  color: var(--oxide);
+}
+
+.stepTitle {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.stepBody { font-size: var(--t-sm); line-height: 1.66; opacity: 0.8; }
+
+.foot { display: flex; gap: var(--s-3); flex-wrap: wrap; }
+
+/* The buttons sit on inverse stock, so their borders and cut shadows have to
+   flip with it rather than inheriting the page's ink. */
+.foot :global(.btn) {
+  border-color: var(--ink-inverse);
+  background: transparent;
+  color: var(--ink-inverse);
+  box-shadow: 3px 3px 0 var(--ink-inverse);
+}
+
+.foot :global(.btn:hover) { box-shadow: 5px 5px 0 var(--ink-inverse); }
+.foot :global(.btn--primary) {
+  background: var(--oxide);
+  border-color: var(--oxide);
+  color: var(--paper);
+}
+.foot :global(.btn--ghost) { box-shadow: none; opacity: 0.85; }
+.foot :global(.btn--ghost:hover) { box-shadow: 3px 3px 0 var(--ink-inverse); opacity: 1; }

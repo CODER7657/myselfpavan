@@ -1,0 +1,117 @@
+/*
+ * A hairline grid with no doubled edges.
+ *
+ * The container owns the top and left rules; every tile owns its right and
+ * bottom. Same token for all four, so an interior seam and an outer edge are
+ * the same weight. Column counts are fixed to divisors of six so the last row
+ * is always full — an `auto-fill` track left two empty cells boxed in by the
+ * container border, which is what read as a stray rectangle.
+ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--rule-strong);
+  border-left: 1px solid var(--rule-strong);
+}
+
+@media (max-width: 1040px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.tile {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  border-right: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background var(--dur) var(--ease-out);
+}
+
+.tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out);
+  pointer-events: none;
+}
+
+.tile:hover::before { opacity: 0.05; }
+
+.tile[data-locked="true"] { cursor: not-allowed; }
+.tile[data-locked="true"] .body { opacity: 0.4; }
+
+.tile[data-on="true"] { background: var(--paper-raised); }
+
+.head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); }
+
+.sigil {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid currentColor;
+}
+
+.state {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.1em;
+}
+
+.callsign {
+  font-family: var(--font-pixel);
+  font-size: var(--t-lg);
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.discipline {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+}
+
+.motto {
+  font-family: var(--font-serif);
+  font-size: var(--t-base);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.brief {
+  font-size: var(--t-xs);
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+.tools { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.tool {
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  padding: 1px 5px;
+  border: 1px solid var(--rule);
+  color: var(--ink-muted);
+}
+
+.body { display: grid; gap: var(--s-3); }
+
+.lock {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.08em;
+  color: var(--warn);
+}

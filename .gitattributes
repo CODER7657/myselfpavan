@@ -1,0 +1,14 @@
+# Normalise to LF in the repository; Git checks out native endings on Windows.
+* text=auto eol=lf
+
+# Binary assets must never be touched.
+*.png binary
+*.webp binary
+*.jpg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+
+# Keep generated art and the lockfile out of diff noise and language stats.
+apps/web/public/art/* linguist-generated=true
+pnpm-lock.yaml linguist-generated=true -diff

@@ -1,0 +1,326 @@
+.slot {
+  perspective: 1600px;
+  min-height: 584px;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 584px;
+  transform-style: preserve-3d;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+/*
+ * The flip target. A full-bleed button sitting behind the card's content —
+ * content is inert to the pointer and passes clicks down to this, while the
+ * repository links opt back in above it. Previously the whole card was one
+ * <button> with anchors inside it, which is invalid HTML and meant the button
+ * consumed every click before a link could see it.
+ */
+.flipSurface {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.flipSurface:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+
+/* Everything except the flip surface and the links is decorative to the
+   pointer, so a click anywhere on the card reaches the surface underneath. */
+.face > *:not(.flipSurface) { pointer-events: none; }
+
+.card[data-flipped="true"] { transform: rotateY(180deg); }
+
+.face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-cut);
+  overflow: hidden;
+  pointer-events: auto;
+  transition: box-shadow var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+
+/* A hidden face must not intercept clicks meant for the visible one. */
+.face[inert] { pointer-events: none; }
+
+.card:hover .face { box-shadow: var(--shadow-cut-lg); }
+
+.back { transform: rotateY(180deg); }
+
+/* ── holo ───────────────────────────────────────────────────────────────── */
+
+/* A specular sheen that tracks the pointer. Only the top two tiers get the
+   spectral pass; below that it would be noise. */
+.sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out);
+  background: radial-gradient(
+    300px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--rarity) 26%, transparent),
+    transparent 62%
+  );
+  mix-blend-mode: multiply;
+}
+
+:global(:root[data-theme="dark"]) .sheen { mix-blend-mode: screen; }
+
+.card:hover .sheen { opacity: 1; }
+
+.spectral {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out);
+  background: repeating-linear-gradient(
+    115deg,
+    var(--oxide-soft) 0 8px,
+    var(--ochre-soft) 8px 16px,
+    var(--verdigris-soft) 16px 24px,
+    var(--indigo-soft) 24px 32px,
+    var(--plum-soft) 32px 40px
+  );
+  mix-blend-mode: multiply;
+}
+
+:global(:root[data-theme="dark"]) .spectral { mix-blend-mode: screen; }
+
+.card:hover .spectral { opacity: 0.55; }
+
+/* ── header band ────────────────────────────────────────────────────────── */
+
+.band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: 0.4rem 0.65rem;
+  background: var(--rarity);
+  color: var(--paper);
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.12em;
+  position: relative;
+  z-index: 5;
+}
+
+.head {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+  z-index: 5;
+}
+
+.headTop { display: flex; align-items: center; gap: var(--s-3); }
+
+.sigil {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid currentColor;
+  flex: none;
+}
+
+.owner {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.1em;
+}
+
+.classification {
+  margin-left: auto;
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+}
+
+.name {
+  font-family: var(--font-pixel);
+  font-size: var(--t-xl);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.tagline {
+  font-family: var(--font-serif);
+  font-size: var(--t-lg);
+  line-height: 1.2;
+  color: var(--ink-soft);
+}
+
+/* ── body ───────────────────────────────────────────────────────────────── */
+
+.body {
+  padding: var(--s-4);
+  display: grid;
+  align-content: start;
+  gap: var(--s-4);
+  position: relative;
+  z-index: 5;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* The reverse carries more prose than the front, so it is the one face allowed
+   to scroll — masked top and bottom so a clipped line reads as "more below"
+   rather than as a mistake. */
+.back .body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 10px,
+    black calc(100% - 14px),
+    transparent 100%
+  );
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+
+.metric {
+  padding: 0.45rem 0.55rem;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  gap: 2px;
+}
+
+.mLabel {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+.mValue { font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink); }
+
+.summary { font-size: var(--t-xs); line-height: 1.68; color: var(--ink-soft); }
+
+/* Plain-language line on the card front — the version that does not assume the
+   reader knows what a delegation chain is. */
+.plain {
+  font-size: var(--t-xs);
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin-top: calc(var(--s-2) * -1);
+}
+
+.privateTag {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  border: 1px solid var(--rule);
+  padding: 1px 5px;
+}
+
+.highlight {
+  border-left: 2px solid var(--rarity);
+  padding-left: var(--s-3);
+  font-size: var(--t-xs);
+  line-height: 1.68;
+  color: var(--ink);
+}
+
+.stack { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  padding: 1px 5px;
+  border: 1px solid var(--rule);
+  color: var(--ink-muted);
+}
+
+/* ── stats ──────────────────────────────────────────────────────────────── */
+
+.stats { display: grid; gap: var(--s-2); }
+
+.stat { display: grid; grid-template-columns: 68px 1fr 30px; align-items: center; gap: var(--s-3); }
+
+.sLabel {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.sVal { font-family: var(--font-mono); font-size: var(--t-2xs); text-align: right; color: var(--ink); }
+
+/* ── footer ─────────────────────────────────────────────────────────────── */
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--rule);
+  position: relative;
+  /* Above the flip surface, so the links inside it are reachable. */
+  z-index: 7;
+  flex-wrap: wrap;
+}
+
+.hint {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.links { display: flex; gap: var(--s-3); }
+
+.link {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rarity);
+  padding-bottom: 1px;
+}
+
+.link:hover { color: var(--rarity); }
+
+/* The one part of the card that takes pointer events besides the flip surface. */
+.face .link { pointer-events: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+  .card[data-flipped="true"] { transform: none; }
+  .card[data-flipped="true"] .front { visibility: hidden; }
+  .back { transform: none; visibility: hidden; }
+  .card[data-flipped="true"] .back { visibility: visible; }
+}

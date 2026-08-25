@@ -1,0 +1,135 @@
+/* Content takes the flexible row, the ridge takes its natural height in the
+   row beneath — so the plate is laid out rather than absolutely positioned,
+   and can never be clipped by a height the copy happens to need. */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  /* A grid item's default `min-width: auto` lets the longest unbreakable word
+     in the headline push the track wider than the viewport. Pinning the column
+     to minmax(0, 1fr) is what stops the whole hero overflowing on narrow
+     screens. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  padding-top: 96px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+/* Engineering-plate grid, held faint enough to read as ruling rather than as
+   a graphic in its own right. */
+.grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to right, var(--rule-hair) 0 1px, transparent 1px 25%),
+    repeating-linear-gradient(to bottom, var(--rule-hair) 0 1px, transparent 1px 120px);
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 88%);
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  padding-bottom: var(--s-6);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.pulse {
+  width: 7px;
+  height: 7px;
+  background: var(--ok);
+  animation: pulse 2.4s var(--ease-out) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+
+.title {
+  font-family: var(--font-pixel);
+  /* Pixelify Sans is wide, and "DETERMINISTIC" is thirteen glyphs — the vw cap
+     is what keeps that single word inside the gutter on a phone. */
+  font-size: min(11vw, var(--t-4xl));
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--s-4);
+  text-wrap: balance;
+}
+
+.title em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+/* Each word is wrapped so GSAP can lift them independently on load. */
+.word { display: inline-block; }
+
+.pitch {
+  font-family: var(--font-serif);
+  font-size: var(--t-xl);
+  line-height: 1.22;
+  /* Two lines rather than three, so more of the range clears the fold. */
+  max-width: 30ch;
+  margin-bottom: var(--s-4);
+  color: var(--ink);
+}
+
+.meta {
+  display: flex;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-5);
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+
+.meta b { color: var(--ink); font-weight: 400; }
+
+.cta { display: flex; gap: var(--s-3); flex-wrap: wrap; }
+
+/* Marginalia running down the left edge, like a plate reference. */
+.margin {
+  position: absolute;
+  left: calc(var(--gutter) * 0.28);
+  top: 40%;
+  z-index: 2;
+  writing-mode: vertical-rl;
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.34em;
+  color: var(--ink-faint);
+}
+
+.scrollCue {
+  display: none;
+  justify-items: center;
+  gap: 6px;
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.2em;
+  color: var(--ink-faint);
+}
+
+.cueLine {
+  width: 1px;
+  height: 34px;
+  background: linear-gradient(to bottom, var(--ink-faint), transparent);
+}
+
+@media (max-width: 900px) {
+  .margin { display: none; }
+  .scrollCue { display: none; }
+}

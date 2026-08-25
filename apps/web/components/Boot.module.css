@@ -1,0 +1,199 @@
+/*
+ * The cold open.
+ *
+ * A real loading screen: it waits on the ridge plate and the webfonts, not on a
+ * timer, then wipes away. Everything is drawn from the same tokens as the page
+ * beneath it, so the transition is a continuation rather than a cut.
+ */
+
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-boot);
+  background: var(--paper);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+  /* Revealed by GSAP; kept out of the way for keyboard users while leaving. */
+  will-change: clip-path;
+}
+
+.boot[data-done="true"] { pointer-events: none; }
+
+/* ── plate ruling ───────────────────────────────────────────────────────── */
+
+.rule {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to right, var(--rule-hair) 0 1px, transparent 1px 12.5%),
+    repeating-linear-gradient(to bottom, var(--rule-hair) 0 1px, transparent 1px 96px);
+}
+
+/* Four corner crop marks, as a printed plate would carry. */
+.crop {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 0 solid var(--rule-strong);
+  opacity: 0.75;
+}
+
+.crop[data-c="tl"] { top: 22px; left: 22px; border-top-width: 1px; border-left-width: 1px; }
+.crop[data-c="tr"] { top: 22px; right: 22px; border-top-width: 1px; border-right-width: 1px; }
+.crop[data-c="bl"] { bottom: 22px; left: 22px; border-bottom-width: 1px; border-left-width: 1px; }
+.crop[data-c="br"] { bottom: 22px; right: 22px; border-bottom-width: 1px; border-right-width: 1px; }
+
+/* ── stage ──────────────────────────────────────────────────────────────── */
+
+.stage {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  padding: var(--gutter);
+  padding-top: clamp(4rem, 14vh, 9rem);
+  max-width: var(--column);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.16em;
+  color: var(--ink-muted);
+  margin-bottom: var(--s-4);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+}
+
+.mark {
+  font-family: var(--font-pixel);
+  font-size: clamp(2.6rem, 1.6rem + 5.4vw, 7.5rem);
+  line-height: 0.84;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--s-4);
+  /* Each glyph is wrapped so the reveal can stagger them. */
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.glyph { display: inline-block; will-change: transform, opacity; }
+.slash { color: var(--accent); }
+
+.sub {
+  font-family: var(--font-serif);
+  font-size: var(--t-xl);
+  line-height: 1.24;
+  color: var(--ink-soft);
+  max-width: 26ch;
+  margin-bottom: var(--s-6);
+}
+
+/* ── meter ──────────────────────────────────────────────────────────────── */
+
+.meterWrap { width: min(560px, 100%); display: grid; gap: var(--s-2); }
+
+.meterTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.1em;
+}
+
+.task { color: var(--ink-soft); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.pct { color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.meter {
+  height: 18px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-sunken);
+  padding: 2px;
+}
+
+/* Solid accent carries the value; the stripe overlay is texture on top of it,
+   so the bar still reads at a glance rather than dissolving into hairlines. */
+.fill {
+  height: 100%;
+  width: 0%;
+  background-color: var(--accent);
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.28) 0 2px,
+    transparent 2px 7px
+  );
+}
+
+.hint {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  margin-top: var(--s-4);
+}
+
+.hint b { color: var(--ink-muted); font-weight: 400; }
+
+/* ── ridge ──────────────────────────────────────────────────────────────── */
+
+.ridge {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  aspect-ratio: 2556 / 987;
+  max-height: 46vh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.plate {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: bottom center;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.plateDark { display: none; }
+
+:global(:root[data-theme="dark"]) .plateLight { display: none; }
+:global(:root[data-theme="dark"]) .plateDark { display: block; }
+
+.veil {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, var(--paper) 0%, transparent 100%);
+  z-index: 2;
+}
+
+/* The exit is a vertical iris on this element itself, so the starting state
+   has to be an explicit full-cover inset for GSAP to interpolate from. */
+.boot { clip-path: inset(0% 0% 0% 0%); }
+
+@media (max-width: 700px) {
+  .sub { font-size: var(--t-lg); }
+  .ridge { max-height: 32vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glyph, .plate { opacity: 1 !important; transform: none !important; }
+}

@@ -1,0 +1,168 @@
+.signal {
+  position: relative;
+  border-top: 1px solid var(--rule-strong);
+  overflow: hidden;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: var(--s-7);
+  align-items: start;
+  margin-bottom: var(--s-7);
+}
+
+.title {
+  font-family: var(--font-pixel);
+  font-size: var(--t-3xl);
+  line-height: 0.9;
+  margin-bottom: var(--s-4);
+}
+
+.title em { font-style: normal; color: var(--accent); }
+
+.pitch {
+  max-width: var(--measure);
+  font-family: var(--font-serif);
+  font-size: var(--t-lg);
+  line-height: 1.32;
+  color: var(--ink-soft);
+  margin-bottom: var(--s-5);
+}
+
+.detail {
+  max-width: var(--measure);
+  font-size: var(--t-sm);
+  line-height: 1.68;
+  color: var(--ink-soft);
+  margin-bottom: var(--s-4);
+}
+
+.interests {
+  list-style: none;
+  margin: 0 0 var(--s-5);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.links { display: grid; margin: 0; border-top: 1px solid var(--rule-strong); }
+
+.links > div {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: var(--s-4);
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.links dt {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+  padding-top: 2px;
+}
+
+.links dd { margin: 0; font-family: var(--font-mono); font-size: var(--t-xs); }
+.links dd a { text-decoration: none; border-bottom: 1px solid var(--rule-strong); }
+.links dd a:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── scoreboard ─────────────────────────────────────────────────────────── */
+
+.scoreboard {
+  border: 1.5px solid var(--ink);
+  background: var(--paper-raised);
+  margin-bottom: var(--s-6);
+}
+
+.scoreHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: 0.5rem 0.75rem;
+  background: var(--ink);
+  color: var(--paper);
+  flex-wrap: wrap;
+}
+
+.scoreTitle { font-family: var(--font-micro); font-size: var(--t-2xs); letter-spacing: 0.12em; }
+
+.scoreStats {
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.reset {
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  padding: 0.2em 0.6em;
+  cursor: pointer;
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.08em;
+}
+
+.reset:hover { background: var(--paper); color: var(--ink); }
+
+.badges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-left: 1px solid var(--rule-strong);
+}
+
+@media (max-width: 620px) {
+  .badges { grid-template-columns: minmax(0, 1fr); }
+}
+
+.badge {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--s-3);
+  align-items: start;
+  padding: var(--s-3) var(--s-4);
+  border-right: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+  opacity: 0.45;
+}
+
+.badge[data-on="true"] { opacity: 1; }
+
+.badgeMark { color: var(--warn); font-size: var(--t-sm); line-height: 1.4; }
+.badge[data-on="true"] .badgeMark { color: var(--ok); }
+
+.badgeBody { display: grid; gap: 1px; min-width: 0; }
+.badgeBody b { font-family: var(--font-micro); font-size: var(--t-2xs); letter-spacing: 0.08em; font-weight: 400; }
+.badgeBody span { font-size: var(--t-2xs); color: var(--ink-muted); line-height: 1.5; }
+
+.badgeXp { font-family: var(--font-mono); font-size: var(--t-2xs); color: var(--ink-faint); }
+
+/* ── colophon ───────────────────────────────────────────────────────────── */
+
+.colophon {
+  display: flex;
+  gap: var(--s-5);
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: var(--s-4) 0 var(--s-6);
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.07em;
+  color: var(--ink-muted);
+}
+
+.colophon span:nth-child(2) { max-width: 56ch; }
+.colophon a { text-decoration: none; color: var(--accent); }
+
+@media (max-width: 900px) {
+  .top { grid-template-columns: 1fr; gap: var(--s-6); }
+}

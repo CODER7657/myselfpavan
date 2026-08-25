@@ -1,0 +1,66 @@
+.sync {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  margin-top: var(--s-4);
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  color: var(--ink-muted);
+  max-width: var(--measure);
+  line-height: 1.7;
+}
+
+.sync strong { font-weight: 500; color: var(--accent); }
+.sync a { color: var(--ink); text-decoration-color: var(--accent); }
+
+.pulse {
+  width: 6px;
+  height: 6px;
+  background: var(--ok);
+  align-self: center;
+  animation: syncPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes syncPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: var(--s-6) 0 var(--s-5);
+}
+
+.filter {
+  padding: 0.35em 0.7em;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.09em;
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.filter:hover { border-color: currentColor; }
+
+.filter[data-on="true"] {
+  border-color: currentColor;
+  box-shadow: 2px 2px 0 currentColor;
+  background: var(--paper-raised);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--s-5);
+}
+
+.item { min-width: 0; }
+
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,25 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "foundry",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@foundry/web",
+        "dev"
+      ],
+      "port": 3210
+    },
+    {
+      "name": "foundry-prod",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@foundry/web",
+        "start"
+      ],
+      "port": 3210
+    }
+  ]
+}

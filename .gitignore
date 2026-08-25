@@ -1,0 +1,34 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+.next/
+out/
+dist/
+.turbo/
+*.tsbuildinfo
+
+# env
+.env
+.env.*
+!.env.example
+
+# editors / os
+.DS_Store
+Thumbs.db
+*.swp
+
+# tooling caches
+.vercel/
+.eslintcache
+
+# vendored agent skills (installed via `npx skills add`)
+.agents/
+
+# working scratch
+assets/_check/
+
+# vendored design skill installed by `npx skills add` — not project source
+.claude/skills/
+skills-lock.json

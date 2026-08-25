@@ -1,0 +1,264 @@
+.hud {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  z-index: var(--z-hud);
+  border-bottom: 1px solid var(--rule-strong);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px) saturate(1.1);
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--s-5);
+  padding-block: 0.55rem;
+}
+
+.mark {
+  font-family: var(--font-pixel);
+  font-size: var(--t-lg);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.mark span { color: var(--accent); }
+
+.nav { display: flex; gap: var(--s-4); justify-content: center; }
+
+.nav a {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  color: var(--ink-muted);
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur-fast), border-color var(--dur-fast);
+}
+
+.nav a:hover { color: var(--ink); border-bottom-color: var(--accent); }
+
+.right { display: flex; align-items: center; gap: var(--s-4); }
+
+.xp { display: grid; gap: 3px; min-width: 168px; }
+
+.xpTop {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.08em;
+}
+
+.lvl { color: var(--accent); }
+.xpNum { color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+.track {
+  height: 8px;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper-sunken);
+  padding: 1px;
+}
+
+.fill {
+  height: 100%;
+  background-image: repeating-linear-gradient(to right, var(--accent) 0 4px, transparent 4px 6px);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+.iconBtn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+
+.iconBtn:hover { background: var(--paper-sunken); border-color: var(--ink); }
+
+.roster { display: flex; gap: 4px; }
+
+.slot {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--rule);
+  opacity: 0.28;
+}
+
+.slot[data-on="true"] { opacity: 1; border-color: currentColor; }
+
+@media (max-width: 1080px) {
+  .nav { display: none; }
+  .inner { grid-template-columns: auto 1fr; }
+}
+
+@media (max-width: 620px) {
+  .xp { min-width: 96px; }
+  .roster { display: none; }
+}
+
+/* Small phones: the wordmark, the XP meter and the stock toggle have to share
+   320px, so everything gives a little rather than the toggle falling off. */
+@media (max-width: 430px) {
+  .inner { gap: var(--s-3); }
+  .right { gap: var(--s-3); }
+  .xp { min-width: 74px; }
+  .mark { font-size: var(--t-base); }
+  .iconBtn { width: 28px; height: 28px; }
+}
+
+@media (max-width: 350px) {
+  .mark { font-size: var(--t-sm); }
+  .xp { min-width: 60px; }
+  .xpTop { font-size: 0.58rem; }
+}
+
+/* ── hamburger ──────────────────────────────────────────────────────────── */
+
+.burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 34px;
+  height: 32px;
+  padding: 0 6px;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  cursor: pointer;
+}
+
+.burger span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--ink);
+  transition: transform var(--dur) var(--ease-out), opacity var(--dur-fast);
+}
+
+/* The three rules fold into a cross rather than swapping for a different icon. */
+.burger[data-open="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.burger[data-open="true"] span:nth-child(2) { opacity: 0; }
+.burger[data-open="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* ── drawer ─────────────────────────────────────────────────────────────── */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-hud) + 1);
+  background: color-mix(in srgb, var(--paper-inverse) 55%, transparent);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--dur) var(--ease-out), visibility var(--dur);
+}
+
+.scrim[data-open="true"] { opacity: 1; visibility: visible; }
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: calc(var(--z-hud) + 2);
+  width: min(320px, 86vw);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--paper);
+  border-left: 1.5px solid var(--ink);
+  box-shadow: -18px 0 40px -30px rgba(0, 0, 0, 0.6);
+  transform: translateX(100%);
+  visibility: hidden;
+  transition: transform var(--dur-slow) var(--ease-out), visibility var(--dur-slow);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.drawer[data-open="true"] { transform: translateX(0); visibility: visible; }
+
+.drawerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.close {
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  font-size: var(--t-sm);
+  line-height: 1;
+}
+
+.close:hover { background: var(--paper-sunken); border-color: var(--ink); }
+
+.drawerNav { display: grid; align-content: start; }
+
+.drawerNav a {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+  font-family: var(--font-pixel);
+  font-size: var(--t-lg);
+  line-height: 1;
+  transition: background var(--dur-fast), padding-left var(--dur-fast);
+}
+
+.drawerNav a:hover,
+.drawerNav a:focus-visible {
+  background: var(--paper-sunken);
+  padding-left: calc(var(--s-5) + 6px);
+}
+
+.drawerNum {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.drawerFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border-top: 1px solid var(--rule-strong);
+  flex-wrap: wrap;
+}
+
+.drawerRoster { display: flex; gap: 5px; }
+
+.drawerRoster .slot { width: 26px; height: 26px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer { transition: visibility var(--dur); }
+}
+
+/* Kept last on purpose: `.burger` is defined `display: none` above, and at
+   equal specificity the later rule wins — so the reveal has to come after it. */
+@media (max-width: 1080px) {
+  .burger { display: flex; }
+}
