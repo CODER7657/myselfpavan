@@ -1,3 +1,4 @@
+import { Assay } from "@/components/Assay";
 import { Boot } from "@/components/Boot";
 import { Console } from "@/components/Console";
 import { Dossier } from "@/components/Dossier";
@@ -30,6 +31,7 @@ export default function Page() {
         <Vault />
         <Tree />
         <Log />
+        <Assay />
         <Shell />
       </main>
       <Signal />

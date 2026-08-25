@@ -36,7 +36,7 @@ export function Signal() {
     <footer id="signal" className={g.signal}>
       <div className="wrap">
         <div className="plate-head" style={{ paddingTop: "var(--s-7)" }}>
-          <span className="plate-num">PLATE 09</span>
+          <span className="plate-num">PLATE 10</span>
           <span className="plate-rule" />
         </div>
 

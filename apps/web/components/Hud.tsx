@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { agents } from "@foundry/content";
 import { levelProgress, useFoundry } from "@/lib/store";
+import { armSound } from "@/lib/sound";
 import { Sigil } from "./Sigil";
 import s from "./Hud.module.css";
 
@@ -12,6 +13,7 @@ const NAV = [
   { href: "#vault", label: "Work" },
   { href: "#tree", label: "Skills" },
   { href: "#log", label: "Education" },
+  { href: "#assay", label: "Assay" },
   { href: "#shell", label: "Terminal" },
   { href: "#signal", label: "Contact" },
 ];
@@ -28,6 +30,8 @@ export function Hud() {
   const theme = useFoundry((st) => st.theme);
   const toggleTheme = useFoundry((st) => st.toggleTheme);
   const syncTheme = useFoundry((st) => st.syncTheme);
+  const sound = useFoundry((st) => st.sound);
+  const toggleSound = useFoundry((st) => st.toggleSound);
 
   const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
@@ -36,6 +40,7 @@ export function Hud() {
 
   useEffect(() => {
     setHydrated(true);
+    armSound();
     const painted = document.documentElement.dataset.theme;
     if (painted === "light" || painted === "dark") syncTheme(painted);
   }, [syncTheme]);
@@ -120,6 +125,17 @@ export function Hud() {
               title="Toggle stock"
             >
               {hydrated && theme === "dark" ? "\u263e" : "\u2600"}
+            </button>
+
+            <button
+              type="button"
+              className={s.iconBtn}
+              onClick={toggleSound}
+              aria-label={(hydrated && sound ? "Mute" : "Unmute") + " event cues"}
+              aria-pressed={hydrated ? sound : true}
+              title="Event cues"
+            >
+              {hydrated && !sound ? "⊘" : "♪"}
             </button>
 
             <button

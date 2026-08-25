@@ -90,7 +90,9 @@ async function countVia(path) {
 const RX = {
   tests: /(^|\/)(tests?|__tests__|spec|e2e)(\/|$)|\.(test|spec)\.[jt]sx?$|(^|\/)test_[^/]+\.py$|_test\.(py|go|rs)$/i,
   ci: /^\.github\/workflows\/.+\.ya?ml$/i,
-  coverage: /(^|\/)(\.coveragerc|codecov\.ya?ml|jest\.config|vitest\.config)|coverage/i,
+  /* Config files only. A `coverage/` directory is build output, not evidence
+     that coverage is configured. */
+  coverage: /(^|\/)(\.coveragerc|codecov\.ya?ml|\.nycrc|jest\.config\.[jt]s|vitest\.config\.[jt]s)$/i,
   linter: /(^|\/)(\.eslintrc|eslint\.config|ruff\.toml|\.flake8|\.prettierrc|tsconfig\.json|mypy\.ini)/i,
   docs: /^docs?\//i,
   manifest: /^(package\.json|pyproject\.toml|requirements\.txt|Cargo\.toml|go\.mod|build\.gradle(\.kts)?|pom\.xml|Gemfile)$/i,
@@ -98,9 +100,26 @@ const RX = {
   workspace: /^(pnpm-workspace\.yaml|turbo\.json|lerna\.json|nx\.json)$/i,
 };
 
+/*
+ * Vendored code and build output are not the author's work.
+ *
+ * A repository with node_modules committed reported 410 test files — its
+ * dependencies' tests, counted as its own. Filtering these out before any
+ * signal is computed is what keeps the score honest.
+ */
+const VENDORED =
+  /(^|\/)(node_modules|bower_components|vendor|third_party|\.venv|venv|site-packages|dist|build|out|target|\.next|coverage|artifacts|cache|typechain-types|__pycache__|\.git)(\/|$)/i;
+
 function pathSignals(paths) {
   const any = (rx) => paths.some((p) => rx.test(p));
   return {
+    /*
+     * Counted, not just detected. "A tests directory exists" cannot tell a
+     * token test file apart from a suite of several hundred, and that is
+     * exactly the distinction the rubric is supposed to reward.
+     */
+    testFiles: paths.filter((p) => RX.tests.test(p) && /\.[a-z]+$/i.test(p)).length,
+    docFiles: paths.filter((p) => RX.docs.test(p) && /\.mdx?$/i.test(p)).length,
     hasTests: any(RX.tests),
     hasCi: any(RX.ci),
     hasCoverage: any(RX.coverage),
@@ -110,6 +129,51 @@ function pathSignals(paths) {
     hasContainer: any(RX.container),
     hasWorkspace: any(RX.workspace),
   };
+}
+
+/* ── readme prose ─────────────────────────────────────────────────────────── */
+
+/**
+ * Pulls the first paragraph of real prose out of a README.
+ *
+ * A generated card that just repeats the one-line GitHub description says very
+ * little. The opening paragraph of a README is usually the author explaining
+ * what the thing is, in their own words — which is far better material, and
+ * still nobody's invention.
+ *
+ * Headings, badge rows, HTML blocks, code fences and list items are skipped;
+ * what survives is a sentence someone actually wrote.
+ */
+function readmeLede(markdown) {
+  if (!markdown) return null;
+
+  const cleaned = markdown
+    .replace(/^---[\s\S]*?---/, "")              // front matter
+    .replace(/```[\s\S]*?```/g, "")              // fenced code
+    .replace(/<[^>]+>/g, "")                        // inline html
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")       // images and badges
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");   // links to their text
+
+  for (const block of cleaned.split(/\n\s*\n/)) {
+    const line = block.trim().replace(/\s+/g, " ");
+    if (!line) continue;
+
+    if (/^[#>|*=+_\-]/.test(line)) continue;  // heading, quote, table, list, aside
+    if (/^\d+[.)]\s/.test(line)) continue;      // numbered step
+    if (/^`/.test(line)) continue;                 // opens with a command
+    if (line.length < 60) continue;                // too short to be a description
+    if (!/[a-z]/.test(line)) continue;             // all-caps banner
+    if (!/[.!?]/.test(line)) continue;             // not a sentence
+    if (line.split(" ").length < 10) continue;     // not enough of one
+
+    // Mostly inline code is a usage note, not prose.
+    const ticked = (line.match(/`[^`]*`/g) || []).join("").length;
+    if (ticked / line.length > 0.2) continue;
+
+    return line.length > 260 ? line.slice(0, 257).trimEnd() + "…" : line;
+  }
+
+  return null;
 }
 
 /* ── per repository ───────────────────────────────────────────────────────── */
@@ -126,7 +190,9 @@ async function inspect(repo) {
   ]);
 
   const entries = Array.isArray(tree?.tree) ? tree.tree : [];
-  const paths = entries.map((t) => t.path);
+  const allPaths = entries.map((t) => t.path);
+  const paths = allPaths.filter((p) => !VENDORED.test(p));
+  const vendoredPaths = allPaths.length - paths.length;
 
   const topLevelDirs = [
     ...new Set(
@@ -165,6 +231,10 @@ async function inspect(repo) {
     topLevelDirs,
     topLevelFiles,
     readmeBytes: readme ? Buffer.byteLength(readme, "utf8") : 0,
+    readmeLede: readmeLede(readme),
+
+    /** Files ignored as vendored or build output, kept for traceability. */
+    vendoredPaths,
 
     ...pathSignals(paths),
   };
@@ -208,15 +278,29 @@ async function main() {
     if (batch.length < 100) break;
   }
 
-  console.log("  " + repos.length + " repositories listed");
+  /*
+   * The evidence file is served publicly, so a private repository must never
+   * reach it. `/users/{owner}/repos` already returns only public repositories
+   * even for an authenticated owner — this filter is the belt to that braces,
+   * so switching to `/user/repos` later cannot silently start leaking names.
+   */
+  const publicOnly = repos.filter((r) => !r.private);
+  const withheld = repos.length - publicOnly.length;
 
-  const evidence = await pool(repos, CONCURRENCY, inspect);
+  console.log(
+    "  " + publicOnly.length + " public repositories listed" +
+      (withheld > 0 ? " (" + withheld + " private, withheld)" : "")
+  );
+
+  const evidence = await pool(publicOnly, CONCURRENCY, inspect);
   evidence.sort((a, b) => b.pushedAt.localeCompare(a.pushedAt));
 
   const payload = {
     collectedAt: new Date().toISOString(),
     owner: OWNER,
     apiCalls: calls,
+    /** Always false for every entry; private work is never published here. */
+    includesPrivate: false,
     repos: evidence,
   };
 

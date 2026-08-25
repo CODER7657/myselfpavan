@@ -20,6 +20,9 @@ importers:
       '@foundry/agent-engine':
         specifier: workspace:*
         version: link:../../packages/agent-engine
+      '@foundry/assay':
+        specifier: workspace:*
+        version: link:../../packages/assay
       '@foundry/content':
         specifier: workspace:*
         version: link:../../packages/content
@@ -81,6 +84,10 @@ importers:
         version: 5.9.3
 
   packages/assay:
+    dependencies:
+      '@foundry/tokens':
+        specifier: workspace:*
+        version: link:../tokens
     devDependencies:
       '@foundry/tsconfig':
         specifier: workspace:*

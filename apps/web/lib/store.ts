@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { achievements, agents, missions, type AgentId } from "@foundry/content";
+import { play } from "./sound";
 
 /**
  * Operator progression.
@@ -51,12 +52,15 @@ interface FoundryState {
   terminalUsed: boolean;
   logRead: boolean;
   theme: "light" | "dark";
+  /** Event cues. Persisted, and silent until the first gesture regardless. */
+  sound: boolean;
   toasts: Toast[];
 
   boot: () => void;
   reset: () => void;
   setTheme: (t: "light" | "dark") => void;
   toggleTheme: () => void;
+  toggleSound: () => void;
   /** Adopts the theme the pre-paint script resolved, without side effects. */
   syncTheme: (t: "light" | "dark") => void;
 
@@ -83,6 +87,7 @@ export const useFoundry = create<FoundryState>()(
         if (st.earned.includes(id)) return;
         const a = achievements.find((x) => x.id === id);
         if (!a) return;
+        play("achievement", !st.sound);
         set({
           earned: [...st.earned, id],
           xp: st.xp + a.xp,
@@ -103,6 +108,7 @@ export const useFoundry = create<FoundryState>()(
         terminalUsed: false,
         logRead: false,
         theme: "light",
+        sound: true,
         toasts: [],
 
         boot: () => set({ booted: true }),
@@ -130,6 +136,12 @@ export const useFoundry = create<FoundryState>()(
 
         toggleTheme: () => get().setTheme(get().theme === "dark" ? "light" : "dark"),
 
+        toggleSound: () => {
+          const next = !get().sound;
+          set({ sound: next });
+          if (next) play("flip", false);
+        },
+
         /*
          * The inline script in <head> resolves a theme before React exists —
          * from storage if present, otherwise from the OS. When it falls back to
@@ -149,6 +161,7 @@ export const useFoundry = create<FoundryState>()(
           if (st.recruited.includes(id)) return;
           const agent = agents.find((a) => a.id === id);
           const next = [...st.recruited, id];
+          play("recruit", !st.sound);
           set({
             recruited: next,
             xp: st.xp + 60,
@@ -172,6 +185,13 @@ export const useFoundry = create<FoundryState>()(
           if (st.completed.includes(id)) return;
           const m = missions.find((x) => x.id === id);
           const next = [...st.completed, id];
+          play("mission", !st.sound);
+
+          // A level crossing is its own event, and deserves its own cue.
+          if (levelFor(st.xp + (m?.xp ?? 100)) > levelFor(st.xp)) {
+            play("level", !st.sound);
+          }
+
           set({
             completed: next,
             xp: st.xp + (m?.xp ?? 100),
@@ -192,6 +212,7 @@ export const useFoundry = create<FoundryState>()(
 
         inspectCard: (slug, rarity) => {
           const st = get();
+          play("flip", !st.sound);
           if (st.inspected.includes(slug)) return;
           const next = [...st.inspected, slug];
           set({ inspected: next, xp: st.xp + 15 });
@@ -228,6 +249,7 @@ export const useFoundry = create<FoundryState>()(
         terminalUsed: s.terminalUsed,
         logRead: s.logRead,
         theme: s.theme,
+        sound: s.sound,
       }),
     }
   )

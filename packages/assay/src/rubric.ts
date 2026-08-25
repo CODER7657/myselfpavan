@@ -12,7 +12,7 @@ import type { Rarity } from "@foundry/tokens";
  * Bump this when the rules change; a stored score always names the rubric that
  * produced it, so an old number is never silently compared against new rules.
  */
-export const RUBRIC_VERSION = "1.0.0";
+export const RUBRIC_VERSION = "1.1.0";
 
 /**
  * Topic a repository must carry before it is judged at all.
@@ -160,10 +160,23 @@ function verificationBand(e: RepoEvidence): Band {
       {
         id: "tests",
         label: "Test suite",
-        earned: e.hasTests ? 11 : 0,
+        /*
+         * Depth, not presence. One token test file and a suite of several
+         * hundred are not the same claim, and scoring them identically was
+         * the rubric's blindest spot.
+         */
+        earned: round(e.hasTests ? 4 + logScale(e.testFiles, 60, 7) : 0),
         max: 11,
-        detail: e.hasTests ? "test directory or spec files present" : "none found",
-        ...(e.hasTests ? {} : { advice: "Add a tests/ directory — the largest single gain available." }),
+        detail: e.hasTests
+          ? e.testFiles + " test file" + (e.testFiles === 1 ? "" : "s")
+          : "none found",
+        ...(e.hasTests && e.testFiles >= 20
+          ? {}
+          : {
+              advice: e.hasTests
+                ? "More of the surface under test is the cheapest way to raise this band."
+                : "Add a tests/ directory — the largest single gain available.",
+            }),
       },
       {
         id: "ci",
@@ -216,9 +229,11 @@ function completenessBand(e: RepoEvidence): Band {
       {
         id: "docs",
         label: "Extended docs",
-        earned: e.hasDocs ? 4 : 0,
+        earned: round(e.hasDocs ? 2 + logScale(e.docFiles, 12, 2) : 0),
         max: 4,
-        detail: e.hasDocs ? "docs/ present" : "none",
+        detail: e.hasDocs
+          ? e.docFiles + " document" + (e.docFiles === 1 ? "" : "s") + " under docs/"
+          : "none",
       },
       {
         id: "licence",
@@ -380,8 +395,10 @@ export function assess(e: RepoEvidence): Assay {
       stars: e.stars,
       pushedAt: e.pushedAt,
       language: e.language,
+      languages: e.languages,
       topics: e.topics,
       description: e.description,
+      readmeLede: e.readmeLede,
       isFork: e.isFork,
     },
     nextSteps,

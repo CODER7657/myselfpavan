@@ -1,0 +1,97 @@
+name: Assay repositories
+
+# Re-grades every repository against the rubric and commits the fresh evidence,
+# which redeploys the site. Nobody has to be asked to run it.
+on:
+  schedule:
+    # 03:20 UTC daily — off the hour, so it is not competing with everyone
+    # else's midnight cron for runners.
+    - cron: "20 3 * * *"
+
+  # The manual button. Actions → "Assay repositories" → "Run workflow".
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why you are running it (recorded in the run log)"
+        required: false
+        default: "manual refresh"
+
+  # Also refresh whenever the rubric or the collector itself changes, so a
+  # rule change is reflected immediately rather than at the next midnight.
+  push:
+    branches: [main]
+    paths:
+      - "packages/assay/src/**"
+      - "tools/collect-evidence.mjs"
+      - ".github/workflows/assay.yml"
+
+concurrency:
+  group: assay
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  assay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Collect evidence
+        env:
+          # Lifts the anonymous 60/hour limit; the account needs roughly 150
+          # calls for a full pass.
+          GITHUB_TOKEN: ${{ secrets.ASSAY_TOKEN || secrets.GITHUB_TOKEN }}
+        run: node tools/collect-evidence.mjs
+
+      - name: Commit if the evidence moved
+        run: |
+          set -euo pipefail
+          git config user.name  "foundry-assay[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # `collectedAt` changes on every run, so compare only the substance —
+          # otherwise the site would redeploy daily for a timestamp.
+          if git diff --quiet -- apps/web/public/data/evidence.json; then
+            echo "No change."
+            exit 0
+          fi
+
+          before=$(git show HEAD:apps/web/public/data/evidence.json 2>/dev/null \
+            | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const j=JSON.parse(d);delete j.collectedAt;delete j.apiCalls;console.log(JSON.stringify(j))}catch(e){console.log("")}})' || echo "")
+          after=$(node -e 'const j=require("./apps/web/public/data/evidence.json");delete j.collectedAt;delete j.apiCalls;console.log(JSON.stringify(j))')
+
+          if [ "$before" = "$after" ]; then
+            echo "Only the timestamp moved — nothing to publish."
+            git checkout -- apps/web/public/data/evidence.json
+            exit 0
+          fi
+
+          git add apps/web/public/data/evidence.json
+          git commit -m "chore(assay): refresh repository evidence
+
+Ran: ${{ github.event_name }}${{ github.event.inputs.reason && format(' — {0}', github.event.inputs.reason) || '' }}"
+          git push
+
+      - name: Summary
+        run: |
+          node -e '
+            const j = require("./apps/web/public/data/evidence.json");
+            const rows = j.repos
+              .slice()
+              .sort((a, b) => b.commits - a.commits)
+              .slice(0, 12)
+              .map(r => `| ${r.name} | ${r.commits} | ${r.hasTests ? "yes" : "no"} | ${r.hasCi ? "yes" : "no"} | ${r.topics.includes("foundry-ready") ? "ready" : "-"} |`);
+            console.log("## Assay\n");
+            console.log(`Collected ${j.repos.length} repositories in ${j.apiCalls} API calls.\n`);
+            console.log("| Repo | Commits | Tests | CI | Gate |");
+            console.log("|---|---|---|---|---|");
+            console.log(rows.join("\n"));
+          ' >> "$GITHUB_STEP_SUMMARY"

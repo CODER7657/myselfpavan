@@ -182,7 +182,7 @@ export function Shell() {
     <section id="shell" className="plate">
       <div className="wrap">
         <div className="plate-head">
-          <span className="plate-num">PLATE 08</span>
+          <span className="plate-num">PLATE 09</span>
           <span className="plate-rule" />
         </div>
         <h2 className="plate-title">CONSOLE</h2>

@@ -32,6 +32,15 @@ export interface RepoEvidence {
   topLevelFiles: string[];
 
   readmeBytes: number;
+  /** First paragraph of real prose from the README, if there is one. */
+  readmeLede: string | null;
+
+  /** Number of test files, not merely whether a tests directory exists. */
+  testFiles: number;
+  /** Number of markdown files under docs/. */
+  docFiles: number;
+  /** Paths discarded as vendored or build output before any signal was read. */
+  vendoredPaths: number;
 
   hasTests: boolean;
   hasCi: boolean;
@@ -80,7 +89,15 @@ export interface Assay {
   bands: Band[];
   evidence: Pick<
     RepoEvidence,
-    "commits" | "stars" | "pushedAt" | "language" | "topics" | "description" | "isFork"
+    | "commits"
+    | "stars"
+    | "pushedAt"
+    | "language"
+    | "languages"
+    | "topics"
+    | "description"
+    | "readmeLede"
+    | "isFork"
   >;
   /** The three cheapest points still on the table. */
   nextSteps: string[];

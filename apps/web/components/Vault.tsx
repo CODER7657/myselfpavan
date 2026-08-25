@@ -5,6 +5,8 @@ import { useGSAP } from "@gsap/react";
 import { agents, projects, type AgentId } from "@foundry/content";
 import { reveal } from "@/lib/gsap";
 import { useLiveRepos } from "@/lib/useLiveRepos";
+import { useAssay } from "@/lib/useAssay";
+import { joinProjects } from "@/lib/liveProjects";
 import { Card } from "./Card";
 import v from "./Vault.module.css";
 
@@ -14,10 +16,15 @@ export function Vault() {
   const root = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const live = useLiveRepos();
+  const assay = useAssay();
+
+  /* Curated cards, re-ranked from the live assay, plus a generated card for
+     anything the gate promoted that has not been written up. */
+  const catalogue = useMemo(() => joinProjects(assay.byName), [assay.byName]);
 
   const shown = useMemo(
-    () => (filter === "all" ? projects : projects.filter((p) => p.agent === filter)),
-    [filter]
+    () => (filter === "all" ? catalogue : catalogue.filter((p) => p.agent === filter)),
+    [filter, catalogue]
   );
 
   useGSAP(
@@ -28,7 +35,7 @@ export function Vault() {
   );
 
   // Only offer a filter for agents that actually own something.
-  const owners = agents.filter((a) => projects.some((p) => p.agent === a.id));
+  const owners = agents.filter((a) => catalogue.some((p) => p.agent === a.id));
 
   return (
     <section id="vault" className="plate" ref={root}>
@@ -39,7 +46,7 @@ export function Vault() {
         </div>
         <h2 className="plate-title">THE VAULT</h2>
         <p className="plate-sub">
-          {projects.length} builds — the ones worth defending, drawn from the public
+          {catalogue.length} builds — the ones worth defending, drawn from the public
           repositories plus two private ones. Ranked by how much of the work survives
           questioning rather than by stars, and rarity follows that ranking. Turn a card over
           for the argument and the numbers.
@@ -64,10 +71,10 @@ export function Vault() {
             data-on={filter === "all"}
             onClick={() => setFilter("all")}
           >
-            ALL · {projects.length}
+            ALL · {catalogue.length}
           </button>
           {owners.map((a) => {
-            const n = projects.filter((p) => p.agent === a.id).length;
+            const n = catalogue.filter((p) => p.agent === a.id).length;
             return (
               <button
                 key={a.id}
