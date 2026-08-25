@@ -80,6 +80,15 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  packages/assay:
+    devDependencies:
+      '@foundry/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   packages/content:
     dependencies:
       '@foundry/tokens':

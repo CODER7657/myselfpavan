@@ -149,14 +149,20 @@ export function searchIndex(query: string, limit = 5): { id: string; kind: strin
   return scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score).slice(0, limit);
 }
 
-/** Ranks projects by how defensible they are, not by reach. */
+/**
+ * Ranks projects by how defensible they are, not by reach.
+ * Normalised to 0–100 so the number the trace prints means something.
+ */
 export function rankProjects(): { slug: string; score: number }[] {
+  const MAX = 4 * 18 + 100 * 0.7 + 6;
+
   return projects
     .map((p: Project) => {
       const rarity = RARITY_RANK[p.rarity] * 18;
       const stats = (p.stats.depth + p.stats.rigor + p.stats.novelty) / 3;
       const shipped = p.demo ? 6 : 0;
-      return { slug: p.slug, score: Math.round(rarity + stats * 0.7 + shipped) };
+      const raw = rarity + stats * 0.7 + shipped;
+      return { slug: p.slug, score: Math.round((raw / MAX) * 100) };
     })
     .sort((a, b) => b.score - a.score);
 }

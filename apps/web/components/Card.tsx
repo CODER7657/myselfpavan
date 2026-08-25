@@ -190,7 +190,7 @@ export function Card({ project }: { project: Project }) {
           </div>
 
           <div className={s.foot}>
-            <span className={s.hint}>▸ TAP TO CLOSE</span>
+            <span className={s.hint}>▸ TAP EDGE TO CLOSE · SCROLL FOR MORE</span>
             <span className={s.links}>
               {project.repo && (
                 <a

@@ -324,8 +324,11 @@
 
 .link:hover { color: var(--rarity); }
 
-/* The one part of the card that takes pointer events besides the flip surface. */
+/* The parts that take pointer events besides the flip surface: the links, and
+   the reverse's body — which scrolls, and cannot be scrolled while it is inert
+   to the pointer. */
 .face .link { pointer-events: auto; }
+.back .body { pointer-events: auto; }
 
 @media (prefers-reduced-motion: reduce) {
   .card { transition: none; }

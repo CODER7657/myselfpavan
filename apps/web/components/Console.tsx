@@ -129,17 +129,34 @@ export function Console() {
         case "token":
           setTokens((t) => t + 1);
           setTrace((p) => {
-            const last = p[p.length - 1];
-            // Because steps run concurrently, a token may belong to a step
-            // other than the one that wrote the previous line — in that case a
-            // new line is opened rather than appending to someone else's.
-            if (last && last.kind === "thought" && last.stepId === ev.stepId && last.live) {
-              if (ev.text === "\n") {
-                return [...p.slice(0, -1), { ...last, live: false }];
-              }
-              return [...p.slice(0, -1), { ...last, text: last.text + ev.text }];
+            /*
+             * Every step owns its own open line.
+             *
+             * Steps run concurrently, so tokens from two agents arrive
+             * interleaved. Appending to whichever line happened to be last
+             * chopped both of their sentences into alternating fragments —
+             * so the append target is found by step, not by position.
+             */
+            let i = p.length - 1;
+            while (i >= 0) {
+              const line = p[i]!;
+              if (line.stepId === ev.stepId && line.kind === "thought" && line.live) break;
+              i--;
             }
+
+            if (i >= 0) {
+              const open = p[i]!;
+              const next = [...p];
+              next[i] =
+                ev.text === "\n"
+                  ? { ...open, live: false }
+                  : { ...open, text: open.text + ev.text };
+              return next;
+            }
+
+            // A newline with no open line closes something already closed.
             if (ev.text === "\n") return p;
+
             return [
               ...p,
               {
