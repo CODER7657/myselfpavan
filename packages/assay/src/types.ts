@@ -42,6 +42,14 @@ export interface RepoEvidence {
   /** Paths discarded as vendored or build output before any signal was read. */
   vendoredPaths: number;
 
+  /** Written source files, excluding vendored code and build output. */
+  sourceFiles: number;
+  /** Source files living under a components/ screens/ views/ directory. */
+  componentFiles: number;
+  hasDesignSystem: boolean;
+  hasA11y: boolean;
+  hasMotion: boolean;
+
   hasTests: boolean;
   hasCi: boolean;
   hasCoverage: boolean;
@@ -64,6 +72,8 @@ export interface Signal {
   detail: string;
   /** Present when points were left on the table — what would earn them. */
   advice?: string;
+  /** Present on attested signals: where a reader can check the claim. */
+  proof?: string;
 }
 
 export interface Band {

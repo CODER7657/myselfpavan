@@ -60,7 +60,7 @@ export const agents: Agent[] = [
       "Handles delegation chains, signature envelopes and the parts of a protocol that fail silently. CIPHER's standing rule is that an unchecked obligation is indistinguishable from a failed one, and must be treated as the worse of the two.",
     color: "var(--agent-cipher)",
     sigil: CIPHER_SIGIL,
-    tools: ["chain.verify", "predicate.eval", "nonce.check", "index.search"],
+    tools: ["chain.verify", "predicate.eval", "assay.verify", "index.search"],
     clearance: 1,
   },
   {
@@ -84,7 +84,7 @@ export const agents: Agent[] = [
       "Runs classification, extraction and generation pipelines — and draws the line past which a model's output stops being evidence. ORACLE keeps confidence scores attached to their claims so downstream code cannot forget how sure it was.",
     color: "var(--agent-oracle)",
     sigil: ORACLE_SIGIL,
-    tools: ["classify", "embed", "rank", "index.search"],
+    tools: ["classify", "embed", "assay.score", "assay.rank"],
     clearance: 1,
   },
   {
@@ -96,7 +96,7 @@ export const agents: Agent[] = [
       "Turns a working core into something a stranger can use without a manual. FORGE cares about the boring parts — empty states, keyboard paths, what happens on the second-slowest network you will ever see.",
     color: "var(--agent-forge)",
     sigil: FORGE_SIGIL,
-    tools: ["render", "route", "github.repo", "index.search"],
+    tools: ["render", "cards.mint", "github.repo", "index.search"],
     clearance: 1,
   },
   {
@@ -108,7 +108,7 @@ export const agents: Agent[] = [
       "Encodes regulation as executable predicates and insists every verdict carries the reasoning that produced it. WARDEN's output is designed to be handed to an auditor without a translation layer.",
     color: "var(--agent-warden)",
     sigil: WARDEN_SIGIL,
-    tools: ["policy.eval", "audit.write", "predicate.eval", "index.search"],
+    tools: ["policy.eval", "audit.write", "assay.gate", "index.search"],
     clearance: 1,
   },
   {
@@ -120,7 +120,7 @@ export const agents: Agent[] = [
       "Holds the storage layer, the migrations and the shape of the data everyone else depends on. ATLAS treats an offline client as a first-class peer rather than a degraded one.",
     color: "var(--agent-atlas)",
     sigil: ATLAS_SIGIL,
-    tools: ["sql.plan", "migrate.check", "github.repo", "index.search"],
+    tools: ["sql.plan", "assay.collect", "github.repo", "index.search"],
     clearance: 1,
   },
 ];

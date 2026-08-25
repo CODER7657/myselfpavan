@@ -5,8 +5,20 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "exports": { ".": "./src/index.ts" },
-  "scripts": { "typecheck": "tsc --noEmit", "clean": "rimraf .turbo" },
-  "dependencies": { "@foundry/content": "workspace:*", "@foundry/tokens": "workspace:*" },
-  "devDependencies": { "@foundry/tsconfig": "workspace:*", "typescript": "^5.7.3" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf .turbo"
+  },
+  "dependencies": {
+    "@foundry/content": "workspace:*",
+    "@foundry/tokens": "workspace:*",
+    "@foundry/assay": "workspace:*"
+  },
+  "devDependencies": {
+    "@foundry/tsconfig": "workspace:*",
+    "typescript": "^5.7.3"
+  }
 }

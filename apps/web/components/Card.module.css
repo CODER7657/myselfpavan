@@ -1,5 +1,4 @@
 .slot {
-  perspective: 1600px;
   /* Grid stretches every slot in a row to the tallest, so the cards stay in
      register without any of them needing a hard-coded height. */
   display: grid;
@@ -10,8 +9,6 @@
   width: 100%;
   min-height: 100%;
   display: grid;
-  transform-style: preserve-3d;
-  transition: transform var(--dur-slow) var(--ease-out);
 }
 
 /*
@@ -39,16 +36,32 @@
    pointer, so a click anywhere on the card reaches the surface underneath. */
 .face > *:not(.flipSurface) { pointer-events: none; }
 
-.card[data-flipped="true"] { transform: rotateY(180deg); }
+/*
+ * The turn, without 3D.
+ *
+ * This was a rotateY flip. It broke twice on WebKit and both failures traced
+ * to the same cause: a rotated element is its own compositing context, so
+ * `backface-visibility` stopped hiding the reverse (both faces painted, the
+ * back mirrored) and the scrollable panel inside it stopped accepting touch.
+ *
+ * A cross-fade with a small lift reads as the same gesture, costs nothing, and
+ * has no 3D context to go wrong. Which face is painted is decided below by
+ * visibility, so it cannot depend on engine behaviour at all.
+ */
 
 /*
  * The front sits in normal flow and therefore sets the card's height; the
  * reverse is absolutely positioned over it. A fixed height on both faces was
  * silently clipping the stack chips off the bottom of the longer cards.
+ *
+ * Which face is painted is decided here by `visibility`, not by
+ * `backface-visibility`. The usual trick — rotate the card and let the hidden
+ * face's backface disappear — needs both faces to share one 3D context, and
+ * once one of them is in normal flow and the other absolute, WebKit stops
+ * honouring it: both faces paint at once and the reverse shows through
+ * mirrored. Toggling visibility cannot fail that way, on any engine.
  */
 .face {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   border: 1.5px solid var(--ink);
@@ -56,7 +69,11 @@
   box-shadow: var(--shadow-cut);
   overflow: hidden;
   pointer-events: auto;
-  transition: box-shadow var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+  transition:
+    opacity var(--dur) var(--ease-out),
+    visibility var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
 }
 
 /* A hidden face must not intercept clicks meant for the visible one. */
@@ -69,7 +86,21 @@
 .back {
   position: absolute;
   inset: 0;
-  transform: rotateY(180deg);
+}
+
+/* Exactly one face is ever painted, and only the painted one takes input. */
+.card[data-flipped="false"] .back,
+.card[data-flipped="true"] .front {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+}
+
+.card[data-flipped="false"] .front,
+.card[data-flipped="true"] .back {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 /* ── holo ───────────────────────────────────────────────────────────────── */
@@ -133,6 +164,19 @@
   position: relative;
   z-index: 5;
 }
+
+.bandScore { font-variant-numeric: tabular-nums; }
+
+/* Says plainly that this rank was not earned from a score. */
+.provisional {
+  font-size: var(--t-2xs);
+  line-height: 1.6;
+  color: var(--ink-muted);
+  border: 1px dashed var(--rule-strong);
+  padding: var(--s-2) var(--s-3);
+}
+
+.provisional b { color: var(--warn); font-weight: 500; }
 
 .head {
   display: grid;
@@ -328,12 +372,16 @@
    the reverse's body — which scrolls, and cannot be scrolled while it is inert
    to the pointer. */
 .face .link { pointer-events: auto; }
-.back .body { pointer-events: auto; }
+.back .body {
+  pointer-events: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .card { transition: none; }
-  .card[data-flipped="true"] { transform: none; }
-  .card[data-flipped="true"] .front { visibility: hidden; }
-  .back { transform: none; visibility: hidden; }
-  .card[data-flipped="true"] .back { visibility: visible; }
+  /* Visibility already swaps the faces; drop the fade and the lift. */
+  .face { transition: none; }
+  .card[data-flipped="false"] .back,
+  .card[data-flipped="true"] .front { transform: none; }
 }

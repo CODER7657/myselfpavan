@@ -1,7 +1,7 @@
 {
-  "collectedAt": "2026-08-25T12:02:24.394Z",
+  "collectedAt": "2026-08-25T17:18:32.186Z",
   "owner": "CODER7657",
-  "apiCalls": 151,
+  "apiCalls": 171,
   "includesPrivate": false,
   "repos": [
     {
@@ -24,7 +24,7 @@
       "isArchived": false,
       "isPrivate": false,
       "stars": 0,
-      "sizeKb": 0,
+      "sizeKb": 3,
       "pushedAt": "2026-08-25T11:51:36Z",
       "createdAt": "2026-08-25T11:47:55Z",
       "licence": "MIT",
@@ -48,6 +48,9 @@
       "vendoredPaths": 0,
       "testFiles": 1,
       "docFiles": 1,
+      "sourceFiles": 2,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": true,
       "hasCoverage": true,
@@ -55,7 +58,9 @@
       "hasDocs": true,
       "hasManifest": true,
       "hasContainer": true,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "pramana",
@@ -116,14 +121,19 @@
       "vendoredPaths": 0,
       "testFiles": 22,
       "docFiles": 6,
+      "sourceFiles": 61,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": true,
-      "hasCoverage": false,
-      "hasLinter": false,
+      "hasCoverage": true,
+      "hasLinter": true,
       "hasDocs": true,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": true
     },
     {
       "name": "AP2",
@@ -180,6 +190,9 @@
       "vendoredPaths": 0,
       "testFiles": 19,
       "docFiles": 11,
+      "sourceFiles": 200,
+      "componentFiles": 24,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": true,
       "hasCoverage": false,
@@ -187,7 +200,9 @@
       "hasDocs": true,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "globetrotter",
@@ -240,6 +255,9 @@
       "vendoredPaths": 0,
       "testFiles": 28,
       "docFiles": 10,
+      "sourceFiles": 146,
+      "componentFiles": 9,
+      "hasDesignSystem": true,
       "hasTests": true,
       "hasCi": true,
       "hasCoverage": true,
@@ -247,7 +265,9 @@
       "hasDocs": true,
       "hasManifest": true,
       "hasContainer": true,
-      "hasWorkspace": true
+      "hasWorkspace": true,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "CODER7657",
@@ -278,6 +298,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 0,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -285,7 +308,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "fix-broken-Terminal-Bench-2-Harbor-",
@@ -321,6 +346,9 @@
       "vendoredPaths": 0,
       "testFiles": 2,
       "docFiles": 0,
+      "sourceFiles": 2,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -328,7 +356,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "traveloop_hh",
@@ -364,6 +394,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 55,
+      "componentFiles": 32,
+      "hasDesignSystem": true,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -371,7 +404,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "assignment-2",
@@ -405,6 +440,9 @@
       "vendoredPaths": 0,
       "testFiles": 1,
       "docFiles": 0,
+      "sourceFiles": 8,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -412,7 +450,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "CRAFTATHON",
@@ -489,6 +529,9 @@
       "vendoredPaths": 20894,
       "testFiles": 3,
       "docFiles": 0,
+      "sourceFiles": 78,
+      "componentFiles": 9,
+      "hasDesignSystem": true,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -496,7 +539,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": true,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "open-multi-agent",
@@ -543,6 +588,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 31,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -550,7 +598,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "claw-code",
@@ -591,6 +641,9 @@
       "vendoredPaths": 0,
       "testFiles": 2,
       "docFiles": 0,
+      "sourceFiles": 102,
+      "componentFiles": 2,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -598,7 +651,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "shoes.store",
@@ -644,6 +699,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 25,
+      "componentFiles": 14,
+      "hasDesignSystem": true,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -651,7 +709,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": true
     },
     {
       "name": "3d-portfolio",
@@ -701,6 +761,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 48,
+      "componentFiles": 37,
+      "hasDesignSystem": false,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -708,7 +771,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": true
     },
     {
       "name": "AURA-GUARD",
@@ -754,6 +819,9 @@
       "vendoredPaths": 0,
       "testFiles": 5,
       "docFiles": 0,
+      "sourceFiles": 83,
+      "componentFiles": 11,
+      "hasDesignSystem": true,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -761,7 +829,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "genex-prj",
@@ -813,6 +883,9 @@
       "vendoredPaths": 0,
       "testFiles": 8,
       "docFiles": 2,
+      "sourceFiles": 54,
+      "componentFiles": 9,
+      "hasDesignSystem": true,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -820,7 +893,9 @@
       "hasDocs": true,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "gtu-ai-attendance-system",
@@ -872,6 +947,9 @@
       "vendoredPaths": 0,
       "testFiles": 3,
       "docFiles": 0,
+      "sourceFiles": 25,
+      "componentFiles": 6,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -879,7 +957,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "Finverse",
@@ -938,6 +1018,9 @@
       "vendoredPaths": 0,
       "testFiles": 12,
       "docFiles": 0,
+      "sourceFiles": 91,
+      "componentFiles": 23,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -945,7 +1028,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "complylite",
@@ -995,6 +1080,9 @@
       "vendoredPaths": 0,
       "testFiles": 1,
       "docFiles": 0,
+      "sourceFiles": 30,
+      "componentFiles": 7,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": true,
       "hasCoverage": false,
@@ -1002,7 +1090,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": true,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "KISAN_MITRA2",
@@ -1029,6 +1119,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 0,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -1036,7 +1129,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "-WEBATHON",
@@ -1076,6 +1171,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 14,
+      "componentFiles": 5,
+      "hasDesignSystem": true,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -1083,7 +1181,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "port_stock",
@@ -1117,6 +1217,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 1,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -1124,7 +1227,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "HashHawks1",
@@ -1171,6 +1276,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 8,
+      "componentFiles": 0,
+      "hasDesignSystem": true,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -1178,7 +1286,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "voice-emotion-detection",
@@ -1216,6 +1326,9 @@
       "vendoredPaths": 0,
       "testFiles": 1,
       "docFiles": 0,
+      "sourceFiles": 5,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -1223,7 +1336,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "quantum_crypto",
@@ -1263,6 +1378,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 6,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": false,
       "hasCi": true,
       "hasCoverage": false,
@@ -1270,7 +1388,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "codes-",
@@ -1316,6 +1436,9 @@
       "vendoredPaths": 3,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 10,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -1323,7 +1446,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "hashhawks-3d-showcase",
@@ -1373,6 +1498,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 74,
+      "componentFiles": 61,
+      "hasDesignSystem": true,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -1380,7 +1508,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": true
     },
     {
       "name": "portfolio2",
@@ -1425,6 +1555,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 18,
+      "componentFiles": 11,
+      "hasDesignSystem": true,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -1432,7 +1565,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "HASHHAWKS",
@@ -1482,6 +1617,9 @@
       "vendoredPaths": 0,
       "testFiles": 0,
       "docFiles": 0,
+      "sourceFiles": 69,
+      "componentFiles": 56,
+      "hasDesignSystem": true,
       "hasTests": false,
       "hasCi": false,
       "hasCoverage": false,
@@ -1489,7 +1627,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "VeriServe_block",
@@ -1537,6 +1677,9 @@
       "vendoredPaths": 0,
       "testFiles": 1,
       "docFiles": 0,
+      "sourceFiles": 14,
+      "componentFiles": 0,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -1544,7 +1687,9 @@
       "hasDocs": false,
       "hasManifest": false,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     },
     {
       "name": "VortiFi",
@@ -1588,6 +1733,9 @@
       "vendoredPaths": 0,
       "testFiles": 2,
       "docFiles": 0,
+      "sourceFiles": 19,
+      "componentFiles": 6,
+      "hasDesignSystem": false,
       "hasTests": true,
       "hasCi": false,
       "hasCoverage": false,
@@ -1595,7 +1743,9 @@
       "hasDocs": false,
       "hasManifest": true,
       "hasContainer": false,
-      "hasWorkspace": false
+      "hasWorkspace": false,
+      "hasA11y": false,
+      "hasMotion": false
     }
   ]
 }

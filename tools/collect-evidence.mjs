@@ -98,6 +98,15 @@ const RX = {
   manifest: /^(package\.json|pyproject\.toml|requirements\.txt|Cargo\.toml|go\.mod|build\.gradle(\.kts)?|pom\.xml|Gemfile)$/i,
   container: /^(Dockerfile|docker-compose\.ya?ml|compose\.ya?ml)$/i,
   workspace: /^(pnpm-workspace\.yaml|turbo\.json|lerna\.json|nx\.json)$/i,
+
+  /* Source, so the work itself can be measured rather than its git history. */
+  source: /\.(ts|tsx|js|jsx|py|rs|go|java|kt|kts|sol|rb|php|swift|c|cc|cpp|h|hpp|cs|vue|svelte|scss|css)$/i,
+
+  /* Interface craft, in the only forms an API can see. */
+  component: /(^|\/)(components?|widgets?|screens?|views?|pages?)\//i,
+  designSystem: /(^|\/)(tailwind\.config|theme\.[jt]s|tokens?\.(json|ts|css)|design-system|styled\.[jt]s|panda\.config|\.storybook)/i,
+  a11y: /(eslint-plugin-jsx-a11y|axe-core|@axe-core|jsx-a11y)/i,
+  motion: /(framer-motion|gsap|motion|react-spring|lottie|three)/i,
 };
 
 /*
@@ -120,6 +129,20 @@ function pathSignals(paths) {
      */
     testFiles: paths.filter((p) => RX.tests.test(p) && /\.[a-z]+$/i.test(p)).length,
     docFiles: paths.filter((p) => RX.docs.test(p) && /\.mdx?$/i.test(p)).length,
+
+    /*
+     * Written source, counted directly.
+     *
+     * Commit count alone punishes a complete project that happened to be
+     * squashed into one import — the history is thin, the work is not. This
+     * measures what is actually there.
+     */
+    sourceFiles: paths.filter((p) => RX.source.test(p)).length,
+
+    /* Interface craft. A polished front end is a real discipline and was
+       previously worth nothing here. */
+    componentFiles: paths.filter((p) => RX.component.test(p) && RX.source.test(p)).length,
+    hasDesignSystem: any(RX.designSystem),
     hasTests: any(RX.tests),
     hasCi: any(RX.ci),
     hasCoverage: any(RX.coverage),
@@ -206,6 +229,25 @@ async function inspect(repo) {
     .filter((t) => t.type === "blob" && !t.path.includes("/"))
     .map((t) => t.path);
 
+  /*
+   * Read the manifests, not just their filenames.
+   *
+   * A path scan reported PRAMANA as having no linter and no coverage, because
+   * ruff, mypy and pytest-cov are all declared inside pyproject.toml rather
+   * than in files named after themselves. Most Python projects and a good
+   * share of Node ones configure tooling this way, so scoring on filenames
+   * alone systematically punishes them.
+   */
+  const manifestNames = topLevelFiles.filter((f) => RX.manifest.test(f));
+  const manifests = await Promise.all(
+    manifestNames
+      .slice(0, 3)
+      .map((f) => gh(base + "/contents/" + f, { raw: true }).catch(() => null))
+  );
+  const declared = manifests.filter(Boolean).join("\n").toLowerCase();
+
+  const declares = (rx) => rx.test(declared);
+
   return {
     name: repo.name,
     url: repo.html_url,
@@ -236,7 +278,21 @@ async function inspect(repo) {
     /** Files ignored as vendored or build output, kept for traceability. */
     vendoredPaths,
 
-    ...pathSignals(paths),
+    ...(() => {
+      const sig = pathSignals(paths);
+      return {
+        ...sig,
+        /* A declared dev dependency counts as much as a config file. */
+        hasCoverage:
+          sig.hasCoverage ||
+          declares(/pytest-cov|coverage\[toml\]|nyc|--cov|c8|codecov/),
+        hasA11y: declares(RX.a11y),
+        hasMotion: declares(RX.motion) || paths.some((p) => RX.motion.test(p)),
+        hasLinter:
+          sig.hasLinter ||
+          declares(/\[tool\.ruff|\[tool\.mypy|ruff|mypy|eslint|biome|pylint|flake8/),
+      };
+    })(),
   };
 }
 

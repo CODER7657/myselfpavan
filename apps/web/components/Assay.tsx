@@ -71,10 +71,11 @@ export function Assay() {
         <h2 className="plate-title">THE ASSAY</h2>
         <p className="plate-sub">
           Which work earns a place here is decided by a rubric, not by memory. Every
-          repository is graded on five bands — depth, verification, completeness, structure
-          and whether it shipped — and anything scoring {PROMOTION_FLOOR} or above is
-          promoted. Open a row to see exactly where its points came from, and what would
-          move it.
+          repository is graded on six bands — depth, verification, completeness, structure,
+          whether it shipped, and a capped allowance for claims the API cannot see but a
+          link can prove. Anything scoring {PROMOTION_FLOOR} or above is promoted, and the
+          tier follows the score. Open a row to see exactly where its points came from, and
+          what would move it.
         </p>
 
         <p className={a.gate}>
@@ -179,7 +180,10 @@ function Row({
             {row.bands.map((b) => (
               <div key={b.id} className={a.band}>
                 <div className={a.bandHead}>
-                  <span className={a.bandLabel}>{b.label}</span>
+                  <span className={a.bandLabel}>
+                    {b.label}
+                    {b.id === "attested" && <em className={a.attested}>attested</em>}
+                  </span>
                   <span className={a.bandScore}>
                     {b.earned}/{b.max}
                   </span>
@@ -199,6 +203,16 @@ function Row({
                       <span className={a.sigBody}>
                         <b>{sig.label}</b>
                         <span>{sig.detail}</span>
+                        {sig.proof && (
+                          <a
+                            className={a.proof}
+                            href={sig.proof}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Check it ↗
+                          </a>
+                        )}
                       </span>
                       <span className={a.sigScore}>
                         {sig.earned}/{sig.max}

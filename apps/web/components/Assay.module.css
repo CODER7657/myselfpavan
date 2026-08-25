@@ -187,6 +187,30 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Marks the one band whose points came from the author rather than the API. */
+.attested {
+  margin-left: 0.5em;
+  font-family: var(--font-mono);
+  font-size: var(--t-2xs);
+  font-style: normal;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--warn);
+  border: 1px solid var(--warn);
+  padding: 0 4px;
+}
+
+.proof {
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+  justify-self: start;
+  margin-top: 2px;
+}
+
 .rationale {
   margin: 0;
   font-size: var(--t-2xs);

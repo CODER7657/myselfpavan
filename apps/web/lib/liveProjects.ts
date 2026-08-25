@@ -160,7 +160,43 @@ export interface LiveProject extends Project {
   assay?: Assay;
   /** True when the whole card was generated rather than written. */
   generated?: boolean;
+  /**
+   * True when no assay could reach this project's repository — private work,
+   * or a filing with no repository of its own. Its rank is the author's
+   * estimate, and the card says so rather than passing it off as a score.
+   */
+  provisional?: boolean;
+  /** Why it could not be graded. */
+  provisionalReason?: string;
+  /** What the vault orders by. Real score where one exists. */
+  sortScore: number;
 }
+
+/**
+ * Where a card sits when the assay cannot reach its repository — private work
+ * still under way, or a filing that has no repository of its own.
+ *
+ * Anchored to the middle of each tier's range so a hand-ranked card lands
+ * among its graded peers rather than above or below all of them.
+ */
+const TIER_ANCHOR: Record<string, number> = {
+  mythic: 87,
+  legendary: 73,
+  epic: 59,
+  rare: 46,
+  common: 34,
+};
+
+const anchorFor = (rarity: string): number => TIER_ANCHOR[rarity] ?? 34;
+
+/** Why a given card cannot be graded, stated on the card itself. */
+const PROVISIONAL_REASON: Record<string, string> = {
+  "raksha-ai":
+    "Private while in progress. Make it public and re-run the assay, and this rank becomes a score.",
+  tradex: "Private. Will be graded once the repository is public.",
+  "ap2-findings":
+    "An upstream filing on Google's repository, not a repository of its own — the gate has nothing to grade.",
+};
 
 /**
  * Curated cards first, in their authored order, then anything the assay
@@ -171,11 +207,36 @@ export function joinProjects(byName: Map<string, Assay>): LiveProject[] {
   const claimed = new Set<string>();
 
   const curated: LiveProject[] = projects.map((p) => {
-    if (NO_REPO.has(p.slug)) return p;
+    /*
+     * The rank on a curated card is the assay's, not the author's.
+     *
+     * Both used to exist: a hand-written rarity in the content, and a computed
+     * tier from the gate. They disagreed — GlobeTrotter was written as epic and
+     * graded legendary — and a portfolio with two ranks for the same project is
+     * one you cannot rely on. The hand-written value is now only a fallback for
+     * work the gate genuinely cannot see, and it is labelled when used.
+     */
+    if (NO_REPO.has(p.slug)) {
+      return {
+        ...p,
+        sortScore: anchorFor(p.rarity),
+        provisional: true,
+        provisionalReason: PROVISIONAL_REASON[p.slug] ?? "Not gradeable from a repository.",
+      };
+    }
 
     const repoName = CARD_TO_REPO[p.slug];
     const assay = repoName ? byName.get(repoName.toLowerCase()) : undefined;
-    if (!assay) return p;
+    if (!assay) {
+      return {
+        ...p,
+        sortScore: anchorFor(p.rarity),
+        provisional: true,
+        provisionalReason:
+          PROVISIONAL_REASON[p.slug] ??
+          "Repository is private, so the gate cannot reach it yet.",
+      };
+    }
 
     claimed.add(repoName!.toLowerCase());
 
@@ -189,13 +250,20 @@ export function joinProjects(byName: Map<string, Assay>): LiveProject[] {
       metrics,
       rarity: assay.tier,
       assay,
+      sortScore: assay.score,
     };
   });
 
   const generated: LiveProject[] = [...byName.values()]
     .filter((a) => a.verdict === "promoted" && !claimed.has(a.name.toLowerCase()))
-    .sort((x, y) => y.score - x.score)
-    .map((a) => ({ ...synthesise(a), assay: a, generated: true }));
+    .map((a) => ({ ...synthesise(a), assay: a, generated: true, sortScore: a.score }));
 
-  return [...curated, ...generated];
+  /*
+   * Ranked, not authored-order. The whole point of the gate is that position
+   * is earned — a card that improves climbs past one that has not, on the next
+   * refresh, with nobody reordering anything by hand.
+   */
+  return [...curated, ...generated].sort(
+    (x, y) => y.sortScore - x.sortScore || x.name.localeCompare(y.name)
+  );
 }

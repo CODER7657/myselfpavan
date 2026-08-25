@@ -1,4 +1,5 @@
 import type { Assay, Band, RepoEvidence, Signal, Verdict } from "./types";
+import { ATTESTED_MAX, attestationsFor } from "./attestations.ts";
 import type { Rarity } from "@foundry/tokens";
 
 /**
@@ -12,7 +13,7 @@ import type { Rarity } from "@foundry/tokens";
  * Bump this when the rules change; a stored score always names the rubric that
  * produced it, so an old number is never silently compared against new rules.
  */
-export const RUBRIC_VERSION = "1.1.0";
+export const RUBRIC_VERSION = "3.0.0";
 
 /**
  * Topic a repository must carry before it is judged at all.
@@ -42,6 +43,10 @@ export const GRANDFATHERED = new Set([
 
 /** Never graded: infrastructure, coursework, and the portfolio itself. */
 export const EXCLUDED = new Set([
+  /* A fixture built to prove the gate end to end. It scored 69 and was
+     promoted with a generated card, which was the point — but it is a test
+     harness, not portfolio work. */
+  "assay-probe",
   "CODER7657",
   "myselfpavan",
   "portfolio2",
@@ -52,14 +57,14 @@ export const EXCLUDED = new Set([
 ]);
 
 /** Score at or above which a repository is shown at all. */
-export const PROMOTION_FLOOR = 38;
+export const PROMOTION_FLOOR = 34;
 
 /** Score → tier. A repository moves between these as it is worked on. */
 const TIERS: { min: number; tier: Rarity }[] = [
-  { min: 86, tier: "mythic" },
-  { min: 72, tier: "legendary" },
-  { min: 58, tier: "epic" },
-  { min: 44, tier: "rare" },
+  { min: 72, tier: "mythic" },
+  { min: 60, tier: "legendary" },
+  { min: 48, tier: "epic" },
+  { min: 36, tier: "rare" },
   { min: 0, tier: "common" },
 ];
 
@@ -110,37 +115,44 @@ function band(
  * measure reach, not work.
  */
 function depthBand(e: RepoEvidence): Band {
-  const commitPts = logScale(e.commits, 80, 18);
-  const sizePts = logScale(e.sizeKb, 4000, 4);
-  const langPts = clamp(e.languages.length - 1, 3);
+  const commitPts = logScale(e.commits, 60, 8);
+  const filePts = logScale(e.sourceFiles, 120, 7);
+  const sizePts = logScale(e.sizeKb, 4000, 3);
 
   return band("depth", "Depth of work", "How much is actually in there.", [
     {
+      id: "source",
+      label: "Source written",
+      earned: round(filePts),
+      max: 7,
+      detail: e.sourceFiles + " source file" + (e.sourceFiles === 1 ? "" : "s"),
+      ...(filePts < 4 ? { advice: "There is not much here yet." } : {}),
+    },
+    {
       id: "commits",
       label: "Commit history",
+      /*
+       * Deliberately no longer the heaviest signal.
+       *
+       * It was worth fifteen points, which meant a finished, deployed project
+       * imported as a single commit scored near zero for depth — punished for
+       * its git history rather than judged on its work. Source written now
+       * carries comparable weight, so a squashed repository can still show
+       * what is in it.
+       */
       earned: round(commitPts),
-      max: 18,
+      max: 8,
       detail: e.commits + " commit" + (e.commits === 1 ? "" : "s"),
-      ...(commitPts < 14
-        ? { advice: "Sustained history is the single heaviest signal here." }
+      ...(commitPts < 5
+        ? { advice: "A visible history makes the work easier to follow, though it is not the whole picture." }
         : {}),
     },
     {
       id: "size",
       label: "Codebase size",
       earned: round(sizePts),
-      max: 4,
-      detail: e.sizeKb.toLocaleString() + " KB checked in",
-    },
-    {
-      id: "languages",
-      label: "Language spread",
-      earned: langPts,
       max: 3,
-      detail:
-        e.languages.length > 0
-          ? e.languages.slice(0, 4).join(", ")
-          : "none detected",
+      detail: e.sizeKb.toLocaleString() + " KB checked in",
     },
   ]);
 }
@@ -165,8 +177,8 @@ function verificationBand(e: RepoEvidence): Band {
          * hundred are not the same claim, and scoring them identically was
          * the rubric's blindest spot.
          */
-        earned: round(e.hasTests ? 4 + logScale(e.testFiles, 60, 7) : 0),
-        max: 11,
+        earned: round(e.hasTests ? 3.5 + logScale(e.testFiles, 60, 5.5) : 0),
+        max: 9,
         detail: e.hasTests
           ? e.testFiles + " test file" + (e.testFiles === 1 ? "" : "s")
           : "none found",
@@ -181,8 +193,8 @@ function verificationBand(e: RepoEvidence): Band {
       {
         id: "ci",
         label: "Continuous integration",
-        earned: e.hasCi ? 8 : 0,
-        max: 8,
+        earned: e.hasCi ? 7 : 0,
+        max: 7,
         detail: e.hasCi ? ".github/workflows present" : "no workflow",
         ...(e.hasCi ? {} : { advice: "A workflow that runs the tests proves they still pass." }),
       },
@@ -206,7 +218,7 @@ function verificationBand(e: RepoEvidence): Band {
 
 /** Completeness. Whether a stranger could pick it up. */
 function completenessBand(e: RepoEvidence): Band {
-  const readmePts = logScale(e.readmeBytes, 6000, 9);
+  const readmePts = logScale(e.readmeBytes, 6000, 7);
 
   return band(
     "completeness",
@@ -217,7 +229,7 @@ function completenessBand(e: RepoEvidence): Band {
         id: "readme",
         label: "README depth",
         earned: round(readmePts),
-        max: 9,
+        max: 7,
         detail:
           e.readmeBytes > 0
             ? e.readmeBytes.toLocaleString() + " bytes"
@@ -229,8 +241,8 @@ function completenessBand(e: RepoEvidence): Band {
       {
         id: "docs",
         label: "Extended docs",
-        earned: round(e.hasDocs ? 2 + logScale(e.docFiles, 12, 2) : 0),
-        max: 4,
+        earned: round(e.hasDocs ? 1.5 + logScale(e.docFiles, 12, 1.5) : 0),
+        max: 3,
         detail: e.hasDocs
           ? e.docFiles + " document" + (e.docFiles === 1 ? "" : "s") + " under docs/"
           : "none",
@@ -253,8 +265,8 @@ function completenessBand(e: RepoEvidence): Band {
       {
         id: "topics",
         label: "Topics",
-        earned: clamp(e.topics.length, 2),
-        max: 2,
+        earned: clamp(e.topics.length, 1),
+        max: 1,
         detail: e.topics.length + " topic" + (e.topics.length === 1 ? "" : "s"),
       },
     ]
@@ -263,14 +275,14 @@ function completenessBand(e: RepoEvidence): Band {
 
 /** Structure. A project, or a folder of loose files. */
 function structureBand(e: RepoEvidence): Band {
-  const dirPts = clamp(e.topLevelDirs.length * 2, 6);
+  const dirPts = clamp(e.topLevelDirs.length * 2, 5);
 
   return band("structure", "Structure", "A project, or a folder of loose files.", [
     {
       id: "layout",
       label: "Directory layout",
       earned: dirPts,
-      max: 6,
+      max: 5,
       detail:
         e.topLevelDirs.length > 0
           ? e.topLevelDirs.length + " top-level directories"
@@ -289,8 +301,8 @@ function structureBand(e: RepoEvidence): Band {
     {
       id: "container",
       label: "Reproducible environment",
-      earned: e.hasContainer ? 3 : 0,
-      max: 3,
+      earned: e.hasContainer ? 2 : 0,
+      max: 2,
       detail: e.hasContainer ? "Dockerfile or compose file" : "none",
     },
     {
@@ -306,14 +318,14 @@ function structureBand(e: RepoEvidence): Band {
 /** Shipped. Whether it left the machine it was written on. */
 function shippedBand(e: RepoEvidence): Band {
   const days = daysSince(e.pushedAt);
-  const recencyPts = days < 90 ? 4 : days < 270 ? 2.5 : days < 540 ? 1 : 0;
+  const recencyPts = days < 90 ? 3 : days < 270 ? 2 : days < 540 ? 1 : 0;
 
   return band("shipped", "Shipped", "Whether it left the machine it was written on.", [
     {
       id: "releases",
       label: "Tagged release",
-      earned: e.releases > 0 ? 6 : 0,
-      max: 6,
+      earned: e.releases > 0 ? 5 : 0,
+      max: 5,
       detail: e.releases > 0 ? e.releases + " release(s)" : "never tagged",
       ...(e.releases > 0 ? {} : { advice: "One tagged release marks a version somebody could actually use." }),
     },
@@ -329,10 +341,107 @@ function shippedBand(e: RepoEvidence): Band {
       id: "recency",
       label: "Recent activity",
       earned: recencyPts,
-      max: 4,
+      max: 3,
       detail: Number.isFinite(days) ? Math.round(days) + " days since last push" : "unknown",
     },
   ]);
+}
+
+/**
+ * Craft. Interface work, which the rest of the rubric is blind to.
+ *
+ * Everything above rewards correctness — tests, CI, licences, structure. A
+ * genuinely well-made front end scores almost nothing on any of it, which is
+ * wrong: making something feel good is a real discipline and a real part of
+ * this portfolio. Kept small on purpose, because it is the easiest band to
+ * fake and the hardest to verify remotely.
+ */
+function craftBand(e: RepoEvidence): Band {
+  const componentPts = logScale(e.componentFiles, 40, 3);
+
+  return band("craft", "Craft", "Interface work the other bands cannot see.", [
+    {
+      id: "components",
+      label: "Component structure",
+      earned: round(componentPts),
+      max: 3,
+      detail:
+        e.componentFiles > 0
+          ? e.componentFiles + " component file" + (e.componentFiles === 1 ? "" : "s")
+          : "no component directory",
+    },
+    {
+      id: "designsystem",
+      label: "Design system",
+      earned: e.hasDesignSystem ? 2 : 0,
+      max: 2,
+      detail: e.hasDesignSystem ? "theme or token config present" : "none",
+      ...(e.hasDesignSystem ? {} : { advice: "Tokens or a theme file show the styling was designed, not improvised." }),
+    },
+    {
+      id: "a11y",
+      label: "Accessibility tooling",
+      earned: e.hasA11y ? 2 : 0,
+      max: 2,
+      detail: e.hasA11y ? "a11y linting configured" : "none",
+      ...(e.hasA11y ? {} : { advice: "jsx-a11y or axe is the cheapest proof the interface was built for everyone." }),
+    },
+    {
+      id: "motion",
+      label: "Motion system",
+      earned: e.hasMotion ? 1 : 0,
+      max: 1,
+      detail: e.hasMotion ? "animation library in use" : "none",
+    },
+  ]);
+}
+
+/**
+ * Attested. Verifiable claims the API cannot reach.
+ *
+ * Capped hard: this can lift a strong project above a merely tidy one, but a
+ * repository with nothing else going for it cannot be talked into a rank. Every
+ * claim carries a proof URL, and the band renders as ATTESTED rather than
+ * OBSERVED so a reader always knows which half of a score came from the author.
+ */
+function attestedBand(e: RepoEvidence): Band {
+  const claims = attestationsFor(e.name);
+
+  if (claims.length === 0) {
+    return band(
+      "attested",
+      "Attested",
+      "Verifiable claims the API cannot see. Each carries a link.",
+      [
+        {
+          id: "none",
+          label: "No claims filed",
+          earned: 0,
+          max: ATTESTED_MAX,
+          detail: "Scored purely on what the repository shows.",
+        },
+      ]
+    );
+  }
+
+  /* Declared weights may exceed the cap; scale them down rather than truncate,
+     so the relative importance the author assigned is preserved. */
+  const declared = claims.reduce((sum, c) => sum + c.weight, 0);
+  const scale = declared > ATTESTED_MAX ? ATTESTED_MAX / declared : 1;
+
+  return band(
+    "attested",
+    "Attested",
+    "Verifiable claims the API cannot see. Each carries a link.",
+    claims.map((c) => ({
+      id: c.id,
+      label: c.label,
+      earned: round(c.weight * scale),
+      max: round(c.weight * scale),
+      detail: c.detail,
+      proof: c.proof,
+    }))
+  );
 }
 
 /* ── the gate ─────────────────────────────────────────────────────────────── */
@@ -350,6 +459,8 @@ export function assess(e: RepoEvidence): Assay {
     completenessBand(e),
     structureBand(e),
     shippedBand(e),
+    craftBand(e),
+    attestedBand(e),
   ];
 
   const score = round(bands.reduce((s, b) => s + b.earned, 0));

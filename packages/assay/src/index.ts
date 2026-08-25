@@ -8,3 +8,4 @@ export {
   GRANDFATHERED,
   EXCLUDED,
 } from "./rubric";
+export { ATTESTATIONS, ATTESTED_MAX, attestationsFor, type Attestation } from "./attestations";

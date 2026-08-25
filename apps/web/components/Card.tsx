@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { agentsById, type Project } from "@foundry/content";
+import type { Assay } from "@foundry/assay";
 import { useFoundry } from "@/lib/store";
 import { Sigil } from "./Sigil";
 import s from "./Card.module.css";
@@ -30,7 +31,16 @@ const STACK_SHOWN = 6;
  * Card content is therefore `pointer-events: none` and passes clicks through to
  * that surface, while the links opt back in and sit above it.
  */
-export function Card({ project }: { project: Project }) {
+export function Card({
+  project,
+}: {
+  project: Project & {
+    assay?: Assay;
+    generated?: boolean;
+    provisional?: boolean;
+    provisionalReason?: string;
+  };
+}) {
   const [flipped, setFlipped] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const inspectCard = useFoundry((st) => st.inspectCard);
@@ -88,7 +98,17 @@ export function Card({ project }: { project: Project }) {
 
           <div className={s.band}>
             <span>{project.rarity.toUpperCase()}</span>
-            <span>{project.year}</span>
+            {project.assay ? (
+              <span className={s.bandScore} title="Assay score, recomputed on every page load">
+                {Math.round(project.assay.score)}/100
+              </span>
+            ) : project.provisional ? (
+              <span className={s.bandScore} title={project.provisionalReason}>
+                PROVISIONAL
+              </span>
+            ) : (
+              <span className={s.bandScore}>{project.year}</span>
+            )}
           </div>
 
           <div className={s.head}>
@@ -97,7 +117,9 @@ export function Card({ project }: { project: Project }) {
                 <Sigil matrix={agent.sigil} size={3} gap={1} />
               </span>
               <span className={s.owner}>{agent.callsign}</span>
-              <span className={s.classification}>{project.classification}</span>
+              <span className={s.classification}>
+                {project.generated ? "AUTO-ASSAYED" : project.classification}
+              </span>
             </div>
             <div className={s.name}>{project.name}</div>
           </div>
@@ -161,6 +183,12 @@ export function Card({ project }: { project: Project }) {
           <div className={s.body}>
             <p className={s.summary}>{project.summary}</p>
             <p className={s.highlight}>{project.highlight}</p>
+
+            {project.provisional && project.provisionalReason && (
+              <p className={s.provisional}>
+                <b>Rank is provisional.</b> {project.provisionalReason}
+              </p>
+            )}
 
             <div className={s.stack}>
               {project.stack.map((t) => (

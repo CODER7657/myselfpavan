@@ -284,6 +284,97 @@ export const missions: Mission[] = [
       },
     ],
   },
+
+  {
+    id: "assay",
+    code: "M-06",
+    title: "RUN THE ASSAY",
+    objective:
+      "Grade every repository against the rubric and rebuild the vault from the result.",
+    reveals: "Re-ranks the card vault, live.",
+    xp: 300,
+    steps: [
+      {
+        id: "y1",
+        agent: "atlas",
+        action: "Load the evidence snapshot",
+        tool: "assay.collect",
+        needs: [],
+        cost: 260,
+        thought: [
+          "Reading the snapshot the scheduled workflow leaves behind.",
+          "Collecting it live would cost about 150 API calls — more than an anonymous visitor is allowed in an hour.",
+          "So the gathering runs once a day in CI, and the grading runs here, on every load.",
+        ],
+      },
+      {
+        id: "y2",
+        agent: "warden",
+        action: "Apply the eligibility gate",
+        tool: "assay.gate",
+        needs: ["y1"],
+        cost: 320,
+        thought: [
+          "Before anything is scored: what is even allowed to be judged?",
+          "Forks are somebody else's work. Archived repositories are finished being interesting.",
+          "And anything without the foundry-ready topic is still being worked on — those are skipped entirely, not marked down.",
+          "Judging unfinished work and then penalising it for being unfinished would be a rigged gate.",
+        ],
+      },
+      {
+        id: "y3",
+        agent: "oracle",
+        action: "Score against the rubric",
+        tool: "assay.score",
+        needs: ["y2"],
+        cost: 480,
+        thought: [
+          "Six bands: depth, verification, completeness, structure, shipped, attested.",
+          "Verification carries the most weight — a project that cannot show it checked itself is taking its own word for it.",
+          "Stars are not an input. They measure reach, not work.",
+          "A language-spread signal used to live here and was removed: being written in one language is focus, not a deficiency.",
+        ],
+      },
+      {
+        id: "y4",
+        agent: "cipher",
+        action: "Re-check the attested claims",
+        tool: "assay.verify",
+        needs: ["y2"],
+        cost: 360,
+        thought: [
+          "Some things are true but invisible to an API — a coverage percentage, a defect acknowledged upstream.",
+          "Those are allowed to count, but only with a link a stranger can open, and only up to a hard cap.",
+          "Attestation can lift a strong repository over a merely tidy one. It cannot carry a weak one.",
+        ],
+      },
+      {
+        id: "y5",
+        agent: "oracle",
+        action: "Rank what cleared the floor",
+        tool: "assay.rank",
+        needs: ["y3", "y4"],
+        cost: 300,
+        thought: [
+          "Ordering by score. Position is earned here, not authored.",
+          "Improve a repository and it climbs past one that stood still — on the next refresh, with nobody editing the site.",
+        ],
+      },
+      {
+        id: "y6",
+        agent: "forge",
+        action: "Mint and place the cards",
+        tool: "cards.mint",
+        needs: ["y5"],
+        cost: 340,
+        thought: [
+          "Anything promoted with no card written for it gets one generated from its own evidence.",
+          "A generated card says so on its face — a card written by a script should admit it.",
+          "Vault rebuilt.",
+        ],
+      },
+    ],
+  },
 ];
 
 export const missionById = Object.fromEntries(missions.map((m) => [m.id, m]));

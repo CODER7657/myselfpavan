@@ -8,6 +8,7 @@ import {
 } from "@foundry/content";
 import { RARITY_RANK } from "@foundry/tokens";
 import type { ToolResult } from "./types";
+import { assayTools } from "./assay-tools.ts";
 
 /**
  * The tool layer. These are real functions over real data — `github.repo`
@@ -314,6 +315,13 @@ const registry: Record<string, ToolFn> = {
   async route() {
     return { ok: true, summary: "routes resolved · 0 client-only dead ends", data: null };
   },
+
+  /*
+   * The assay tools are the real gate, not a description of one: they load the
+   * same evidence snapshot and call the same rubric the Assay plate uses, so a
+   * mission run and the published ranking cannot disagree.
+   */
+  ...assayTools,
 };
 
 export async function callTool(tool: string, args: Record<string, unknown> = {}): Promise<ToolResult> {
