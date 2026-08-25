@@ -81,19 +81,44 @@
 /* ── the graph ──────────────────────────────────────────────────────────── */
 
 .graph {
+  --node-h: 76px;
   padding: var(--s-4) var(--s-5);
   border-bottom: 1px solid var(--rule-strong);
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
-.levels { display: flex; align-items: stretch; gap: 0; min-width: min-content; }
+/*
+ * Stage columns and their connectors.
+ *
+ * Every node occupies a fixed row height, so the first node in each column
+ * always starts at the same y. The arrow is then offset to sit on that node's
+ * centre line rather than being centred in the column — which is what made it
+ * drift downward beside a column holding two nodes.
+ */
+.levels {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  min-width: min-content;
+}
 
-.level { display: grid; gap: var(--s-2); align-content: start; }
+.level {
+  display: grid;
+  grid-auto-rows: var(--node-h);
+  gap: var(--s-2);
+  align-content: start;
+}
 
 .connector {
+  --node-h: 76px;
   width: 34px;
   display: grid;
-  place-items: center;
+  justify-items: center;
+  align-items: start;
+  align-self: start;
+  /* Half a node, less half the arrow's line box. */
+  padding-top: calc(var(--node-h) / 2 - 0.62em);
   color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: var(--t-xs);
@@ -101,10 +126,12 @@
 
 .node {
   display: grid;
+  align-content: start;
   gap: 3px;
-  padding: 6px 9px;
+  padding: 7px 9px;
+  height: 100%;
   border: 1px solid var(--rule-strong);
-  min-width: 148px;
+  min-width: 160px;
   background: var(--paper);
   transition: border-color var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast);
 }

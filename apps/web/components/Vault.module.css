@@ -59,7 +59,9 @@
   gap: var(--s-5);
 }
 
-.item { min-width: 0; }
+/* The stretch has to be unbroken from the grid down to the card, or each card
+   falls back to its own content height and the row stops lining up. */
+.item { min-width: 0; display: grid; }
 
 @media (max-width: 560px) {
   .grid { grid-template-columns: 1fr; }

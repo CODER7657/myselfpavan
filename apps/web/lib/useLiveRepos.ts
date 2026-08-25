@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { projects, type RepoRow } from "@foundry/content";
+import type { RepoRow } from "@foundry/content";
 
 /**
  * Live GitHub state, fetched once per page load and shared by every consumer.
@@ -16,8 +16,6 @@ import { projects, type RepoRow } from "@foundry/content";
 export interface LiveState {
   repos: RepoRow[] | null;
   error: string | null;
-  /** Authored repositories with no curated card yet. */
-  uncurated: RepoRow[];
   /** Newest push across the account, as an ISO date. */
   lastPush: string | null;
   byName: Map<string, RepoRow>;
@@ -26,32 +24,9 @@ export interface LiveState {
 const EMPTY: LiveState = {
   repos: null,
   error: null,
-  uncurated: [],
   lastPush: null,
   byName: new Map(),
 };
-
-/** Repos deliberately excluded from "new work" — infrastructure, not portfolio. */
-const IGNORE = new Set(["CODER7657", "portfolio2", "codes-", "assignment-2", "3d-portfolio"]);
-
-/**
- * Curated cards do not always share a slug with their repository, so the link
- * between them is declared here rather than guessed.
- */
-const CURATED_REPOS = new Set<string>([
-  ...projects.map((p) => p.slug),
-  "pramana",
-  "CRAFTATHON",
-  "complylite",
-  "globetrotter",
-  "VortiFi",
-  "VeriServe_block",
-  "open-multi-agent",
-  "genex-prj",
-  "shoes.store",
-  "fix-broken-Terminal-Bench-2-Harbor-",
-  "AP2",
-]);
 
 let cache: RepoRow[] | null = null;
 let inflight: Promise<RepoRow[]> | null = null;
@@ -151,9 +126,6 @@ export function useLiveRepos(): LiveState {
         setState({
           repos,
           error: null,
-          uncurated: authored.filter(
-            (r) => !IGNORE.has(r.name) && !CURATED_REPOS.has(r.name)
-          ),
           lastPush: authored[0]?.pushed ?? null,
           byName: new Map(repos.map((r) => [r.name.toLowerCase(), r])),
         });

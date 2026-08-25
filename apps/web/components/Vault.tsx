@@ -46,33 +46,14 @@ export function Vault() {
         </p>
 
         {/* Live sync. The curated list is hand-written and would otherwise go
-            stale; this notices anything pushed since and says so. */}
+            stale; this states when the account last moved, and nothing more —
+            listing half-finished repositories on a portfolio only advertises
+            the half-finished ones. */}
         {live.lastPush && (
           <p className={v.sync}>
             <span className={v.pulse} aria-hidden="true" />
-            Synced with GitHub · last push {live.lastPush}
-            {live.uncurated.length > 0 && (
-              <>
-                {" · "}
-                <strong>{live.uncurated.length} newer</strong>{" "}
-                {live.uncurated.length === 1 ? "repository" : "repositories"} not written up
-                yet —{" "}
-                {live.uncurated.slice(0, 3).map((r, i) => (
-                  <span key={r.name}>
-                    {i > 0 && ", "}
-                    <a href={r.url} target="_blank" rel="noreferrer">
-                      {r.name}
-                    </a>
-                  </span>
-                ))}
-                {live.uncurated.length > 3 && " and more"}
-                {" — see "}
-                <a href="https://github.com/CODER7657" target="_blank" rel="noreferrer">
-                  GitHub
-                </a>
-                .
-              </>
-            )}
+            Synced live with GitHub · last push {live.lastPush} ·{" "}
+            <a href="https://github.com/CODER7657">see everything</a>
           </p>
         )}
 
