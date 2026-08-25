@@ -1,7 +1,3 @@
 packages:
   - "apps/*"
   - "packages/*"
-
-# sharp ships prebuilt binaries and needs its install script to run.
-onlyBuiltDependencies:
-  - sharp

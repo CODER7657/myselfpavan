@@ -17,7 +17,26 @@ import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const sharp = require("sharp");
+
+/**
+ * sharp is deliberately not a workspace dependency: it is a native module this
+ * script alone needs, and installing it on every deploy meant CI blocking its
+ * post-install script. Install it ad hoc when regenerating the art.
+ */
+let sharp;
+try {
+  sharp = require("sharp");
+} catch {
+  console.error(
+    "This script needs sharp, which is not a project dependency.
+" +
+      "Install it just for this run:
+
+  npm i --no-save sharp
+"
+  );
+  process.exit(1);
+}
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(HERE, "../apps/web/public/art");
