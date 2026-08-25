@@ -1,7 +1,9 @@
 name: Assay repositories
 
-# Re-grades every repository against the rubric and commits the fresh evidence,
-# which redeploys the site. Nobody has to be asked to run it.
+# Re-grades every repository against the rubric, records where each one stood,
+# writes prose for anything newly promoted, and commits the result — which
+# redeploys the site. Nobody has to be asked to run it, and nobody edits a card
+# to change a rank.
 on:
   schedule:
     # 03:20 UTC daily — off the hour, so it is not competing with everyone
@@ -15,14 +17,21 @@ on:
         description: "Why you are running it (recorded in the run log)"
         required: false
         default: "manual refresh"
+      force:
+        description: "Re-record the standings and rewrite every generated card"
+        type: boolean
+        required: false
+        default: false
 
-  # Also refresh whenever the rubric or the collector itself changes, so a
-  # rule change is reflected immediately rather than at the next midnight.
+  # Also refresh whenever the rubric or the tooling itself changes, so a rule
+  # change is reflected immediately rather than at the next midnight.
   push:
     branches: [main]
     paths:
       - "packages/assay/src/**"
       - "tools/collect-evidence.mjs"
+      - "tools/record-standings.mjs"
+      - "tools/write-cards.mjs"
       - ".github/workflows/assay.yml"
 
 concurrency:
@@ -35,7 +44,7 @@ permissions:
 jobs:
   assay:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -51,47 +60,88 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ASSAY_TOKEN || secrets.GITHUB_TOKEN }}
         run: node tools/collect-evidence.mjs
 
-      - name: Commit if the evidence moved
+      # `collectedAt` changes on every run, so a pass where nothing actually
+      # happened still rewrites the file. Putting it back here — before anything
+      # reads it — means every later step sees the same evidence the site is
+      # already serving, and the site does not redeploy for a clock.
+      - name: Discard a timestamp-only change
+        run: |
+          set -euo pipefail
+          strip() {
+            node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const j=JSON.parse(d);delete j.collectedAt;delete j.apiCalls;console.log(JSON.stringify(j))}catch(e){console.log("")}})'
+          }
+
+          if git diff --quiet -- apps/web/public/data/evidence.json; then
+            echo "Evidence unchanged."
+            exit 0
+          fi
+
+          before=$(git show HEAD:apps/web/public/data/evidence.json | strip)
+          after=$(strip < apps/web/public/data/evidence.json)
+
+          if [ "$before" = "$after" ]; then
+            echo "Only the timestamp moved — restoring the committed evidence."
+            git checkout -- apps/web/public/data/evidence.json
+          else
+            echo "Evidence moved."
+          fi
+
+      # Keeps one previous standing, so a card can show what it gained or lost.
+      # Writes nothing when no score moved.
+      - name: Record the standings
+        env:
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          if [ "${FORCE:-false}" = "true" ]; then
+            node --experimental-strip-types tools/record-standings.mjs --force
+          else
+            node --experimental-strip-types tools/record-standings.mjs
+          fi
+
+      # Prose for a card the gate promoted and nobody has written by hand.
+      #
+      # Deliberately allowed to fail. No key, a rate limit, or a model having a
+      # bad day must not stop the evidence being published — the vault falls
+      # back to the card it can build from evidence alone, which is always
+      # correct if a little flat. Turn it on by adding GROQ_API_KEY under
+      # Settings → Secrets and variables → Actions.
+      - name: Write cards for anything newly promoted
+        continue-on-error: true
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'llama-3.3-70b-versatile' }}
+          GITHUB_TOKEN: ${{ secrets.ASSAY_TOKEN || secrets.GITHUB_TOKEN }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          if [ "${FORCE:-false}" = "true" ]; then
+            node --experimental-strip-types tools/write-cards.mjs --force
+          else
+            node --experimental-strip-types tools/write-cards.mjs
+          fi
+
+      - name: Commit if anything moved
+        env:
+          EVENT: ${{ github.event_name }}
+          REASON: ${{ inputs.reason }}
         run: |
           set -euo pipefail
           git config user.name  "foundry-assay[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # `collectedAt` changes on every run, so compare only the substance —
-          # otherwise the site would redeploy daily for a timestamp.
-          if git diff --quiet -- apps/web/public/data/evidence.json; then
-            echo "No change."
+          if [ -z "$(git status --porcelain apps/web/public/data)" ]; then
+            echo "Nothing to publish."
             exit 0
           fi
 
-          before=$(git show HEAD:apps/web/public/data/evidence.json 2>/dev/null \
-            | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const j=JSON.parse(d);delete j.collectedAt;delete j.apiCalls;console.log(JSON.stringify(j))}catch(e){console.log("")}})' || echo "")
-          after=$(node -e 'const j=require("./apps/web/public/data/evidence.json");delete j.collectedAt;delete j.apiCalls;console.log(JSON.stringify(j))')
-
-          if [ "$before" = "$after" ]; then
-            echo "Only the timestamp moved — nothing to publish."
-            git checkout -- apps/web/public/data/evidence.json
-            exit 0
-          fi
-
-          git add apps/web/public/data/evidence.json
-          git commit -m "chore(assay): refresh repository evidence
-
-Ran: ${{ github.event_name }}${{ github.event.inputs.reason && format(' — {0}', github.event.inputs.reason) || '' }}"
+          git add apps/web/public/data
+          git commit \
+            -m "chore(assay): refresh repository evidence" \
+            -m "Ran: ${EVENT}${REASON:+ — ${REASON}}"
           git push
 
+      # What the run decided, in the run's own summary — so pressing the button
+      # tells you the outcome without opening the site.
       - name: Summary
-        run: |
-          node -e '
-            const j = require("./apps/web/public/data/evidence.json");
-            const rows = j.repos
-              .slice()
-              .sort((a, b) => b.commits - a.commits)
-              .slice(0, 12)
-              .map(r => `| ${r.name} | ${r.commits} | ${r.hasTests ? "yes" : "no"} | ${r.hasCi ? "yes" : "no"} | ${r.topics.includes("foundry-ready") ? "ready" : "-"} |`);
-            console.log("## Assay\n");
-            console.log(`Collected ${j.repos.length} repositories in ${j.apiCalls} API calls.\n`);
-            console.log("| Repo | Commits | Tests | CI | Gate |");
-            console.log("|---|---|---|---|---|");
-            console.log(rows.join("\n"));
-          ' >> "$GITHUB_STEP_SUMMARY"
+        run: node --experimental-strip-types tools/assay-summary.ts >> "$GITHUB_STEP_SUMMARY"

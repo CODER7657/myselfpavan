@@ -286,7 +286,9 @@ export const missions: Mission[] = [
   },
 
   {
-    id: "assay",
+    /* Not "assay": M-03 already owns that id, and two missions sharing one
+       meant completing this credited that one's XP and marked both done. */
+    id: "regrade",
     code: "M-06",
     title: "RUN THE ASSAY",
     objective:

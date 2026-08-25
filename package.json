@@ -4,12 +4,16 @@
   "version": "1.0.0",
   "description": "PAVAN//FOUNDRY — an agentic operating system disguised as a portfolio.",
   "packageManager": "pnpm@11.22.0",
+  "type": "module",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "start": "turbo run start",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
+    "assay": "node tools/collect-evidence.mjs && node --experimental-strip-types tools/record-standings.mjs && node --experimental-strip-types tools/assay-summary.ts",
+    "assay:report": "node --experimental-strip-types tools/assay-summary.ts",
+    "assay:score": "node --experimental-strip-types tools/score-preview.ts",
     "gen:mountains": "node tools/generate-mountains.mjs",
     "clean": "turbo run clean && rimraf node_modules",
     "gen:ridge": "node tools/extract-ridge-plate.mjs"

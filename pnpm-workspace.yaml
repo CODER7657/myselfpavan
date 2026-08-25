@@ -2,6 +2,13 @@ packages:
   - "apps/*"
   - "packages/*"
 
+# pnpm 11 asks per package whether its post-install script may run, and left
+# unanswered it writes a placeholder here that fails every install with
+# ERR_PNPM_IGNORED_BUILDS. Answering it is what makes `pnpm build` work on a
+# clean clone.
+allowBuilds:
+  sharp: true
+
 # sharp is an optional dependency of Next.js (image optimisation) and ships a
 # native post-install script, which pnpm blocks by default on CI. Approving it
 # here is what keeps `--frozen-lockfile` from failing with
