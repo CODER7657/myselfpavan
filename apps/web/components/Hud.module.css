@@ -103,13 +103,27 @@
 
 .slot[data-on="true"] { opacity: 1; border-color: currentColor; }
 
-@media (max-width: 1080px) {
+/*
+ * Where the header gives up and hands over to the drawer.
+ *
+ * Width alone was wrong for tablets. The cut was at 1080, which is exactly an
+ * iPad 10.9 in landscape and so just caught it — but an iPad Air or Pro 11 is
+ * 1180 to 1194, and a Pro 12.9 is 1366. All of them kept the full navigation:
+ * nine links, the roster, the meter and the toggles, with 67px between the
+ * last link and the controls on the widest of them, and no hamburger to
+ * escape to.
+ *
+ * So it is width or the absence of a mouse. A tablet reports hover: none and
+ * pointer: coarse at any width, which is what separates an iPad Pro from a
+ * laptop that happens to be the same number of pixels across.
+ */
+@media (max-width: 1200px), (hover: none) and (pointer: coarse) {
   .nav { display: none; }
   .inner { grid-template-columns: auto 1fr; }
 
-  /* From here down the hamburger exists, and it carries the stock toggle and
-     the level meter with room to label them. Leaving copies in the header
-     only crowds the one control that has to stay reachable. */
+  /* The drawer carries the stock toggle and the level meter, with room to
+     label them. Leaving copies in the header only crowds the one control that
+     has to stay reachable. */
   .xp { display: none; }
   .controls > .iconBtn:first-child { display: none; }
 }
@@ -270,7 +284,7 @@
 
 /* Kept last on purpose: `.burger` is defined `display: none` above, and at
    equal specificity the later rule wins — so the reveal has to come after it. */
-@media (max-width: 1080px) {
+@media (max-width: 1200px), (hover: none) and (pointer: coarse) {
   .burger { display: flex; }
 }
 
@@ -286,7 +300,7 @@
 /* The header cannot hold the meters and the toggles on a phone, so they come
    in here, labelled rather than reduced to a glyph. */
 .drawerControls {
-  display: grid;
+  display: none;
   gap: var(--s-3);
   padding: var(--s-4) 0;
   margin-top: var(--s-4);
@@ -314,8 +328,9 @@
 
 .drawerXp { display: grid; gap: 4px; padding-top: var(--s-2); }
 
-/* Above the hamburger breakpoint the drawer never opens, so these would only
-   ever duplicate the header. */
-@media (min-width: 1081px) {
-  .drawerControls { display: none; }
+/* Hidden by default and shown under exactly the condition that produces the
+   hamburger — stated as the same query rather than its inverse, so the two
+   cannot drift apart and leave a drawer whose controls are not in it. */
+@media (max-width: 1200px), (hover: none) and (pointer: coarse) {
+  .drawerControls { display: grid; }
 }
