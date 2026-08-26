@@ -126,6 +126,12 @@
      has to stay reachable. */
   .xp { display: none; }
   .controls > .iconBtn:first-child { display: none; }
+
+  /* Push what is left to the corner.
+     This column is 1fr here so the wordmark can keep its width, and a flex row
+     fills from the start — which left the burger stranded mid-header with 712px
+     of empty space to its right. */
+  .right { justify-content: flex-end; }
 }
 
 @media (max-width: 620px) {
