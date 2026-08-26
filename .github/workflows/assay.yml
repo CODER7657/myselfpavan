@@ -124,6 +124,16 @@ jobs:
             node --experimental-strip-types tools/write-cards.mjs
           fi
 
+      # The second line of defence, between collecting and publishing.
+      #
+      # The collector already retries and carries a failed repository forward,
+      # so a bad read rarely gets this far. This catches the one that does: a
+      # snapshot where a repository has quietly lost its files scores lower,
+      # looks entirely plausible, and withdraws real cards from the vault.
+      # Refusing to publish is always cheaper than noticing a week later.
+      - name: Verify nothing collapsed
+        run: node --experimental-strip-types tools/verify-evidence.mjs
+
       - name: Commit if anything moved
         env:
           EVENT: ${{ github.event_name }}
