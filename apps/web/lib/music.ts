@@ -214,19 +214,47 @@ function context(): AudioContext | null {
   return ctx;
 }
 
-/** Fetched once, decoded once, and only when somebody actually asks for it. */
-async function load(): Promise<AudioBuffer | null> {
+/**
+ * Fetches, decodes and stitches the track — without creating an AudioContext.
+ *
+ * This used to decode through the live context, which meant the context had to
+ * exist at page load, before the visitor had touched anything. A context built
+ * outside a gesture starts suspended and, on the stricter browsers, is simply
+ * never allowed to make sound again — which is exactly what "no music at all
+ * on the first visit" looks like.
+ *
+ * decodeAudioData works perfectly well on an OfflineAudioContext, and that
+ * needs no permission. So all of the expensive work happens on arrival, and
+ * the only thing left for the first gesture to do is open a context and press
+ * play — which is the one thing a gesture is needed for.
+ */
+async function prepare(): Promise<AudioBuffer | null> {
   if (buffer) return buffer;
   if (loading) return loading;
 
   loading = (async () => {
-    const c = context();
-    if (!c) return null;
-
     try {
       const res = await fetch(SRC, { cache: "force-cache" });
       if (!res.ok) return null;
-      buffer = await c.decodeAudioData(await res.arrayBuffer());
+
+      /* A one-frame context, used only as a decoder. */
+      const decoder = new OfflineAudioContext(1, 1, 44100);
+      const raw = await decoder.decodeAudioData(await res.arrayBuffer());
+
+      const phrases = phrasesOf(raw);
+      const music = phrases.reduce((sum, p) => sum + (p.to - p.from), 0);
+
+      if (phrases.length > 1 && music >= MIN_LOOP_S) {
+        buffer = await stitch(raw, phrases);
+        plan = { start: 0, end: buffer.duration, loop: true };
+      } else if (phrases.length === 1 && phrases[0]!.to - phrases[0]!.from >= MIN_LOOP_S) {
+        buffer = raw;
+        plan = { start: phrases[0]!.from, end: phrases[0]!.to, loop: true };
+      } else {
+        buffer = raw;
+        plan = { start: firstSound(raw), end: lastSound(raw), loop: false };
+      }
+
       return buffer;
     } catch {
       /* No music is a perfectly acceptable outcome. */
@@ -238,7 +266,6 @@ async function load(): Promise<AudioBuffer | null> {
 
   return loading;
 }
-
 /**
  * Queues one pass, fading it in across the tail of the pass before it.
  *
@@ -308,56 +335,27 @@ function pump(): void {
 /** Starts the music. Must be called from a gesture — browsers require it. */
 export async function startMusic(onFinished?: () => void): Promise<boolean> {
   stoppedByUser = false;
+  finished = onFinished ?? null;
 
+  /*
+   * The context is created here and nowhere else, so it is always built inside
+   * the gesture that wants it.
+   */
   const c = context();
   if (!c) return false;
 
   /*
-   * Ask to resume before anything is awaited.
-   *
-   * Safari — and iOS in particular — only honours resume() when it is called
-   * in the same task as the gesture that triggered it. Awaiting the fetch and
-   * the decode first, as this did, hands control back to the event loop and
-   * the resume that follows is no longer inside the gesture: it is refused,
-   * silently, and the control is left claiming to play. The promise is
-   * collected here and settled once the buffer is ready.
+   * Ask to resume before anything is awaited: Safari, and iOS especially, only
+   * honours resume() in the same task as the gesture. Awaiting first hands
+   * control back to the event loop and the request is refused, silently.
    */
   const resuming = c.state === "suspended" ? c.resume().catch(() => undefined) : null;
 
-  const buf = await load();
-  if (!buf) return false;
-
-  /*
-   * Decide once what this file can support, then build it.
-   *
-   * Phrases joined into one piece if there is enough music to loop; the whole
-   * thing played once, trimmed, if there is not. Either way the rest of this
-   * module does not need to know which file it is playing.
-   */
-  if (!plan) {
-    const phrases = phrasesOf(buf);
-    const music = phrases.reduce((sum, p) => sum + (p.to - p.from), 0);
-
-    if (phrases.length > 1 && music >= MIN_LOOP_S) {
-      buffer = await stitch(buf, phrases);
-      plan = { start: 0, end: buffer.duration, loop: true };
-    } else if (phrases.length === 1 && phrases[0]!.to - phrases[0]!.from >= MIN_LOOP_S) {
-      plan = { start: phrases[0]!.from, end: phrases[0]!.to, loop: true };
-    } else {
-      plan = { start: firstSound(buf), end: lastSound(buf), loop: false };
-    }
-  }
-  finished = onFinished ?? null;
+  const buf = await prepare();
+  if (!buf || !plan) return false;
 
   await resuming;
-
-  /*
-   * Still suspended means the browser refused: audio cannot begin before the
-   * visitor has interacted with the page. Saying so lets the caller wait for
-   * a gesture rather than leave a control claiming to play silence.
-   */
   if (c.state === "suspended") return false;
-
   if (playing) return true;
 
   playing = true;
@@ -409,45 +407,61 @@ export function startWhenAllowed(onFinished?: () => void): () => void {
   let cancelled = false;
 
   /*
-   * click and touchend are here as well as pointerdown, because Safari counts
-   * activation on its own terms and a tap that produces one but not another is
-   * exactly the case this has to survive.
+   * pointerdown alone is not enough. Safari counts activation on its own
+   * terms, and a tap that produces one of these but not another is exactly the
+   * case this has to survive. They are captured, so nothing that calls
+   * stopPropagation on its own handlers can hide the gesture from us.
    */
   const events = ["pointerdown", "touchend", "click", "keydown"] as const;
 
   const attach = () => {
-    for (const e of events) window.addEventListener(e, onGesture, { once: true, passive: true });
+    for (const e of events) {
+      window.addEventListener(e, onGesture, { capture: true, passive: true });
+    }
   };
 
   const detach = () => {
-    for (const e of events) window.removeEventListener(e, onGesture);
+    for (const e of events) window.removeEventListener(e, onGesture, { capture: true });
   };
 
   function onGesture(): void {
-    detach();
-
     /*
      * The press that turns the music off is itself a gesture, and this runs on
      * pointerdown while the toggle runs on click — so without this the music
      * would start a moment before being told not to.
      */
-    if (cancelled || stoppedByUser) return;
+    if (cancelled || stoppedByUser) {
+      detach();
+      return;
+    }
 
     void startMusic(onFinished).then((started) => {
       /*
-       * A gesture the browser did not accept as activation must not be the
-       * only attempt. Listening again costs nothing and means the second tap
-       * works where the first did not — the alternative is a page that stays
-       * silent for the rest of the visit.
+       * Only stop listening once sound is genuinely coming out. A gesture the
+       * browser declined to count as activation must not be the only attempt:
+       * detaching there left the page silent for the rest of the visit.
        */
-      if (!started && !cancelled && !stoppedByUser) attach();
+      if (started || cancelled || stoppedByUser) detach();
     });
   }
 
-  void startMusic(onFinished).then((started) => {
-    if (cancelled || started) return;
+  /* Fetch, decode and stitch now — none of which needs permission — so the
+     first gesture only has to open a context and play. */
+  void prepare();
+
+  /*
+   * Started here only if this page has already been interacted with, which is
+   * true of a soft navigation and false of a fresh load. On a fresh load the
+   * attempt would create a context outside a gesture, which is the thing that
+   * leaves some browsers permanently silent.
+   */
+  if (navigator.userActivation?.hasBeenActive) {
+    void startMusic(onFinished).then((started) => {
+      if (!started && !cancelled) attach();
+    });
+  } else {
     attach();
-  });
+  }
 
   return () => {
     cancelled = true;

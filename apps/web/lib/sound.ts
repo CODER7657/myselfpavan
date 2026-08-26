@@ -147,12 +147,26 @@ export function play(cue: Cue, muted = false): void {
  * part it removes.
  */
 const CLICK_SRC = "/audio/click.wav";
-const CLICK_LENGTH = 0.42;
+/*
+ * 200 ms, not 420.
+ *
+ * The transient peaks 29 ms in and the body is over by 220 ms; the rest of
+ * the file is a tail nobody hears. Playing the longer slice meant two presses
+ * inside half a second overlapped, and the cue stacked on itself.
+ */
+const CLICK_LENGTH = 0.2;
+/** Two presses closer together than this are one press as far as sound goes. */
+const CLICK_MIN_GAP_MS = 45;
 /** Deliberately forward of the other cues: this one is meant to be felt. */
 const CLICK_GAIN = 0.34;
 
 let click: AudioBuffer | null = null;
 let clickLoading = false;
+
+/* The click currently sounding, so a new one can take its place rather than
+   pile on top of it. */
+let clickVoice: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
+let lastClickAt = 0;
 
 function loadClick(audio: AudioContext): void {
   if (click || clickLoading) return;
@@ -177,6 +191,12 @@ function loadClick(audio: AudioContext): void {
 function playClick(muted: boolean): void {
   if (muted || !unlocked) return;
 
+  /* Guards against a control that reports a press twice — and against a
+     finger that can move faster than the ear can separate. */
+  const nowMs = performance.now();
+  if (nowMs - lastClickAt < CLICK_MIN_GAP_MS) return;
+  lastClickAt = nowMs;
+
   const audio = ensure();
   if (!audio) return;
 
@@ -188,6 +208,28 @@ function playClick(muted: boolean): void {
   }
 
   const now = audio.currentTime;
+
+  /*
+   * One click at a time.
+   *
+   * Whatever is still sounding is faded out over 12 ms and stopped before the
+   * new one begins — long enough not to click on the way out, short enough to
+   * read as the same press. Left to overlap, a run of quick presses turned
+   * into a mush of two and three copies at once.
+   */
+  if (clickVoice) {
+    const old = clickVoice;
+    clickVoice = null;
+    try {
+      old.gain.gain.cancelScheduledValues(now);
+      old.gain.gain.setValueAtTime(old.gain.gain.value, now);
+      old.gain.gain.linearRampToValueAtTime(0, now + 0.012);
+      old.src.stop(now + 0.02);
+    } catch {
+      /* Already finished on its own. */
+    }
+  }
+
   const src = audio.createBufferSource();
   src.buffer = click;
 
@@ -195,19 +237,22 @@ function playClick(muted: boolean): void {
   gain.gain.setValueAtTime(CLICK_GAIN, now);
   /* Cut on a ramp rather than mid-waveform, which would add a click of its
      own to the end of the click. */
-  gain.gain.setValueAtTime(CLICK_GAIN, now + CLICK_LENGTH - 0.05);
+  gain.gain.setValueAtTime(CLICK_GAIN, now + CLICK_LENGTH - 0.04);
   gain.gain.linearRampToValueAtTime(0, now + CLICK_LENGTH);
 
   src.connect(gain);
   gain.connect(audio.destination);
   src.start(now, 0, CLICK_LENGTH);
   src.stop(now + CLICK_LENGTH + 0.02);
+
+  const voice = { src, gain };
+  clickVoice = voice;
   src.onended = () => {
+    if (clickVoice === voice) clickVoice = null;
     src.disconnect();
     gain.disconnect();
   };
 }
-
 /**
  * A cue on every button, from one listener rather than forty call sites.
  *

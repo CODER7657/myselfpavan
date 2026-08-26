@@ -268,10 +268,10 @@ export const useFoundry = create<FoundryState>()(
     {
       name: "foundry.operator.v1",
       /*
-       * The music flag shipped as false earlier today, so anyone who loaded the
-       * site in that window has false stored and would never hear it. Version 2
-       * turns it on once for them. A deliberate off, made after this, persists
-       * normally — the migration runs a single time.
+       * The music flag has needed correcting twice: once when it shipped
+       * defaulting to off, and once when the audio could not start at all. Both
+       * left `false` stored for reasons that had nothing to do with what anyone
+       * wanted. A deliberate off, made from here on, persists normally.
        */
       /*
        * The boot sequence runs on every visit.
@@ -286,10 +286,14 @@ export const useFoundry = create<FoundryState>()(
         ...(persisted as object),
         booted: false,
       }),
-      version: 2,
+      version: 3,
       migrate: (persisted, from) => {
         const state = (persisted ?? {}) as Record<string, unknown>;
-        if (from < 2) state.music = true;
+        /* 2 turned it on for anyone stored while it defaulted to off. 3 does
+           it again, because the versions in between could not actually play:
+           the context was built outside a gesture and the browser never let
+           it sound, so an `off` recorded then was a bug, not a preference. */
+        if (from < 3) state.music = true;
         return state as never;
       },
       partialize: (s) => ({
