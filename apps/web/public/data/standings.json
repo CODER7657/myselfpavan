@@ -1,12 +1,12 @@
 {
   "rubricVersion": "3.0.0",
   "current": {
-    "ranAt": "2026-08-26T04:04:04.301Z",
+    "ranAt": "2026-08-26T05:42:57.972Z",
     "scores": {
       "complylite": 51.1,
       "CRAFTATHON": 55.3,
       "genex-prj": 41,
-      "globetrotter": 68.5,
+      "globetrotter": 69.5,
       "pramana": 75.3,
       "shoes.store": 41.2,
       "VeriServe_block": 21.1,
@@ -14,13 +14,13 @@
     }
   },
   "previous": {
-    "ranAt": "2026-08-26T03:04:16.936Z",
+    "ranAt": "2026-08-26T04:04:04.301Z",
     "scores": {
       "complylite": 51.1,
       "CRAFTATHON": 55.3,
       "genex-prj": 41,
       "globetrotter": 68.5,
-      "pramana": 75,
+      "pramana": 75.3,
       "shoes.store": 41.2,
       "VeriServe_block": 21.1,
       "VortiFi": 35.7
