@@ -9,6 +9,7 @@ export {
   EXCLUDED,
 } from "./rubric";
 export { CARD_TO_REPO, NO_REPO, CURATED_REPOS } from "./curated";
+export { ageOf, pushedSince, type Age, type Freshness } from "./freshness";
 export {
   placementFor,
   movementFor,

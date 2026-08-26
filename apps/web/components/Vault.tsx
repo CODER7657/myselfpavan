@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { agents, type AgentId } from "@foundry/content";
-import { PROMOTION_FLOOR } from "@foundry/assay";
+import { PROMOTION_FLOOR, ageOf, pushedSince } from "@foundry/assay";
 import { reveal } from "@/lib/gsap";
 import { useLiveRepos } from "@/lib/useLiveRepos";
 import { useAssay } from "@/lib/useAssay";
@@ -30,10 +30,34 @@ export function Vault() {
    * written up — and anything that stopped clearing it is named underneath
    * rather than quietly dropped.
    */
+  const graded = assay.status === "ready";
+
   const { vault: catalogue, withdrawn } = useMemo(
-    () => joinProjects(assay.byName, standings.previous, written),
-    [assay.byName, standings.previous, written]
+    () => joinProjects(assay.byName, standings.previous, written, graded),
+    [assay.byName, standings.previous, written, graded]
   );
+
+  /*
+   * How old the numbers on these cards are, and whether GitHub has moved since.
+   *
+   * The scoring is live, but the evidence it scores is a snapshot, and those
+   * are different things. Without this line a four-hour-old commit count is
+   * indistinguishable from a wrong one — which is exactly how a stale number
+   * gets reported as a bug.
+   *
+   * `now` is read once per mount rather than on a timer: a clock that ticks
+   * under the reader is a distraction, and the page is not open for hours.
+   */
+  const age = useMemo(() => ageOf(assay.collectedAt), [assay.collectedAt]);
+
+  /* Repositories GitHub says were pushed after this snapshot was taken. */
+  const behind = useMemo(() => {
+    if (!graded || !live.byName.size) return [];
+    return catalogue
+      .filter((p) => p.assay)
+      .filter((p) => pushedSince(p.assay!.evidence.pushedAt, live.byName.get(p.assay!.name.toLowerCase())?.pushed))
+      .map((p) => p.name);
+  }, [catalogue, live.byName, graded]);
 
   const shown = useMemo(
     () => (filter === "all" ? catalogue : catalogue.filter((p) => p.agent === filter)),
@@ -74,6 +98,37 @@ export function Vault() {
             <span className={v.pulse} aria-hidden="true" />
             Synced live with GitHub · last push {live.lastPush} ·{" "}
             <a href="https://github.com/CODER7657">see everything</a>
+          </p>
+        )}
+
+        {/* How old these numbers are, said plainly, so a stale one cannot be
+            mistaken for a wrong one. */}
+        {assay.status === "loading" && (
+          <p className={v.freshness} data-level="loading">
+            Grading against the evidence snapshot…
+          </p>
+        )}
+
+        {assay.status === "error" && (
+          <p className={v.freshness} data-level="stale">
+            The evidence snapshot could not be read, so nothing here has been graded.
+            These are the cards as written, and the ranks with them.
+          </p>
+        )}
+
+        {graded && age && (
+          <p className={v.freshness} data-level={age.level}>
+            Scored in your browser just now, from evidence collected{" "}
+            <strong>{age.label}</strong>.
+            {behind.length > 0 && (
+              <>
+                {" "}
+                GitHub has moved since — {behind.slice(0, 3).join(", ")}
+                {behind.length > 3 ? " and " + (behind.length - 3) + " more" : ""}
+                {behind.length === 1 ? " has" : " have"} been pushed to. Run the assay to
+                catch up.
+              </>
+            )}
           </p>
         )}
 

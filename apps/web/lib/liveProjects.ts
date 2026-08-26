@@ -180,6 +180,11 @@ export interface LiveProject extends Project {
   provisionalReason?: string;
   /** How the score moved since the previous assay, where there is one to compare. */
   movement?: Movement | null;
+  /**
+   * True while the evidence is still loading, or could not be loaded at all.
+   * The card shows what was written about it and makes no claim about a rank.
+   */
+  pending?: boolean;
   /** What the vault orders by. Real score where one exists. */
   sortScore: number;
 }
@@ -254,8 +259,26 @@ const PROVISIONAL_REASON: Record<string, string> = {
 export function joinProjects(
   byName: Map<string, Assay>,
   previous?: Map<string, number>,
-  written?: Map<string, WrittenCard>
+  written?: Map<string, WrittenCard>,
+  graded: boolean = true
 ): Catalogue {
+  /*
+   * Before the snapshot arrives there are no verdicts, and a card must not be
+   * made to answer for that. Reporting every project as unreachable while a
+   * fetch is in flight put "Repository is private, so the gate cannot reach it
+   * yet" on the face of PRAMANA — which is public — on every page load, and
+   * left it there permanently whenever evidence.json could not be served.
+   *
+   * An ungraded pass therefore renders the authored cards as authored, marked
+   * pending, and claims nothing about a gate that has not run.
+   */
+  if (!graded) {
+    return {
+      vault: projects.map((p) => ({ ...p, pending: true, sortScore: anchorFor(p.rarity) })),
+      withdrawn: [],
+    };
+  }
+
   const claimed = new Set<string>();
   const vault: LiveProject[] = [];
   const withdrawn: WithdrawnCard[] = [];

@@ -38,6 +38,10 @@ export interface AssayState {
   byName: Map<string, Assay>;
 }
 
+/** Long enough for a cold CDN, short enough that nobody watches a dead page. */
+const FETCH_TIMEOUT_MS = 8_000;
+const RETRY_DELAY_MS = 750;
+
 const EMPTY: AssayState = {
   status: "loading",
   error: null,
@@ -58,12 +62,38 @@ export function useAssay(): AssayState {
   useEffect(() => {
     const ac = new AbortController();
 
-    fetch("/data/evidence.json", { signal: ac.signal, cache: "no-cache" })
-      .then((r) => {
-        if (!r.ok) throw new Error("evidence.json → " + r.status);
-        return r.json();
-      })
-      .then((json: EvidenceFile) => {
+    /*
+     * Bounded and retried once.
+     *
+     * There was no timeout here at all, so a request that never resolved left
+     * the vault ungraded for the life of the page — and an ungraded vault used
+     * to report every project as unreachable. A single retry covers the case
+     * this actually fails in practice: a CDN miss on a deploy that has only
+     * just gone out.
+     */
+    const load = async (): Promise<EvidenceFile> => {
+      let last: Error | null = null;
+
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const res = await fetch("/data/evidence.json", {
+            signal: AbortSignal.any([ac.signal, AbortSignal.timeout(FETCH_TIMEOUT_MS)]),
+            cache: "no-cache",
+          });
+          if (!res.ok) throw new Error("evidence.json → " + res.status);
+          return (await res.json()) as EvidenceFile;
+        } catch (e) {
+          last = e as Error;
+          if (ac.signal.aborted) throw last;
+          if (attempt < 2) await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+        }
+      }
+
+      throw last ?? new Error("evidence.json could not be read");
+    };
+
+    load()
+      .then((json) => {
         if (!ac.signal.aborted) setFile(json);
       })
       .catch((e: Error) => {
