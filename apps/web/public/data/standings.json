@@ -1,6 +1,19 @@
 {
   "rubricVersion": "3.0.0",
   "current": {
+    "ranAt": "2026-08-26T03:04:16.936Z",
+    "scores": {
+      "complylite": 51.1,
+      "CRAFTATHON": 55.3,
+      "genex-prj": 41,
+      "globetrotter": 68.5,
+      "pramana": 75,
+      "shoes.store": 41.2,
+      "VeriServe_block": 21.1,
+      "VortiFi": 35.7
+    }
+  },
+  "previous": {
     "ranAt": "2026-08-25T17:18:32.186Z",
     "scores": {
       "complylite": 51.1,
@@ -12,6 +25,5 @@
       "VeriServe_block": 21.1,
       "VortiFi": 35.7
     }
-  },
-  "previous": null
+  }
 }
