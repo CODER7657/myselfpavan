@@ -111,6 +111,12 @@ export function Signal() {
             Built as a pnpm monorepo — Next.js 15, GSAP ScrollTrigger, and a hand-written
             agent runtime. No model was called to render this page.
           </span>
+          {/* Somebody else made the music. Whose it is belongs on the page, not
+              in a commit message. */}
+          <span>
+            Music: &ldquo;Calm music&rdquo; from the Freesound community. Credit pending
+            confirmation of the original author and licence.
+          </span>
           <a href="#top">Back to the ridge ↑</a>
         </div>
       </div>

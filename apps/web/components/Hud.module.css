@@ -41,9 +41,14 @@
 
 .nav a:hover { color: var(--ink); border-bottom-color: var(--accent); }
 
-.right { display: flex; align-items: center; gap: var(--s-4); }
+.right { display: flex; align-items: center; gap: var(--s-3); }
 
-.xp { display: grid; gap: 3px; min-width: 168px; }
+/* Toggles sit closer to each other than to the meters beside them. */
+.controls { display: flex; align-items: center; gap: var(--s-2); }
+
+/* Was 168px, which left the third toggle hanging past the header's own
+   width at 1280. The meter reads perfectly well narrower. */
+.xp { display: grid; gap: 3px; min-width: 140px; }
 
 .xpTop {
   display: flex;
@@ -261,4 +266,11 @@
    equal specificity the later rule wins — so the reveal has to come after it. */
 @media (max-width: 1080px) {
   .burger { display: flex; }
+}
+
+/* The music button lights up while it is playing, so the state is visible
+   without hunting for a crossed-out glyph. */
+.iconBtn[data-on="true"] {
+  color: var(--accent);
+  border-color: currentColor;
 }

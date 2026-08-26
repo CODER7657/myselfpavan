@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { achievements, agents, missions, type AgentId } from "@foundry/content";
 import { play } from "./sound";
+import { startMusic, stopMusic } from "./music";
 
 /**
  * Operator progression.
@@ -54,6 +55,8 @@ interface FoundryState {
   theme: "light" | "dark";
   /** Event cues. Persisted, and silent until the first gesture regardless. */
   sound: boolean;
+  /** Background music. Off unless asked for: nobody wants a page that sings at them. */
+  music: boolean;
   toasts: Toast[];
 
   boot: () => void;
@@ -61,6 +64,7 @@ interface FoundryState {
   setTheme: (t: "light" | "dark") => void;
   toggleTheme: () => void;
   toggleSound: () => void;
+  toggleMusic: () => void;
   /** Adopts the theme the pre-paint script resolved, without side effects. */
   syncTheme: (t: "light" | "dark") => void;
 
@@ -109,6 +113,7 @@ export const useFoundry = create<FoundryState>()(
         logRead: false,
         theme: "light",
         sound: true,
+        music: false,
         toasts: [],
 
         boot: () => set({ booted: true }),
@@ -140,6 +145,21 @@ export const useFoundry = create<FoundryState>()(
           const next = !get().sound;
           set({ sound: next });
           if (next) play("flip", false);
+        },
+
+        /*
+         * Music is started from the click itself, never restored on load.
+         * Browsers require a gesture before audio, and a site that begins
+         * playing the moment it opens is one people close.
+         */
+        toggleMusic: () => {
+          const next = !get().music;
+          set({ music: next });
+          /* A track too short to loop plays once and then really is over —
+             the control follows it back to "play" rather than claiming to be
+             playing silence. */
+          if (next) void startMusic(() => set({ music: false }));
+          else stopMusic();
         },
 
         /*
@@ -250,6 +270,7 @@ export const useFoundry = create<FoundryState>()(
         logRead: s.logRead,
         theme: s.theme,
         sound: s.sound,
+        music: s.music,
       }),
     }
   )

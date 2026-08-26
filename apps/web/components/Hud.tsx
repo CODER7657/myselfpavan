@@ -31,7 +31,9 @@ export function Hud() {
   const toggleTheme = useFoundry((st) => st.toggleTheme);
   const syncTheme = useFoundry((st) => st.syncTheme);
   const sound = useFoundry((st) => st.sound);
+  const music = useFoundry((st) => st.music);
   const toggleSound = useFoundry((st) => st.toggleSound);
+  const toggleMusic = useFoundry((st) => st.toggleMusic);
 
   const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
@@ -117,6 +119,10 @@ export function Hud() {
               </div>
             </div>
 
+            {/* The three toggles travel together and share a tighter gap:
+                adding the third pushed the row past the header's own width,
+                where overflow-x: clip made it unclickable. */}
+            <div className={s.controls}>
             <button
               type="button"
               className={s.iconBtn}
@@ -137,6 +143,22 @@ export function Hud() {
             >
               {hydrated && !sound ? "⊘" : "♪"}
             </button>
+
+            {/* Music is a separate decision from the event cues: one is a
+                texture you opt into, the other is feedback on your own
+                actions. Off until asked for. */}
+            <button
+              type="button"
+              className={s.iconBtn}
+              onClick={toggleMusic}
+              aria-label={(hydrated && music ? "Stop" : "Play") + " background music"}
+              aria-pressed={hydrated ? music : false}
+              title="Background music"
+              data-on={hydrated && music}
+            >
+              {"♫"}
+            </button>
+            </div>
 
             <button
               ref={toggleRef}
