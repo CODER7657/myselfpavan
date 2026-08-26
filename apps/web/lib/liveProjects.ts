@@ -2,6 +2,7 @@ import { projects, type AgentId, type Project } from "@foundry/content";
 import type { WrittenCard } from "@/lib/useCards";
 import {
   CARD_TO_REPO,
+  READY_TOPIC,
   NO_REPO,
   movementFor,
   placementFor,
@@ -93,43 +94,187 @@ function describeStructure(a: Assay): string {
  * still computed here, from the assay. A model is trusted to write a sentence
  * and never to decide a number.
  */
-function synthesise(a: Assay, written?: WrittenCard): Project {
-  const agent = inferAgent(a);
-  const languages = a.evidence.topics.length
-    ? a.evidence.topics.slice(0, 6)
-    : [a.evidence.language ?? "Mixed"];
+/**
+ * A deployment link, but only if it is one.
+ *
+ * `homepage` is free text on GitHub: people put "coming soon", a bare domain,
+ * or an npm page in it. Anything that is not a real https URL is not a demo,
+ * and must never reach an href.
+ */
+function demoUrl(raw: string | null): string | null {
+  if (!raw) return null;
+  try {
+    const u = new URL(raw.trim());
+    return u.protocol === "https:" ? u.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
-  const commits = a.evidence.commits;
-  const pushed = a.evidence.pushedAt.slice(0, 10);
+/**
+ * What this is built with, in the order a reader cares about.
+ *
+ * Languages come from GitHub's own byte counts, so they are real regardless of
+ * whether anyone remembered to set topics — which, on most of these
+ * repositories, nobody has. Topics are added after, because when they do exist
+ * they name frameworks the language list cannot see.
+ */
+function stackOf(a: Assay): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+
+  const add = (v: string | null | undefined) => {
+    const t = (v ?? "").trim();
+    if (!t || t.length > 24) return;
+    const key = t.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(t);
+  };
+
+  for (const l of a.evidence.languages) add(l);
+  /* The gate's own topic is plumbing, not a technology: "Foundry-ready" was
+     turning up in the stack beside Python and TypeScript. */
+  for (const t of a.evidence.topics) {
+    if (t === READY_TOPIC) continue;
+    add(prettyTopic(t));
+  }
+  if (out.length === 0) add(a.evidence.language ?? "Mixed");
+
+  return out.slice(0, 7);
+}
+
+/** `offline-first` reads better as `Offline-first` next to `TypeScript`. */
+function prettyTopic(t: string): string {
+  if (/^[a-z0-9]+$/.test(t) && t.length <= 4) return t.toUpperCase();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+/**
+ * Four facts about the project, not four facts about the assay.
+ *
+ * A curated card shows things like "671 passing" and "Apache-2.0" — the
+ * specifics somebody would ask about. The generated card used to show its own
+ * score, its commit count and the words "Auto-generated", which tells a reader
+ * nothing they cannot see from the band at the top. These are drawn from the
+ * strongest signals the repository actually has, so a well-built project shows
+ * its tests and its licence, and a thin one honestly shows less.
+ */
+function metricsOf(a: Assay): { label: string; value: string }[] {
+  const e = a.evidence;
+  const out: { label: string; value: string }[] = [];
+
+  if (e.testFiles > 0) out.push({ label: "Tests", value: e.testFiles + " files" });
+  if (e.hasCi) out.push({ label: "CI", value: e.hasCoverage ? "With coverage" : "Configured" });
+  if (e.licence) out.push({ label: "Licence", value: e.licence });
+  if (e.releases > 0) {
+    out.push({ label: "Releases", value: String(e.releases) });
+  }
+  if (e.hasContainer) out.push({ label: "Container", value: "Dockerised" });
+  if (e.docFiles > 0) out.push({ label: "Docs", value: e.docFiles + " pages" });
+  if (e.sourceFiles > 0) out.push({ label: "Source", value: e.sourceFiles + " files" });
+
+  out.push({ label: "Commits", value: String(e.commits) });
+  if (e.language) out.push({ label: "Language", value: e.language });
+
+  return out.slice(0, 4);
+}
+
+/**
+ * What kind of thing this is, when no model has written a better line.
+ *
+ * "Auto-assayed" described how the card was made rather than what the project
+ * is, which is the one thing a classification is for.
+ */
+function classifyFallback(a: Assay): string {
+  const e = a.evidence;
+  const hay = [a.name, e.description ?? "", e.topics.join(" "), e.readmeLede ?? ""].join(" ");
+
+  /*
+   * Ordered most specific first. The word boundaries matter: without them
+   * "ai" matches inside "chain" and "detail", and everything classifies as
+   * machine learning.
+   */
+  if (/\b(contract|on-chain|web3|solidity|blockchain)\b/i.test(hay)) return "On-chain System";
+  if (/\b(ml|ai|llm|nlp|inference|agent)\b/i.test(hay)) return "Applied ML";
+  if (/\b(cli|command-line|terminal)\b/i.test(hay)) return "Command-line Tool";
+  if (/\b(dashboard|portal|console|admin)\b/i.test(hay)) return "Interface";
+  if (/\b(api|server|backend|service|microservice)\b/i.test(hay)) return "Service";
+  if (/\b(app|mobile|android|ios|flutter)\b/i.test(hay)) return "Application";
+  if (e.homepage) return "Deployed Project";
+  return "Repository";
+}
+
+/**
+ * Splits a README lede into its opening sentence and the rest.
+ *
+ * Both halves are used, and they must not be the same text: taking the first
+ * sentence for the tagline and the whole lede for the plain line put the same
+ * words on the card twice, once truncated with an ellipsis.
+ */
+function splitLede(lede: string | null): { head: string; rest: string } | null {
+  if (!lede) return null;
+
+  const whole = lede.trim().replace(/\s+/g, " ");
+  const m = /^(.{20,}?[.!?])(?:\s+|$)/.exec(whole);
+  if (!m) return { head: clip(whole, 96), rest: "" };
+
+  return { head: clip(m[1]!, 96), rest: whole.slice(m[0].length).trim() };
+}
+
+const clip = (v: string, n: number): string =>
+  v.length <= n ? v : v.slice(0, n - 1).trimEnd() + "…";
+function synthesise(a: Assay, written?: WrittenCard): Project {
+  const e = a.evidence;
+  const commits = e.commits;
+  const pushed = e.pushedAt.slice(0, 10);
+
+  /*
+   * Every field falls back through the same order: what a model wrote, then
+   * what the author wrote on GitHub, then what the README says, then a plain
+   * statement of what was observed. Only the last of those is a template, and
+   * it is reached only when a repository carries no prose at all.
+   */
+  const lede = splitLede(e.readmeLede);
+
+  const tagline =
+    written?.tagline ??
+    e.description ??
+    lede?.head ??
+    titleCase(a.name) + " — no description set on the repository.";
+
+  /*
+   * When the tagline came from the README's first sentence, the plain line
+   * picks up from the second — otherwise the card says the same thing twice.
+   */
+  const plain =
+    written?.plain ??
+    /* A description on GitHub and a README are two different sentences, so
+       both can be shown. */
+    (e.description ? e.readmeLede ?? e.description : null) ??
+    /* Only a README: its first sentence is already the tagline, so this takes
+       the second onwards. */
+    (lede && lede.rest.length > 60 ? lede.rest : null) ??
+    /* One sentence in the whole repository. Saying it twice, once truncated,
+       is worse than admitting there is no more. */
+    (lede
+      ? "That is the whole of what the repository says about itself. Everything below " +
+        "was observed by the gate rather than written."
+      : null) ??
+    "The repository carries no description or README prose, so there is nothing here " +
+      "that was written by hand — only what the gate could observe.";
 
   return {
     slug: "auto-" + a.name.toLowerCase(),
     name: titleCase(a.name),
-    classification: written?.classification ?? "Auto-assayed",
-    tagline: written?.tagline ?? a.evidence.description ?? "No description set on the repository.",
-    /*
-     * The README's opening paragraph beats the one-line GitHub description:
-     * it is the author explaining the thing in their own words, which is the
-     * closest an auto-generated card can get to being written.
-     */
-    plain:
-      written?.plain ??
-      a.evidence.readmeLede ??
-      a.evidence.description ??
-      "Generated from the repository itself — it carries no description or README prose yet.",
+    classification: written?.classification ?? classifyFallback(a),
+    tagline,
+    plain,
     summary:
       written?.summary ??
-      "Promoted automatically by the assay at " +
-      Math.round(a.score) +
-      "/100. " +
-      describeStructure(a) +
-      " " +
-      commits +
-      " commit" +
-      (commits === 1 ? "" : "s") +
-      ", last pushed " +
-      pushed +
-      ".",
+      "Promoted by the assay at " + Math.round(a.score) + "/100. " +
+        describeStructure(a) + " " + commits + " commit" + (commits === 1 ? "" : "s") +
+        ", last pushed " + pushed + ".",
     highlight:
       written?.highlight ??
       (a.nextSteps.length > 0
@@ -138,17 +283,12 @@ function synthesise(a: Assay, written?: WrittenCard): Project {
           a.nextSteps[0]!.slice(1)
         : "Written by a script, not by hand — it cleared every signal the rubric checks."),
     rarity: a.tier,
-    agent,
-    stack: languages,
-    metrics: [
-      { label: "Assay score", value: Math.round(a.score) + "/100" },
-      { label: "Commits", value: String(commits) },
-      { label: "Last push", value: pushed },
-      { label: "Origin", value: written ? "Machine-written" : "Auto-generated" },
-    ],
+    agent: inferAgent(a),
+    stack: stackOf(a),
+    metrics: metricsOf(a),
     repo: a.url,
-    demo: null,
-    year: Number(a.evidence.pushedAt.slice(0, 4)) || new Date().getFullYear(),
+    demo: demoUrl(e.homepage),
+    year: Number(e.pushedAt.slice(0, 4)) || new Date().getFullYear(),
     stats: {
       depth: bandScore(a, "depth"),
       rigor: bandScore(a, "verification"),
@@ -355,12 +495,52 @@ export function joinProjects(
     });
   }
 
+  /*
+   * A card that was waiting for its repository binds to it the moment it
+   * appears.
+   *
+   * RAKSHA AI is written up but carries no repository, because the work is
+   * private. Make it public and the gate promotes it — and without this it
+   * would arrive as a *second*, generated card sitting next to the written
+   * one, both describing the same project. Matching on the name, flattened,
+   * means the written card simply starts being graded instead: no mapping to
+   * remember, no edit to make.
+   */
+  const flatten = (v: string) => v.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const waiting = new Map<string, number>();
+  vault.forEach((p, i) => {
+    if (!p.provisional) return;
+    waiting.set(flatten(p.name), i);
+    waiting.set(flatten(p.slug), i);
+  });
+
   /* Anything the gate promoted that nobody has written up gets a card of its own. */
   for (const a of byName.values()) {
     if (a.verdict !== "promoted") continue;
     if (claimed.has(a.name.toLowerCase())) continue;
 
     const prose = written?.get(a.name.toLowerCase());
+
+    /* Does a written card already describe this repository by name? */
+    const waitingAt = waiting.get(flatten(a.name));
+    if (waitingAt !== undefined) {
+      const card = vault[waitingAt]!;
+      vault[waitingAt] = {
+        ...card,
+        rarity: a.tier,
+        assay: a,
+        movement: movedBy(a),
+        sortScore: a.score,
+        provisional: false,
+        provisionalReason: undefined,
+        metrics: card.metrics.map((m) =>
+          /^commits$/i.test(m.label) ? { ...m, value: String(a.evidence.commits) } : m
+        ),
+        demo: card.demo ?? demoUrl(a.evidence.homepage),
+      };
+      claimed.add(a.name.toLowerCase());
+      continue;
+    }
 
     vault.push({
       ...synthesise(a, prose),

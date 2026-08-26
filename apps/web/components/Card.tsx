@@ -133,11 +133,12 @@ export function Card({
                 <Sigil matrix={agent.sigil} size={3} gap={1} />
               </span>
               <span className={s.owner}>{agent.callsign}</span>
-              <span className={s.classification}>
-                {project.generated && !project.writtenBy
-                  ? "AUTO-ASSAYED"
-                  : project.classification}
-              </span>
+              {/* What the project is, always. A generated card used to print
+                  "AUTO-ASSAYED" here — which describes how the card was made
+                  rather than what it is, and a classification is for exactly
+                  the opposite. That it was generated is said on the reverse,
+                  where there is room to say it properly. */}
+              <span className={s.classification}>{project.classification}</span>
             </div>
             <div className={s.name}>{project.name}</div>
           </div>
@@ -209,6 +210,17 @@ export function Card({
                 {project.writtenBy} from the repository&rsquo;s own evidence, under rules
                 that forbid any claim the evidence does not carry. The score, the tier and
                 the numbers are the assay&rsquo;s, not the model&rsquo;s.
+              </p>
+            )}
+
+            {/* And one that nobody has written at all says that too, rather
+                than passing assembled facts off as prose. */}
+            {project.generated && !project.writtenBy && (
+              <p className={s.provisional}>
+                <b>Assembled, not written.</b> This card was built from the
+                repository&rsquo;s own evidence because the gate promoted it and nobody
+                has written it up yet. Everything on it was observed; none of it was
+                composed.
               </p>
             )}
 

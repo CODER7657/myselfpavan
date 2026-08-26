@@ -1,5 +1,5 @@
 {
-  "collectedAt": "2026-08-26T05:19:54.164Z",
+  "collectedAt": "2026-08-26T05:42:57.972Z",
   "owner": "CODER7657",
   "apiCalls": 171,
   "includesPrivate": false,
@@ -268,7 +268,7 @@
       "hasContainer": true,
       "hasWorkspace": true,
       "hasA11y": false,
-      "hasMotion": false
+      "hasMotion": true
     },
     {
       "name": "CODER7657",
@@ -816,7 +816,7 @@
         "TECH_STACK.md"
       ],
       "readmeBytes": 15871,
-      "readmeLede": "We welcome contributions to AURA-GUARD! Here's how to get started:",
+      "readmeLede": null,
       "vendoredPaths": 0,
       "testFiles": 5,
       "docFiles": 0,
@@ -880,7 +880,7 @@
         "test_headache_response.js"
       ],
       "readmeBytes": 21925,
-      "readmeLede": "This project is licensed under the MIT License - see the LICENSE file for details.",
+      "readmeLede": null,
       "vendoredPaths": 0,
       "testFiles": 8,
       "docFiles": 2,
@@ -1568,7 +1568,7 @@
       "hasContainer": false,
       "hasWorkspace": false,
       "hasA11y": false,
-      "hasMotion": false
+      "hasMotion": true
     },
     {
       "name": "HASHHAWKS",
@@ -1630,7 +1630,7 @@
       "hasContainer": false,
       "hasWorkspace": false,
       "hasA11y": false,
-      "hasMotion": false
+      "hasMotion": true
     },
     {
       "name": "VeriServe_block",

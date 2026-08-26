@@ -97,17 +97,35 @@ export interface Assay {
   /** Set when the verdict is anything other than `promoted`. */
   reason: string | null;
   bands: Band[];
+  /*
+   * Everything a card needs to be built without going back to the raw file.
+   *
+   * This used to carry only what the assay table displayed, which is why a
+   * generated card had no deployment link, no licence and a one-item stack:
+   * the facts existed in the evidence and simply were not passed through.
+   */
   evidence: Pick<
     RepoEvidence,
     | "commits"
     | "stars"
     | "pushedAt"
+    | "createdAt"
     | "language"
     | "languages"
     | "topics"
     | "description"
     | "readmeLede"
     | "isFork"
+    | "homepage"
+    | "licence"
+    | "releases"
+    | "testFiles"
+    | "docFiles"
+    | "sourceFiles"
+    | "hasCi"
+    | "hasCoverage"
+    | "hasContainer"
+    | "hasTests"
   >;
   /** The three cheapest points still on the table. */
   nextSteps: string[];

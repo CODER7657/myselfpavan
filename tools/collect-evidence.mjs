@@ -199,7 +199,7 @@ const RX = {
   component: /(^|\/)(components?|widgets?|screens?|views?|pages?)\//i,
   designSystem: /(^|\/)(tailwind\.config|theme\.[jt]s|tokens?\.(json|ts|css)|design-system|styled\.[jt]s|panda\.config|\.storybook)/i,
   a11y: /(eslint-plugin-jsx-a11y|axe-core|@axe-core|jsx-a11y)/i,
-  motion: /(framer-motion|gsap|motion|react-spring|lottie|three)/i,
+  motion: /(framer-motion|\bgsap\b|\bmotion\b|react-spring|lottie|three)/i,
 };
 
 /*
@@ -264,23 +264,46 @@ function readmeLede(markdown) {
   if (!markdown) return null;
 
   const cleaned = markdown
-    .replace(/^---[\s\S]*?---/, "")              // front matter
-    .replace(/```[\s\S]*?```/g, "")              // fenced code
-    .replace(/<[^>]+>/g, "")                        // inline html
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")       // images and badges
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");   // links to their text
+    .replace(/^---[\s\S]*?---/, "")        // front matter
+    .replace(/```[\s\S]*?```/g, "")        // fenced code
+    .replace(/<[^>]+>/g, "")                    // inline html
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")   // images and badges
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1"); // links to their text
 
-  for (const block of cleaned.split(/\n\s*\n/)) {
+  /*
+   * The introduction, then everything, in that order.
+   *
+   * AURA-GUARD's card opened with "We welcome contributions to AURA-GUARD!"
+   * because its intro had no paragraph that qualified and the search ran on
+   * into the contributing section. Cutting the back matter away fixed that
+   * and immediately cost GlobeTrotter its lede, whose only real prose sits
+   * below a heading. So the intro is preferred and the rest is a fallback:
+   * a description from further down beats no description at all, and the
+   * housekeeping shapes are refused either way.
+   */
+  const backMatter =
+    /^#{1,6}\s*(?:contributing|contribution|licen[sc]e|installation|install|getting started|setup|acknowledge?ments?|credits|changelog|roadmap|contact|support)\b/im;
+
+  return pickLede(cleaned.split(backMatter)[0]) ?? pickLede(cleaned);
+}
+
+/** The first paragraph that reads like somebody describing their project. */
+function pickLede(text) {
+  for (const block of (text ?? "").split(/\n\s*\n/)) {
     const line = block.trim().replace(/\s+/g, " ");
     if (!line) continue;
 
-    if (/^[#>|*=+_\-]/.test(line)) continue;  // heading, quote, table, list, aside
-    if (/^\d+[.)]\s/.test(line)) continue;      // numbered step
-    if (/^`/.test(line)) continue;                 // opens with a command
-    if (line.length < 60) continue;                // too short to be a description
-    if (!/[a-z]/.test(line)) continue;             // all-caps banner
-    if (!/[.!?]/.test(line)) continue;             // not a sentence
-    if (line.split(" ").length < 10) continue;     // not enough of one
+    if (/^[#>|*=+_\-]/.test(line)) continue;   // heading, quote, table, list, aside
+    if (/^\d+[.)]\s/.test(line)) continue;    // numbered step
+    if (/^`/.test(line)) continue;                // opens with a command
+    if (line.length < 60) continue;               // too short to be a description
+    if (!/[a-z]/.test(line)) continue;            // all-caps banner
+    if (!/[.!?]/.test(line)) continue;            // not a sentence
+    if (line.split(" ").length < 10) continue;    // not enough of one
+
+    /* Housekeeping prose, which says nothing about the project itself. */
+    if (/^(we welcome|contributions are|this project is licensed|pull requests|please read|to get started|first,? clone|run the following|clone the repo)/i.test(line)) continue;
+    if (/^(thanks?|thank you|special thanks)\b/i.test(line)) continue;
 
     // Mostly inline code is a usage note, not prose.
     const ticked = (line.match(/`[^`]*`/g) || []).join("").length;
@@ -388,12 +411,12 @@ async function inspect(repo) {
         /* A declared dev dependency counts as much as a config file. */
         hasCoverage:
           sig.hasCoverage ||
-          declares(/pytest-cov|coverage\[toml\]|nyc|--cov|c8|codecov/),
+          declares(/pytest-cov|coverage\[toml\]|\bnyc\b|--cov|\bc8\b|codecov/),
         hasA11y: declares(RX.a11y),
         hasMotion: declares(RX.motion) || paths.some((p) => RX.motion.test(p)),
         hasLinter:
           sig.hasLinter ||
-          declares(/\[tool\.ruff|\[tool\.mypy|ruff|mypy|eslint|biome|pylint|flake8/),
+          declares(/\[tool\.ruff|\[tool\.mypy|\bruff\b|\bmypy\b|\beslint\b|\bbiome\b|\bpylint\b|\bflake8\b/),
       };
     })(),
   };
