@@ -151,7 +151,16 @@ export function Tree() {
   const active = hover ? nodes.find((n) => n.id === hover) : null;
 
   return (
-    <section id="tree" className="plate" ref={root}>
+    <section
+      id="tree"
+      className="plate"
+      ref={root}
+      /* A tap on the surface behind the nodes puts the tree back to normal;
+         without it a touch device has no way to undo the dimming. */
+      onPointerUp={(e) => {
+        if (e.pointerType !== "mouse") setHover(null);
+      }}
+    >
       <div className="wrap">
         <div className="plate-head">
           <span className="plate-num">PLATE 06</span>
@@ -213,8 +222,25 @@ export function Tree() {
                       height: NODE_H,
                       color: agent.color,
                     }}
-                    onMouseEnter={() => setHover(n.id)}
-                    onMouseLeave={() => setHover(null)}
+                    /*
+                     * Pointer events rather than mouse events: a tap fires
+                     * pointerenter and then never fires pointerleave, so on a
+                     * phone the tapped node lit its path and left every other
+                     * node sitting at 28% opacity — which reads as most of the
+                     * tree having vanished. A second tap on the same node now
+                     * clears it, and so does a tap anywhere off a node.
+                     */
+                    onPointerEnter={(e) => {
+                      if (e.pointerType === "mouse") setHover(n.id);
+                    }}
+                    onPointerLeave={(e) => {
+                      if (e.pointerType === "mouse") setHover(null);
+                    }}
+                    onPointerUp={(e) => {
+                      if (e.pointerType === "mouse") return;
+                      e.stopPropagation();
+                      setHover((current) => (current === n.id ? null : n.id));
+                    }}
                     onFocus={() => setHover(n.id)}
                     onBlur={() => setHover(null)}
                     tabIndex={0}

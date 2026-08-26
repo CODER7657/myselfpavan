@@ -83,6 +83,32 @@ export function reveal(
         start,
         once: true,
         invalidateOnRefresh: true,
+
+        /*
+         * The rescue this file has always claimed to have, and did not.
+         *
+         * A trigger measures its start once. Anything that changes the page
+         * height afterwards — a webfont, the ridge plate decoding, the live
+         * GitHub table filling in, the loading screen handing over — moves the
+         * section without moving the trigger, and a `once` trigger that is
+         * refreshed into a position already behind the reader never fires.
+         * The tween holds its from-state, which is opacity 0, and the block is
+         * simply invisible for the rest of the visit.
+         *
+         * Caught in the wild on the log section: start 8861 against a viewport
+         * bottom of 9460 — scrolled well past — with the animation still at
+         * progress 0.
+         *
+         * Half a viewport is the test rather than the very edge: at the top of
+         * the page a first section whose start sits just inside the fold must
+         * still animate rather than snap.
+         */
+        onRefresh: (self) => {
+          const strandedBehind = self.start < window.scrollY + window.innerHeight * 0.5;
+          if (strandedBehind && self.animation && self.animation.progress() === 0) {
+            self.animation.progress(1);
+          }
+        },
       },
     }
   );

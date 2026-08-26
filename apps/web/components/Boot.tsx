@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { profile } from "@foundry/content";
-import { gsap, reducedMotion } from "@/lib/gsap";
+import { gsap, reducedMotion, ScrollTrigger } from "@/lib/gsap";
 import { useFoundry } from "@/lib/store";
 import s from "./Boot.module.css";
 
@@ -86,12 +86,27 @@ export function Boot() {
 
     if (reducedMotion()) {
       boot();
+      requestAnimationFrame(() => ScrollTrigger.refresh());
       return;
     }
 
     // The screen irises open from the middle, revealing the page beneath —
     // one animated property, no extra elements to get in the content's way.
-    const tl = gsap.timeline({ onComplete: boot });
+    /*
+     * Re-measure once the curtain has gone.
+     *
+     * Every scroll trigger on the page was created while this overlay was up.
+     * The handover is the last thing that moves the layout, so it is the last
+     * chance to catch a trigger that measured against a page that has since
+     * shifted — and, since the loading screen now runs on every visit, it
+     * happens on every visit too.
+     */
+    const tl = gsap.timeline({
+      onComplete: () => {
+        boot();
+        requestAnimationFrame(() => ScrollTrigger.refresh());
+      },
+    });
     tl.to("." + s.stage, { y: -26, opacity: 0, duration: 0.4, ease: "power2.in" })
       .to("." + s.plate, { yPercent: 10, opacity: 0, duration: 0.5, ease: "power2.in" }, "<")
       .to(
