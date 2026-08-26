@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { agents } from "@foundry/content";
 import { levelProgress, useFoundry } from "@/lib/store";
 import { armSound, armTaps } from "@/lib/sound";
-import { watchVisibility } from "@/lib/music";
+import { startWhenAllowed, watchVisibility } from "@/lib/music";
 import { Sigil } from "./Sigil";
 import s from "./Hud.module.css";
 
@@ -52,9 +52,20 @@ export function Hud() {
     const stopTaps = armTaps(() => false);
     const stopWatching = watchVisibility();
 
+    /*
+     * The music is a remembered preference, so a reload should carry on rather
+     * than reset to silence. Read once from storage rather than subscribed to:
+     * this is about resuming what was already chosen, and the toggle handles
+     * every change after that itself.
+     */
+    const stopMusicWait = useFoundry.getState().music
+      ? startWhenAllowed(() => useFoundry.setState({ music: false }))
+      : () => undefined;
+
     return () => {
       stopTaps();
       stopWatching();
+      stopMusicWait();
     };
   }, [syncTheme]);
 

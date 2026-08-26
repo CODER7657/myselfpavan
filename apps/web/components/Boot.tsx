@@ -89,12 +89,12 @@ export function Boot() {
     // The screen irises open from the middle, revealing the page beneath —
     // one animated property, no extra elements to get in the content's way.
     const tl = gsap.timeline({ onComplete: boot });
-    tl.to("." + s.stage, { y: -26, opacity: 0, duration: 0.46, ease: "power2.in" })
-      .to("." + s.plate, { yPercent: 10, opacity: 0, duration: 0.6, ease: "power2.in" }, "<")
+    tl.to("." + s.stage, { y: -26, opacity: 0, duration: 0.4, ease: "power2.in" })
+      .to("." + s.plate, { yPercent: 10, opacity: 0, duration: 0.5, ease: "power2.in" }, "<")
       .to(
         root.current,
-        { clipPath: "inset(50% 0% 50% 0%)", duration: 0.92, ease: "expo.inOut" },
-        "-=0.3"
+        { clipPath: "inset(50% 0% 50% 0%)", duration: 0.8, ease: "expo.inOut" },
+        "-=0.25"
       )
       .set(root.current, { autoAlpha: 0 });
   }, [boot]);
@@ -111,7 +111,16 @@ export function Boot() {
       }
 
       const counter = { v: 0 };
+      /*
+       * Played at 1.4x.
+       *
+       * The whole sequence ran to about 3.8s on a warm cache, which is long for
+       * something every visit now shows. Scaling the timeline keeps the
+       * choreography and every overlap exactly as composed and simply runs it
+       * faster — re-timing eight tweens by hand would not.
+       */
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+      tl.timeScale(1.4);
 
       tl.from("." + s.crop, { scale: 0.4, opacity: 0, duration: 0.7, stagger: 0.05 })
         .from("." + s.kicker, { y: 10, opacity: 0, duration: 0.5 }, "-=0.45")
@@ -135,7 +144,7 @@ export function Boot() {
         counter,
         {
           v: 92,
-          duration: 1.6,
+          duration: 1.15,
           ease: "power1.inOut",
           onUpdate() {
             const n = Math.round(counter.v);
@@ -157,7 +166,7 @@ export function Boot() {
         }
         gsap.to(counter, {
           v: 100,
-          duration: 0.42,
+          duration: 0.35,
           ease: "power2.out",
           onUpdate() {
             const n = Math.round(counter.v);
@@ -166,13 +175,15 @@ export function Boot() {
           },
           onComplete() {
             setTask(TASKS[TASKS.length - 1] as string);
-            gsap.delayedCall(0.28, leave);
+            gsap.delayedCall(0.15, leave);
           },
         });
       };
 
       let raf = 0;
-      const kickoff = gsap.delayedCall(1.85, () => {
+      /* Just past the end of the entrance at 1.4x, so nothing is still moving
+         when the meter completes and the curtain starts to part. */
+      const kickoff = gsap.delayedCall(1.35, () => {
         raf = requestAnimationFrame(settle);
       });
 

@@ -188,6 +188,9 @@ let loading: Promise<AudioBuffer | null> | null = null;
 let timer: ReturnType<typeof setInterval> | null = null;
 let nextStartAt = 0;
 let playing = false;
+/* Set when the visitor stops it, so a pending auto-start does not override
+   the decision they just made. */
+let stoppedByUser = false;
 let finished: (() => void) | null = null;
 const live = new Set<AudioBufferSourceNode>();
 
@@ -295,6 +298,8 @@ function pump(): void {
 
 /** Starts the music. Must be called from a gesture — browsers require it. */
 export async function startMusic(onFinished?: () => void): Promise<boolean> {
+  stoppedByUser = false;
+
   const c = context();
   if (!c) return false;
 
@@ -324,6 +329,14 @@ export async function startMusic(onFinished?: () => void): Promise<boolean> {
   finished = onFinished ?? null;
 
   if (c.state === "suspended") await c.resume().catch(() => undefined);
+
+  /*
+   * Still suspended means the browser refused: audio cannot begin before the
+   * visitor has interacted with the page. Saying so lets the caller wait for
+   * a gesture rather than leave a control claiming to play silence.
+   */
+  if (c.state === "suspended") return false;
+
   if (playing) return true;
 
   playing = true;
@@ -339,12 +352,55 @@ export async function startMusic(onFinished?: () => void): Promise<boolean> {
   return true;
 }
 
+/**
+ * Starts the music as soon as the browser will allow it.
+ *
+ * Autoplay policy blocks audio until the visitor has interacted, so a page
+ * that simply calls startMusic on load gets a silent context and a control
+ * insisting it is playing. This tries immediately — which succeeds on a
+ * reload where the tab already has permission — and otherwise waits for the
+ * first pointer, key or touch and starts then.
+ *
+ * Returns a cleanup that cancels the wait, so turning the music off before
+ * ever touching the page does not arm a surprise for the first click.
+ */
+export function startWhenAllowed(onFinished?: () => void): () => void {
+  let cancelled = false;
+  const events = ["pointerdown", "keydown", "touchstart"] as const;
+
+  const onGesture = () => {
+    detach();
+    /*
+     * The press that turns the music off is itself the first gesture, and this
+     * listener runs on pointerdown while the toggle runs on click — so without
+     * the second test, turning it off would start it a moment beforehand.
+     */
+    if (cancelled || stoppedByUser) return;
+    void startMusic(onFinished);
+  };
+
+  const detach = () => {
+    for (const e of events) window.removeEventListener(e, onGesture);
+  };
+
+  void startMusic(onFinished).then((started) => {
+    if (cancelled || started) return;
+    for (const e of events) window.addEventListener(e, onGesture, { once: true, passive: true });
+  });
+
+  return () => {
+    cancelled = true;
+    detach();
+  };
+}
+
 /** Stops it, fading out first — a hard stop reads as a fault. */
 export function stopMusic(): void {
   const c = ctx;
   if (!c || !out) return;
 
   playing = false;
+  stoppedByUser = true;
 
   const now = c.currentTime;
   out.gain.cancelScheduledValues(now);

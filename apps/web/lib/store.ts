@@ -55,7 +55,7 @@ interface FoundryState {
   theme: "light" | "dark";
   /** Event cues. Persisted, and silent until the first gesture regardless. */
   sound: boolean;
-  /** Background music. Off unless asked for: nobody wants a page that sings at them. */
+  /** Background music. On by default; a visitor who turns it off is remembered. */
   music: boolean;
   toasts: Toast[];
 
@@ -113,7 +113,7 @@ export const useFoundry = create<FoundryState>()(
         logRead: false,
         theme: "light",
         sound: true,
-        music: false,
+        music: true,
         toasts: [],
 
         boot: () => set({ booted: true }),
@@ -259,8 +259,40 @@ export const useFoundry = create<FoundryState>()(
     },
     {
       name: "foundry.operator.v1",
+      /*
+       * The music flag shipped as false earlier today, so anyone who loaded the
+       * site in that window has false stored and would never hear it. Version 2
+       * turns it on once for them. A deliberate off, made after this, persists
+       * normally — the migration runs a single time.
+       */
+      /*
+       * The boot sequence runs on every visit.
+       *
+       * Dropping `booted` from partialize only stops it being written; anything
+       * already in storage is still merged back on rehydrate, so a browser that
+       * had visited before carried booted: true forever and never saw the
+       * loading screen again. Forcing it here does not depend on what is stored.
+       */
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted as object),
+        booted: false,
+      }),
+      version: 2,
+      migrate: (persisted, from) => {
+        const state = (persisted ?? {}) as Record<string, unknown>;
+        if (from < 2) state.music = true;
+        return state as never;
+      },
       partialize: (s) => ({
-        booted: s.booted,
+        /*
+         * `booted` is deliberately absent.
+         *
+         * Persisting it meant the loading sequence played once, ever, and every
+         * later visit dropped straight into the page. It is part of arriving
+         * here, not a first-run tutorial to be got out of the way, so it starts
+         * false on every load and runs again.
+         */
         xp: s.xp,
         recruited: s.recruited,
         completed: s.completed,
