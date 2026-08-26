@@ -9,6 +9,9 @@ import s from "./Boot.module.css";
 
 const WORDMARK = "PAVAN//FOUNDRY";
 
+/** The two halves, so the only legal break is at the slash. */
+const WORD_GROUPS = ["PAVAN//", "FOUNDRY"] as const;
+
 const TASKS = [
   "mounting agent runtime",
   "loading tool registry",
@@ -231,13 +234,26 @@ export function Boot() {
         </div>
 
         <h1 className={s.mark} aria-label={WORDMARK}>
-          {WORDMARK.split("").map((ch, i) => (
-            <span
-              key={ch + i}
-              className={`${s.glyph} ${ch === "/" ? s.slash : ""}`}
-              aria-hidden="true"
-            >
-              {ch}
+          {/*
+            Grouped, not one flat run of letters.
+
+            The heading is a wrapping flex row of individual glyphs so they can
+            be staggered, which on a 375px screen broke it as PAVAN//FOUNDR and
+            a lone Y on the next line. Each half is now unbreakable, so the only
+            place it can wrap is the slash it is named for. The glyphs are still
+            separate elements and the animation is untouched.
+          */}
+          {WORD_GROUPS.map((group, g) => (
+            <span key={group} className={s.word}>
+              {group.split("").map((ch, i) => (
+                <span
+                  key={ch + g + i}
+                  className={`${s.glyph} ${ch === "/" ? s.slash : ""}`}
+                  aria-hidden="true"
+                >
+                  {ch}
+                </span>
+              ))}
             </span>
           ))}
         </h1>

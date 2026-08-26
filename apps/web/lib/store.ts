@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { achievements, agents, missions, type AgentId } from "@foundry/content";
 import { play } from "./sound";
-import { startMusic, stopMusic } from "./music";
+import { isAudible, startMusic, stopMusic } from "./music";
 
 /**
  * Operator progression.
@@ -153,7 +153,15 @@ export const useFoundry = create<FoundryState>()(
          * playing the moment it opens is one people close.
          */
         toggleMusic: () => {
-          const next = !get().music;
+          /*
+           * Toggle against what is actually happening, not the stored wish.
+           *
+           * The control reads "play" whenever no sound is coming out — which,
+           * before the visitor has interacted, is true even though the
+           * preference says on. Flipping the preference there would have
+           * turned the music off in response to a button offering to start it.
+           */
+          const next = !isAudible();
           set({ music: next });
           /* A track too short to loop plays once and then really is over —
              the control follows it back to "play" rather than claiming to be

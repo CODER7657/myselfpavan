@@ -88,6 +88,9 @@
   flex-wrap: wrap;
 }
 
+/* Half a wordmark, which never breaks inside itself. */
+.word { display: flex; flex-wrap: nowrap; }
+
 .glyph { display: inline-block; will-change: transform, opacity; }
 .slash { color: var(--accent); }
 

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { agents } from "@foundry/content";
 import { levelProgress, useFoundry } from "@/lib/store";
 import { armSound, armTaps } from "@/lib/sound";
-import { startWhenAllowed, watchVisibility } from "@/lib/music";
+import { startWhenAllowed, watchAudible, watchVisibility } from "@/lib/music";
 import { Sigil } from "./Sigil";
 import s from "./Hud.module.css";
 
@@ -35,6 +35,10 @@ export function Hud() {
   const toggleMusic = useFoundry((st) => st.toggleMusic);
 
   const [hydrated, setHydrated] = useState(false);
+  /* Whether sound is actually coming out, which is not the same as whether
+     the visitor has asked for it: browsers refuse audio until they have
+     interacted with the page. */
+  const [audible, setAudible] = useState(false);
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -49,6 +53,7 @@ export function Hud() {
        moment of the press rather than closing over it. */
     /* There is no mute control any more, so nothing to consult: the click
        and the event cues always play. */
+    const stopAudible = watchAudible(setAudible);
     const stopTaps = armTaps(() => false);
     const stopWatching = watchVisibility();
 
@@ -63,6 +68,7 @@ export function Hud() {
       : () => undefined;
 
     return () => {
+      stopAudible();
       stopTaps();
       stopWatching();
       stopMusicWait();
@@ -162,10 +168,10 @@ export function Hud() {
               type="button"
               className={s.iconBtn}
               onClick={toggleMusic}
-              aria-label={(hydrated && music ? "Stop" : "Play") + " background music"}
-              aria-pressed={hydrated ? music : false}
+              aria-label={(hydrated && audible ? "Stop" : "Play") + " background music"}
+              aria-pressed={hydrated ? audible : false}
               title="Background music"
-              data-on={hydrated && music}
+              data-on={hydrated && audible}
             >
               {"♫"}
             </button>
@@ -236,11 +242,11 @@ export function Hud() {
             type="button"
             className={s.drawerControl}
             onClick={toggleMusic}
-            data-on={hydrated && music}
+            data-on={hydrated && audible}
             tabIndex={open ? 0 : -1}
           >
             <span>{"♫"}</span>
-            {hydrated && music ? "Stop music" : "Play music"}
+            {hydrated && audible ? "Stop music" : "Play music"}
           </button>
 
           <div className={s.drawerXp}>

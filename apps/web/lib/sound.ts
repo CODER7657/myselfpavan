@@ -219,12 +219,14 @@ function playClick(muted: boolean): void {
  * Anything that already has its own voice opts out with data-cue="none", so
  * a card flip does not tap and click at once.
  */
+/** What counts as a control worth a cue. */
+const SELECTOR =
+  'button, [role="button"], a[href], summary, input[type="checkbox"], input[type="radio"]';
+
 export function armTaps(muted: () => boolean): () => void {
   const onDown = (e: PointerEvent) => {
     const el = e.target as Element | null;
-    const hit = el?.closest?.(
-      'button, [role="button"], a[href], summary, input[type="checkbox"], input[type="radio"]'
-    );
+    const hit = el?.closest?.(SELECTOR);
     if (!hit) return;
     if (hit.closest('[data-cue="none"]')) return;
     if (hit.getAttribute("aria-disabled") === "true") return;
@@ -237,8 +239,36 @@ export function armTaps(muted: () => boolean): () => void {
     playClick(muted());
   };
 
+  /*
+   * Enter and Space on a focused control are a press too.
+   *
+   * Listening only for pointerdown meant anyone navigating by keyboard heard
+   * nothing at all — the same buttons, silently. Repeats are ignored, so
+   * holding a key does not machine-gun the cue.
+   */
+  const onKey = (e: KeyboardEvent) => {
+    if (e.repeat) return;
+    if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+
+    /* The event's own target is the focused control; activeElement is only a
+       fallback for anything that dispatches without one. */
+    const el = (e.target as Element | null) ?? document.activeElement;
+    const hit = el?.closest?.(SELECTOR);
+    if (!hit) return;
+    if (hit.closest('[data-cue="none"]')) return;
+    if ((hit as HTMLButtonElement).disabled) return;
+
+    unlock();
+    playClick(muted());
+  };
+
   document.addEventListener("pointerdown", onDown, { passive: true });
-  return () => document.removeEventListener("pointerdown", onDown);
+  document.addEventListener("keydown", onKey, { passive: true });
+
+  return () => {
+    document.removeEventListener("pointerdown", onDown);
+    document.removeEventListener("keydown", onKey);
+  };
 }
 
 export type { Cue };

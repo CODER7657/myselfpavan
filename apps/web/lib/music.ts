@@ -191,6 +191,8 @@ let playing = false;
 /* Set when the visitor stops it, so a pending auto-start does not override
    the decision they just made. */
 let stoppedByUser = false;
+/* Told when sound genuinely starts or stops, so a control need never guess. */
+let onAudible: ((live: boolean) => void) | null = null;
 let finished: (() => void) | null = null;
 const live = new Set<AudioBufferSourceNode>();
 
@@ -283,6 +285,13 @@ function schedulePass(at: number): void {
        control can go back to reading "play" instead of lying. */
     if (!plan?.loop && playing && live.size === 0) {
       playing = false;
+      onAudible?.(false);
+      /* The scheduler has nothing left to schedule. Left running it ticked
+         four times a second for the life of the page. */
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
       finished?.();
     }
   };
@@ -302,6 +311,18 @@ export async function startMusic(onFinished?: () => void): Promise<boolean> {
 
   const c = context();
   if (!c) return false;
+
+  /*
+   * Ask to resume before anything is awaited.
+   *
+   * Safari — and iOS in particular — only honours resume() when it is called
+   * in the same task as the gesture that triggered it. Awaiting the fetch and
+   * the decode first, as this did, hands control back to the event loop and
+   * the resume that follows is no longer inside the gesture: it is refused,
+   * silently, and the control is left claiming to play. The promise is
+   * collected here and settled once the buffer is ready.
+   */
+  const resuming = c.state === "suspended" ? c.resume().catch(() => undefined) : null;
 
   const buf = await load();
   if (!buf) return false;
@@ -328,7 +349,7 @@ export async function startMusic(onFinished?: () => void): Promise<boolean> {
   }
   finished = onFinished ?? null;
 
-  if (c.state === "suspended") await c.resume().catch(() => undefined);
+  await resuming;
 
   /*
    * Still suspended means the browser refused: audio cannot begin before the
@@ -340,6 +361,7 @@ export async function startMusic(onFinished?: () => void): Promise<boolean> {
   if (playing) return true;
 
   playing = true;
+  onAudible?.(true);
   nextStartAt = c.currentTime + 0.05;
   schedulePass(nextStartAt);
 
@@ -364,28 +386,67 @@ export async function startMusic(onFinished?: () => void): Promise<boolean> {
  * Returns a cleanup that cancels the wait, so turning the music off before
  * ever touching the page does not arm a surprise for the first click.
  */
+/**
+ * Reports whether audio is actually coming out, as opposed to wanted.
+ *
+ * The two are different until the visitor has interacted: a browser refuses
+ * to start audio before that, so a control driven by the stored preference
+ * alone sits there reading "stop" over silence — which is exactly how this
+ * looked broken.
+ */
+/** Whether sound is coming out right now. */
+export const isAudible = (): boolean => playing;
+
+export function watchAudible(cb: (live: boolean) => void): () => void {
+  onAudible = cb;
+  cb(playing);
+  return () => {
+    if (onAudible === cb) onAudible = null;
+  };
+}
+
 export function startWhenAllowed(onFinished?: () => void): () => void {
   let cancelled = false;
-  const events = ["pointerdown", "keydown", "touchstart"] as const;
 
-  const onGesture = () => {
-    detach();
-    /*
-     * The press that turns the music off is itself the first gesture, and this
-     * listener runs on pointerdown while the toggle runs on click — so without
-     * the second test, turning it off would start it a moment beforehand.
-     */
-    if (cancelled || stoppedByUser) return;
-    void startMusic(onFinished);
+  /*
+   * click and touchend are here as well as pointerdown, because Safari counts
+   * activation on its own terms and a tap that produces one but not another is
+   * exactly the case this has to survive.
+   */
+  const events = ["pointerdown", "touchend", "click", "keydown"] as const;
+
+  const attach = () => {
+    for (const e of events) window.addEventListener(e, onGesture, { once: true, passive: true });
   };
 
   const detach = () => {
     for (const e of events) window.removeEventListener(e, onGesture);
   };
 
+  function onGesture(): void {
+    detach();
+
+    /*
+     * The press that turns the music off is itself a gesture, and this runs on
+     * pointerdown while the toggle runs on click — so without this the music
+     * would start a moment before being told not to.
+     */
+    if (cancelled || stoppedByUser) return;
+
+    void startMusic(onFinished).then((started) => {
+      /*
+       * A gesture the browser did not accept as activation must not be the
+       * only attempt. Listening again costs nothing and means the second tap
+       * works where the first did not — the alternative is a page that stays
+       * silent for the rest of the visit.
+       */
+      if (!started && !cancelled && !stoppedByUser) attach();
+    });
+  }
+
   void startMusic(onFinished).then((started) => {
     if (cancelled || started) return;
-    for (const e of events) window.addEventListener(e, onGesture, { once: true, passive: true });
+    attach();
   });
 
   return () => {
@@ -393,7 +454,6 @@ export function startWhenAllowed(onFinished?: () => void): () => void {
     detach();
   };
 }
-
 /** Stops it, fading out first — a hard stop reads as a fault. */
 export function stopMusic(): void {
   const c = ctx;
@@ -401,6 +461,7 @@ export function stopMusic(): void {
 
   playing = false;
   stoppedByUser = true;
+  onAudible?.(false);
 
   const now = c.currentTime;
   out.gain.cancelScheduledValues(now);
@@ -442,4 +503,18 @@ export function watchVisibility(): () => void {
 
   document.addEventListener("visibilitychange", onChange);
   return () => document.removeEventListener("visibilitychange", onChange);
+}
+
+/* Exposed in development only, the way the store is, so the reason no sound
+   is coming out can be read rather than guessed at. */
+if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
+  (window as unknown as Record<string, unknown>).__music = () => ({
+    contextState: ctx?.state ?? null,
+    playing,
+    stoppedByUser,
+    plan,
+    liveSources: live.size,
+    masterGain: out?.gain.value ?? null,
+    decoded: buffer ? +buffer.duration.toFixed(2) : null,
+  });
 }
