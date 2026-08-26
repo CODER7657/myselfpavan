@@ -94,6 +94,7 @@ export function Card({
             ref={frontBtn}
             type="button"
             className={s.flipSurface}
+            data-cue="none"
             onClick={flip}
             aria-expanded={flipped}
             aria-label={project.name + " — show details"}
@@ -184,6 +185,7 @@ export function Card({
             ref={backBtn}
             type="button"
             className={s.flipSurface}
+            data-cue="none"
             onClick={flip}
             aria-label={project.name + " — back to front"}
           />

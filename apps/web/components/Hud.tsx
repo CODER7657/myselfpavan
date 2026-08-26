@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { agents } from "@foundry/content";
 import { levelProgress, useFoundry } from "@/lib/store";
-import { armSound } from "@/lib/sound";
+import { armSound, armTaps } from "@/lib/sound";
+import { watchVisibility } from "@/lib/music";
 import { Sigil } from "./Sigil";
 import s from "./Hud.module.css";
 
@@ -30,9 +31,7 @@ export function Hud() {
   const theme = useFoundry((st) => st.theme);
   const toggleTheme = useFoundry((st) => st.toggleTheme);
   const syncTheme = useFoundry((st) => st.syncTheme);
-  const sound = useFoundry((st) => st.sound);
   const music = useFoundry((st) => st.music);
-  const toggleSound = useFoundry((st) => st.toggleSound);
   const toggleMusic = useFoundry((st) => st.toggleMusic);
 
   const [hydrated, setHydrated] = useState(false);
@@ -45,6 +44,18 @@ export function Hud() {
     armSound();
     const painted = document.documentElement.dataset.theme;
     if (painted === "light" || painted === "dark") syncTheme(painted);
+
+    /* One listener for every button on the page, reading the mute flag at the
+       moment of the press rather than closing over it. */
+    /* There is no mute control any more, so nothing to consult: the click
+       and the event cues always play. */
+    const stopTaps = armTaps(() => false);
+    const stopWatching = watchVisibility();
+
+    return () => {
+      stopTaps();
+      stopWatching();
+    };
   }, [syncTheme]);
 
   const close = useCallback(() => {
@@ -133,17 +144,6 @@ export function Hud() {
               {hydrated && theme === "dark" ? "\u263e" : "\u2600"}
             </button>
 
-            <button
-              type="button"
-              className={s.iconBtn}
-              onClick={toggleSound}
-              aria-label={(hydrated && sound ? "Mute" : "Unmute") + " event cues"}
-              aria-pressed={hydrated ? sound : true}
-              title="Event cues"
-            >
-              {hydrated && !sound ? "⊘" : "♪"}
-            </button>
-
             {/* Music is a separate decision from the event cues: one is a
                 texture you opt into, the other is feedback on your own
                 actions. Off until asked for. */}
@@ -206,6 +206,42 @@ export function Hud() {
             </a>
           ))}
         </nav>
+
+        {/* On a phone the header has room for the wordmark, the music button
+            and the burger — nothing else. The rest of the controls live in
+            here, where there is space to label them. */}
+        <div className={s.drawerControls}>
+          <button
+            type="button"
+            className={s.drawerControl}
+            onClick={toggleTheme}
+            tabIndex={open ? 0 : -1}
+          >
+            <span>{hydrated && theme === "dark" ? "☾" : "☀"}</span>
+            {hydrated && theme === "dark" ? "Light stock" : "Dark stock"}
+          </button>
+
+          <button
+            type="button"
+            className={s.drawerControl}
+            onClick={toggleMusic}
+            data-on={hydrated && music}
+            tabIndex={open ? 0 : -1}
+          >
+            <span>{"♫"}</span>
+            {hydrated && music ? "Stop music" : "Play music"}
+          </button>
+
+          <div className={s.drawerXp}>
+            <div className={s.xpTop}>
+              <span suppressHydrationWarning>LVL {level}</span>
+              <span suppressHydrationWarning>{hydrated ? xp : 0} XP</span>
+            </div>
+            <div className={s.track}>
+              <div className={s.fill} style={{ width: pct + "%" }} />
+            </div>
+          </div>
+        </div>
 
         <div className={s.drawerFoot}>
           <div className={s.drawerRoster} aria-label="Recruited operatives">

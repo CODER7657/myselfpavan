@@ -3,45 +3,45 @@
 /**
  * The background track, looped without a seam.
  *
- * The supplied file is not a loop and cannot be played as one. Measured from
- * the decoded waveform in quarter-second windows:
+ * The supplied file is not a loop and could not be played as one. Measured
+ * from the decoded waveform in 100 ms windows, it is three separate phrases
+ * with silence between them:
  *
- *     duration          27.67 s
- *     0.00 - 0.50       silence
- *     0.50 - 6.00       music
- *     6.00 - 7.75       fades away to -87 dB
- *     8.00              hard restart at -19 dB
- *     8.00 - 25.00      music, with one musical rest around 13.5 s
- *     25.00 - 27.67     fades out, then 912 ms of silence
+ *     0.0  - 0.6    silence
+ *     0.6  - 6.9    music
+ *     6.9  - 8.1    fades to -87 dB, then hard-restarts
+ *     8.1  - 13.7   music
+ *     13.7 - 14.7   silence
+ *     14.7 - 26.1   music
+ *     26.1 - 27.7   fade-out, then 912 ms of silence
  *
- * On `loop` that plays a second and a half of silence every twenty-six
- * seconds, and half a second more in the middle. On a page somebody leaves
- * open it is not background music, it is a fault they notice a hundred times
- * an hour.
+ * Played on `loop` that is a second and a half of silence every twenty-six
+ * seconds and half a second more twice in between. Playing only the longest
+ * phrase avoids the holes and buys an eleven-second loop, which repeats some
+ * three hundred and eighty times an hour — not background music, a nagging.
  *
- * So only the clean stretch is played, each pass crossfaded into the last on
- * the AudioContext clock — not with timers, which drift when the main thread
- * is busy.
+ * So the phrases are stitched: each laid over the last through a short
+ * equal-power crossfade, the silences removed rather than played, giving
+ * about twenty-two seconds of continuous music that loops properly. Rendered
+ * once, offline, on the first play.
+ *
+ * None of this is specific to this file. The buffer is measured on decode, so
+ * a track built for looping is simply found to be one phrase and looped as it
+ * stands; anything with too little music to bear repeating is played once and
+ * then stopped. Scheduling runs on the AudioContext clock rather than timers,
+ * which drift when the main thread is busy.
  */
 const SRC = "/audio/calm.mp3";
 
-/*
- * Where the loop region comes from.
- *
- * Not from constants. The supplied file turned out to be three short phrases
- * separated by two silent gaps -- 0.6-6.9 s, 8.1-13.7 s, 14.7-26.1 s -- so any
- * pair of hand-picked bounds is wrong for the next file somebody drops in, and
- * every wrong pair loops through silence.
- *
- * So the buffer is measured on decode: 100 ms windows, and the longest run
- * that stays above the floor becomes the loop. If that run is too short to
- * bear repeating, the track is played once instead of looped, because an
- * eleven-second loop is not background music, it is a nagging.
- */
+/* How the measurement is taken, and what counts as silence. */
 const WINDOW_S = 0.1;
 const FLOOR_DB = -45;
-/** Below this, repetition is more noticeable than the music. */
+/** Less music than this in total, and the track is played once, not looped. */
 const MIN_LOOP_S = 20;
+/* Shorter than this is a stray note, not a phrase worth keeping. */
+const MIN_PHRASE_S = 2;
+/* The overlap where one phrase becomes the next. */
+const JOIN_S = 0.35;
 const CROSSFADE = 2.0;
 
 interface Plan {
@@ -52,62 +52,110 @@ interface Plan {
 
 let plan: Plan | null = null;
 
-/** The longest stretch of the buffer that never drops to silence. */
-function measure(buf: AudioBuffer): Plan {
+/** Where the audible part of a buffer begins and ends. */
+function edge(buf: AudioBuffer, backwards: boolean): number {
+  const ch = buf.getChannelData(0);
+  const threshold = 0.002;
+
+  if (backwards) {
+    for (let i = ch.length - 1; i >= 0; i--) {
+      if (Math.abs(ch[i]!) > threshold) return i / buf.sampleRate;
+    }
+    return buf.duration;
+  }
+
+  for (let i = 0; i < ch.length; i++) {
+    if (Math.abs(ch[i]!) > threshold) return i / buf.sampleRate;
+  }
+  return 0;
+}
+
+const firstSound = (b: AudioBuffer) => edge(b, false);
+const lastSound = (b: AudioBuffer) => edge(b, true);
+
+/** Every stretch of the buffer that stays above the floor, in order. */
+function phrasesOf(buf: AudioBuffer): { from: number; to: number }[] {
   const ch = buf.getChannelData(0);
   const sr = buf.sampleRate;
   const windows = Math.floor(buf.duration / WINDOW_S);
   const floor = Math.pow(10, FLOOR_DB / 20);
 
-  /* Starts empty, not as the whole file: seeded with the full duration, no
-     shorter run could ever beat it and the measurement always reported one
-     clean stretch — which is how the first version decided to loop straight
-     through both silences. */
-  let best = { from: 0, to: 0 };
-  let runFrom: number | null = null;
+  const found: { from: number; to: number }[] = [];
+  let from: number | null = null;
 
   const close = (at: number) => {
-    if (runFrom === null) return;
-    if (at - runFrom > best.to - best.from) best = { from: runFrom, to: at };
-    runFrom = null;
+    if (from === null) return;
+    if (at - from >= MIN_PHRASE_S) found.push({ from, to: at });
+    from = null;
   };
 
   for (let i = 0; i < windows; i++) {
     let sum = 0;
-    const from = (i * WINDOW_S * sr) | 0;
-    const to = Math.min(ch.length, ((i + 1) * WINDOW_S * sr) | 0);
-    for (let j = from; j < to; j++) sum += ch[j]! * ch[j]!;
-    const rms = Math.sqrt(sum / Math.max(1, to - from));
+    const lo = (i * WINDOW_S * sr) | 0;
+    const hi = Math.min(ch.length, ((i + 1) * WINDOW_S * sr) | 0);
+    for (let j = lo; j < hi; j++) sum += ch[j]! * ch[j]!;
 
-    if (rms >= floor) {
-      if (runFrom === null) runFrom = i * WINDOW_S;
+    if (Math.sqrt(sum / Math.max(1, hi - lo)) >= floor) {
+      if (from === null) from = i * WINDOW_S;
     } else {
       close(i * WINDOW_S);
     }
   }
   close(windows * WINDOW_S);
 
-  const span = best.to - best.from;
-  return span >= MIN_LOOP_S
-    ? { start: best.from, end: best.to, loop: true }
-    : /* Nothing long enough to loop: play the whole thing once, trimmed of its
-         leading and trailing silence only. */
-      { start: firstSound(buf), end: lastSound(buf), loop: false };
+  return found;
 }
 
-function edge(buf: AudioBuffer, backwards: boolean): number {
-  const ch = buf.getChannelData(0);
-  const threshold = 0.002;
-  if (backwards) {
-    for (let i = ch.length - 1; i >= 0; i--) if (Math.abs(ch[i]!) > threshold) return i / buf.sampleRate;
-    return buf.duration;
-  }
-  for (let i = 0; i < ch.length; i++) if (Math.abs(ch[i]!) > threshold) return i / buf.sampleRate;
-  return 0;
-}
+/**
+ * Joins the phrases into one continuous piece.
+ *
+ * The supplied file is not a performance with a couple of rests in it; it is
+ * three separate phrases with silence between them, and the longest single
+ * one is 11.4 s. Looping that is a fragment repeating every nine seconds.
+ *
+ * Stitched instead: each phrase is laid down overlapping the last by a short
+ * equal-power crossfade, so the silences are removed rather than played. The
+ * three phrases become about 22 s of unbroken music, which loops properly.
+ *
+ * Rendered once, offline, on the first play — not per pass.
+ */
+async function stitch(buf: AudioBuffer, phrases: { from: number; to: number }[]) {
+  const sr = buf.sampleRate;
+  const join = Math.min(JOIN_S, ...phrases.map((p) => (p.to - p.from) / 3));
 
-const firstSound = (b: AudioBuffer) => edge(b, false);
-const lastSound = (b: AudioBuffer) => edge(b, true);
+  const total = phrases.reduce((sum, p) => sum + (p.to - p.from), 0) - join * (phrases.length - 1);
+
+  const off = new OfflineAudioContext(
+    buf.numberOfChannels,
+    Math.ceil(total * sr),
+    sr
+  );
+
+  let at = 0;
+  phrases.forEach((phrase, i) => {
+    const span = phrase.to - phrase.from;
+    const src = off.createBufferSource();
+    src.buffer = buf;
+
+    const gain = off.createGain();
+    gain.gain.setValueAtTime(i === 0 ? 1 : 0, at);
+    /* Every join is crossfaded; the outer edges are left alone, because the
+       loop's own crossfade handles those. */
+    if (i > 0) gain.gain.setValueCurveAtTime(FADE_IN, at, join);
+    if (i < phrases.length - 1) {
+      gain.gain.setValueAtTime(1, at + span - join);
+      gain.gain.setValueCurveAtTime(FADE_OUT, at + span - join, join);
+    }
+
+    src.connect(gain);
+    gain.connect(off.destination);
+    src.start(at, phrase.from, span);
+
+    at += span - join;
+  });
+
+  return off.startRendering();
+}
 /**
  * Equal-power crossfade curves.
  *
@@ -253,7 +301,26 @@ export async function startMusic(onFinished?: () => void): Promise<boolean> {
   const buf = await load();
   if (!buf) return false;
 
-  plan ??= measure(buf);
+  /*
+   * Decide once what this file can support, then build it.
+   *
+   * Phrases joined into one piece if there is enough music to loop; the whole
+   * thing played once, trimmed, if there is not. Either way the rest of this
+   * module does not need to know which file it is playing.
+   */
+  if (!plan) {
+    const phrases = phrasesOf(buf);
+    const music = phrases.reduce((sum, p) => sum + (p.to - p.from), 0);
+
+    if (phrases.length > 1 && music >= MIN_LOOP_S) {
+      buffer = await stitch(buf, phrases);
+      plan = { start: 0, end: buffer.duration, loop: true };
+    } else if (phrases.length === 1 && phrases[0]!.to - phrases[0]!.from >= MIN_LOOP_S) {
+      plan = { start: phrases[0]!.from, end: phrases[0]!.to, loop: true };
+    } else {
+      plan = { start: firstSound(buf), end: lastSound(buf), loop: false };
+    }
+  }
   finished = onFinished ?? null;
 
   if (c.state === "suspended") await c.resume().catch(() => undefined);

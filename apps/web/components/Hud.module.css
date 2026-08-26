@@ -106,6 +106,12 @@
 @media (max-width: 1080px) {
   .nav { display: none; }
   .inner { grid-template-columns: auto 1fr; }
+
+  /* From here down the hamburger exists, and it carries the stock toggle and
+     the level meter with room to label them. Leaving copies in the header
+     only crowds the one control that has to stay reachable. */
+  .xp { display: none; }
+  .controls > .iconBtn:first-child { display: none; }
 }
 
 @media (max-width: 620px) {
@@ -273,4 +279,43 @@
 .iconBtn[data-on="true"] {
   color: var(--accent);
   border-color: currentColor;
+}
+
+/* ── drawer controls ─────────────────────────────────────────────────────── */
+
+/* The header cannot hold the meters and the toggles on a phone, so they come
+   in here, labelled rather than reduced to a glyph. */
+.drawerControls {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-4) 0;
+  margin-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+}
+
+.drawerControl {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-3);
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-micro);
+  font-size: var(--t-2xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.drawerControl:hover { border-color: currentColor; }
+.drawerControl[data-on="true"] { color: var(--accent); border-color: currentColor; }
+
+.drawerXp { display: grid; gap: 4px; padding-top: var(--s-2); }
+
+/* Above the hamburger breakpoint the drawer never opens, so these would only
+   ever duplicate the header. */
+@media (min-width: 1081px) {
+  .drawerControls { display: none; }
 }
