@@ -36,7 +36,10 @@ on:
 
 concurrency:
   group: assay
-  cancel-in-progress: false
+  # A superseded run is worse than no run: it holds a two-hour-old checkout and
+  # publishes a snapshot that is already stale. Every run collects the same
+  # thing from scratch, so the newest one is always the one worth keeping.
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -135,13 +138,56 @@ jobs:
             exit 0
           fi
 
-          git add apps/web/public/data
-          git commit \
-            -m "chore(assay): refresh repository evidence" \
-            -m "Ran: ${EVENT}${REASON:+ — ${REASON}}"
-          git push
+          # Publish onto whatever main is *now*, not onto the commit this run
+          # was triggered from.
+          #
+          # actions/checkout pins a run to its triggering commit, and a run can
+          # sit queued for hours — one waited from 03:04 until 04:55, by which
+          # time two other refreshes had landed and the push was rejected with
+          # "fetch first". The collected evidence was fine; only the publish
+          # failed, which is the worst way to lose a run.
+          #
+          # These files are generated output, not authored work: there is
+          # nothing to merge, and the newest collection is always the right
+          # one. So the snapshot is replayed onto the current tip instead.
+          snapshot="$(mktemp -d)"
+          cp apps/web/public/data/*.json "$snapshot/"
+
+          for attempt in 1 2 3; do
+            git fetch --quiet origin main
+            # --force is the point: the working copy is deliberately discarded,
+            # because the snapshot it held is already safe in $snapshot.
+            git checkout --quiet --force -B publish origin/main
+            cp "$snapshot"/*.json apps/web/public/data/
+
+            if [ -z "$(git status --porcelain apps/web/public/data)" ]; then
+              echo "Another run already published this evidence. Nothing to do."
+              exit 0
+            fi
+
+            git add apps/web/public/data
+            git commit --quiet \
+              -m "chore(assay): refresh repository evidence" \
+              -m "Ran: ${EVENT}${REASON:+ — ${REASON}}"
+
+            if git push --quiet origin publish:main; then
+              echo "Published on attempt ${attempt}."
+              exit 0
+            fi
+
+            echo "main moved while publishing — replaying onto the new tip (${attempt}/3)."
+            git reset --quiet --hard HEAD~1
+          done
+
+          echo "::error::Could not publish after three attempts. The evidence was collected; only the push failed."
+          exit 1
 
       # What the run decided, in the run's own summary — so pressing the button
       # tells you the outcome without opening the site.
+      #
+      # Runs even when publishing failed: the grading is the useful part, and
+      # hiding it because a push raced is how a failed run looks like a failed
+      # assay.
       - name: Summary
+        if: always()
         run: node --experimental-strip-types tools/assay-summary.ts >> "$GITHUB_STEP_SUMMARY"
