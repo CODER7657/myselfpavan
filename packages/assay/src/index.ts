@@ -4,11 +4,12 @@ export {
   tierFor,
   RUBRIC_VERSION,
   READY_TOPIC,
+  HIDE_TOPIC,
   PROMOTION_FLOOR,
-  GRANDFATHERED,
   EXCLUDED,
 } from "./rubric";
 export { CARD_TO_REPO, NO_REPO, CURATED_REPOS } from "./curated";
+export { fromSealed, withSealed, type SealedRecord, type SealedFile } from "./sealed";
 export { ageOf, pushedSince, type Age, type Freshness } from "./freshness";
 export {
   placementFor,

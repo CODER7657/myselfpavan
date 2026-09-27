@@ -12,34 +12,35 @@ import type { Rarity } from "@foundry/tokens";
  *
  * Bump this when the rules change; a stored score always names the rubric that
  * produced it, so an old number is never silently compared against new rules.
+ *
+ * 3.1.0 turned the gate around. Scoring is unchanged; what changed is which
+ * repositories are allowed to be scored.
  */
-export const RUBRIC_VERSION = "3.0.0";
+export const RUBRIC_VERSION = "3.1.0";
 
 /**
- * Topic a repository must carry before it is judged at all.
+ * Topic that keeps a public repository out of the assay.
  *
- * This is the "do not look at it yet" switch. Work in progress stays invisible
- * until it is deliberately marked — add the topic on GitHub (Settings → About →
- * Topics) and the next assay picks it up. Nothing needs to be cloned or edited.
+ * The gate used to be opt-in: nothing was graded until it carried a
+ * "foundry-ready" topic. In practice that meant new work never appeared —
+ * charkha scored 75.7, mythic, above PRAMANA, and sat invisible for a fortnight
+ * as "not marked ready" because nobody remembered to tag it. A portfolio that
+ * needs a reminder to show its best work is not keeping itself up to date.
+ *
+ * So every public, non-fork repository is now graded, and the promotion floor
+ * is what keeps unfinished work off the page. Anything that should stay out
+ * regardless carries this topic instead (Settings → About → Topics).
+ */
+export const HIDE_TOPIC = "foundry-hide";
+
+/**
+ * Topic that lets a private repository be graded.
+ *
+ * Private work is still opt-in, because being graded means its name, score and
+ * activity become public — a decision about a private repository has to be made
+ * deliberately, not inferred. Public repositories do not need it.
  */
 export const READY_TOPIC = "foundry-ready";
-
-/**
- * Repositories that are graded regardless of the topic.
- *
- * These predate the gate and are already written up by hand. Everything new
- * goes through the topic instead.
- */
-export const GRANDFATHERED = new Set([
-  "pramana",
-  "complylite",
-  "globetrotter",
-  "CRAFTATHON",
-  "VortiFi",
-  "VeriServe_block",
-  "genex-prj",
-  "shoes.store",
-]);
 
 /** Never graded: infrastructure, coursework, and the portfolio itself. */
 export const EXCLUDED = new Set([
@@ -449,8 +450,8 @@ function attestedBand(e: RepoEvidence): Band {
 /**
  * Grades one repository.
  *
- * The readiness check runs before any scoring: an unmarked repository is
- * reported as `not-ready` with a zero score rather than being judged half-built.
+ * Every repository is scored; the verdict then decides whether it may be shown.
+ * A hidden one is reported as `not-ready` rather than marked down.
  */
 export function assess(e: RepoEvidence): Assay {
   const bands = [
@@ -477,9 +478,14 @@ export function assess(e: RepoEvidence): Assay {
   } else if (e.isArchived) {
     verdict = "excluded";
     reason = "Archived.";
-  } else if (!e.topics.includes(READY_TOPIC) && !GRANDFATHERED.has(e.name)) {
+  } else if (e.topics.includes(HIDE_TOPIC)) {
     verdict = "not-ready";
-    reason = `Not marked ready. Add the "${READY_TOPIC}" topic when you want it graded.`;
+    reason = `Hidden — it carries the "${HIDE_TOPIC}" topic. Remove it to have it graded.`;
+  } else if (e.isPrivate && !e.topics.includes(READY_TOPIC)) {
+    /* Belt and braces: the collector never inspects an unmarked private
+       repository in the first place, so this should be unreachable. */
+    verdict = "not-ready";
+    reason = `Private. Add the "${READY_TOPIC}" topic to publish its score.`;
   } else if (score < PROMOTION_FLOOR) {
     verdict = "held";
     reason = `Scored ${score}, below the promotion floor of ${PROMOTION_FLOOR}.`;

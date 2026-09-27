@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { assess, RUBRIC_VERSION, type Assay, type RepoEvidence } from "@foundry/assay";
+import {
+  assess,
+  RUBRIC_VERSION,
+  withSealed,
+  type Assay,
+  type RepoEvidence,
+  type SealedRecord,
+} from "@foundry/assay";
 
 /**
  * Reads the evidence snapshot and grades it in the browser.
@@ -58,6 +65,8 @@ const EMPTY: AssayState = {
 export function useAssay(): AssayState {
   const [file, setFile] = useState<EvidenceFile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /* Private grades. Optional: absent or unreadable just means none. */
+  const [sealed, setSealed] = useState<SealedRecord[]>([]);
 
   useEffect(() => {
     const ac = new AbortController();
@@ -92,6 +101,17 @@ export function useAssay(): AssayState {
       throw last ?? new Error("evidence.json could not be read");
     };
 
+    /*
+     * Private work arrives separately, and failing to read it never holds up
+     * the public grading — it simply means no private cards this load.
+     */
+    fetch("/data/sealed.json", { signal: ac.signal, cache: "no-cache" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json: { records?: SealedRecord[] } | null) => {
+        if (!ac.signal.aborted && Array.isArray(json?.records)) setSealed(json.records);
+      })
+      .catch(() => undefined);
+
     load()
       .then((json) => {
         if (!ac.signal.aborted) setFile(json);
@@ -108,9 +128,10 @@ export function useAssay(): AssayState {
     if (error) return { ...EMPTY, status: "error", error };
     if (!file) return EMPTY;
 
-    const all = file.repos
-      .map((r) => assess(r))
-      .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+    const all = withSealed(
+      file.repos.map((r) => assess(r)),
+      sealed
+    ).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 
     return {
       status: "ready",
@@ -124,5 +145,5 @@ export function useAssay(): AssayState {
       excluded: all.filter((a) => a.verdict === "excluded"),
       byName: new Map(all.map((a) => [a.name.toLowerCase(), a])),
     };
-  }, [file, error]);
+  }, [file, error, sealed]);
 }

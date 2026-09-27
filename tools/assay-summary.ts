@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 import { assess, PROMOTION_FLOOR, RUBRIC_VERSION } from "../packages/assay/src/rubric.ts";
 import { movementFor, placementFor } from "../packages/assay/src/placement.ts";
 import type { RepoEvidence } from "../packages/assay/src/types.ts";
+import { withSealed, type SealedRecord } from "../packages/assay/src/sealed.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = resolve(HERE, "../apps/web/public/data");
@@ -36,8 +37,12 @@ const previous = new Map(
   Object.entries(standings?.previous?.scores ?? {}).map(([n, s]) => [n.toLowerCase(), s])
 );
 
-const all = evidence.repos
-  .map((r) => assess(r))
+const sealedPath = resolve(DATA, "sealed.json");
+const sealed: SealedRecord[] = existsSync(sealedPath)
+  ? ((JSON.parse(readFileSync(sealedPath, "utf8")) as { records?: SealedRecord[] }).records ?? [])
+  : [];
+
+const all = withSealed(evidence.repos.map((r) => assess(r)), sealed)
   .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 
 const promoted = all.filter((a) => a.verdict === "promoted");
@@ -84,10 +89,10 @@ if (held.length) {
 }
 
 if (notReady.length) {
-  say("### Not marked ready — " + notReady.length);
+  say("### Hidden — " + notReady.length);
   say();
   say(
-    "Not scored and not penalised. " +
+    "Kept out on purpose with the foundry-hide topic, or private without foundry-ready. " +
       notReady
         .slice(0, 12)
         .map((a) => "`" + a.name + "`")

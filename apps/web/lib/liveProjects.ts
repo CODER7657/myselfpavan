@@ -3,6 +3,7 @@ import type { WrittenCard } from "@/lib/useCards";
 import {
   CARD_TO_REPO,
   READY_TOPIC,
+  HIDE_TOPIC,
   NO_REPO,
   movementFor,
   placementFor,
@@ -136,7 +137,7 @@ function stackOf(a: Assay): string[] {
   /* The gate's own topic is plumbing, not a technology: "Foundry-ready" was
      turning up in the stack beside Python and TypeScript. */
   for (const t of a.evidence.topics) {
-    if (t === READY_TOPIC) continue;
+    if (t === READY_TOPIC || t === HIDE_TOPIC) continue;
     add(prettyTopic(t));
   }
   if (out.length === 0) add(a.evidence.language ?? "Mixed");
@@ -224,7 +225,57 @@ function splitLede(lede: string | null): { head: string; rest: string } | null {
 
 const clip = (v: string, n: number): string =>
   v.length <= n ? v : v.slice(0, n - 1).trimEnd() + "…";
+/**
+ * The card for a private repository nobody has written up.
+ *
+ * It can only say what the sealed grade carries — the score, the tier, the
+ * commit count, the last push and the shape of the bands — because anything
+ * more would be describing private code in public. So it says exactly that,
+ * and says why, rather than padding the gap with invented prose.
+ */
+function sealedCard(a: Assay): Project {
+  const pushed = a.evidence.pushedAt.slice(0, 10);
+  return {
+    slug: "sealed-" + a.name.toLowerCase(),
+    name: titleCase(a.name),
+    classification: "Private Work",
+    tagline: "Graded from a private repository.",
+    plain:
+      "The code is private, so this card carries the grade and nothing else: " +
+      "no description, no stack, no link. The score is the same rubric every " +
+      "public repository here is measured by.",
+    summary:
+      "Scored " + Math.round(a.score) + "/100 from its source by the assay, which " +
+      "read it with the owner’s own access and published only the result. " +
+      a.evidence.commits + " commits, last pushed " + pushed + ".",
+    highlight:
+      "Made public, it would be graded from its full evidence and this card would " +
+      "fill in on the next run with nothing to edit.",
+    rarity: a.tier,
+    agent: "cipher",
+    stack: ["Private"],
+    metrics: [
+      { label: "Assay score", value: Math.round(a.score) + "/100" },
+      { label: "Commits", value: String(a.evidence.commits) },
+      { label: "Last push", value: pushed },
+      { label: "Source", value: "Private" },
+    ],
+    /* No link: a private repository is a 404 for every visitor. */
+    repo: null,
+    demo: null,
+    year: Number(pushed.slice(0, 4)) || new Date().getFullYear(),
+    stats: {
+      depth: bandScore(a, "depth"),
+      rigor: bandScore(a, "verification"),
+      surface: bandScore(a, "completeness"),
+      novelty: bandScore(a, "shipped"),
+    },
+  };
+}
+
 function synthesise(a: Assay, written?: WrittenCard): Project {
+  if (a.sealed) return sealedCard(a);
+
   const e = a.evidence;
   const commits = e.commits;
   const pushed = e.pushedAt.slice(0, 10);

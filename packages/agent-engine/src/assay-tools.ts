@@ -1,7 +1,7 @@
 import {
   assess,
   PROMOTION_FLOOR,
-  READY_TOPIC,
+  HIDE_TOPIC,
   RUBRIC_VERSION,
   type Assay,
   type RepoEvidence,
@@ -96,8 +96,8 @@ export const assayTools: Record<string, ToolFn> = {
         ready.length +
         " eligible · " +
         notReady.length +
-        " unmarked (no " +
-        READY_TOPIC +
+        " hidden (" +
+        HIDE_TOPIC +
         " topic) · " +
         excluded.length +
         " excluded as forks or infrastructure",

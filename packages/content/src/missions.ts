@@ -319,7 +319,7 @@ export const missions: Mission[] = [
         thought: [
           "Before anything is scored: what is even allowed to be judged?",
           "Forks are somebody else's work. Archived repositories are finished being interesting.",
-          "And anything without the foundry-ready topic is still being worked on — those are skipped entirely, not marked down.",
+          "Anything carrying the foundry-hide topic was kept out on purpose — skipped, not marked down.",
           "Judging unfinished work and then penalising it for being unfinished would be a rigged gate.",
         ],
       },

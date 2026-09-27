@@ -30,6 +30,7 @@ on:
     paths:
       - "packages/assay/src/**"
       - "tools/collect-evidence.mjs"
+      - "tools/collect-sealed.mjs"
       - "tools/record-standings.mjs"
       - "tools/write-cards.mjs"
       - ".github/workflows/assay.yml"
@@ -88,6 +89,20 @@ jobs:
           else
             echo "Evidence moved."
           fi
+
+      # Private repositories, graded and published as a score only.
+      #
+      # Reads only the ASSAY_TOKEN secret — never the workflow's own token,
+      # which cannot see private repositories and would only produce a 403.
+      # With no ASSAY_TOKEN set this does nothing and leaves sealed.json as it
+      # was. A private repository is read only if it carries the foundry-ready
+      # topic, and nothing but its name, score, tier, commit count, last push
+      # and band totals is written. Never blocks the public assay.
+      - name: Grade private repositories (sealed)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.ASSAY_TOKEN }}
+        run: node --experimental-strip-types tools/collect-sealed.mjs
 
       # Keeps one previous standing, so a card can show what it gained or lost.
       # Writes nothing when no score moved.

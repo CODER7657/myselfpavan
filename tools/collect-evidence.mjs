@@ -15,7 +15,7 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(HERE, "../apps/web/public/data");
@@ -118,7 +118,24 @@ async function attempt(url, raw, emptyOn = []) {
     if (emptyOn.includes(res.status)) return null;
     if (res.ok) return res;
 
-    if (res.status === 403 || res.status === 429) {
+    /*
+     * A 403 is only a rate limit when GitHub says so. It is also how GitHub
+     * answers a token that is not allowed to see something — the workflow's
+     * own token asking for private repositories, for one — and retrying that
+     * for a minute at a time, four times over, just stalls the run before
+     * failing anyway.
+     */
+    const limited =
+      res.status === 429 ||
+      res.headers.get("retry-after") !== null ||
+      res.headers.get("x-ratelimit-remaining") === "0";
+
+    if (res.status === 403 && !limited) {
+      const detail = (await res.text().catch(() => "")).slice(0, 140).replace(/\s+/g, " ");
+      throw new Error(url + " → 403 forbidden" + (detail ? " — " + detail : ""));
+    }
+
+    if (limited) {
       const wait = askedToWait(res) ?? 60_000;
       if (wait > MAX_WAIT_MS || n === MAX_ATTEMPTS) {
         throw new Error(
@@ -146,7 +163,7 @@ async function attempt(url, raw, emptyOn = []) {
   throw new Error(url + " — exhausted " + MAX_ATTEMPTS + " attempts");
 }
 
-async function gh(path, { raw = false, emptyOn = [] } = {}) {
+export async function gh(path, { raw = false, emptyOn = [] } = {}) {
   const res = await attempt(API + path, raw, emptyOn);
   if (!res) return null;
   return raw ? res.text() : res.json();
@@ -317,7 +334,7 @@ function pickLede(text) {
 
 /* ── per repository ───────────────────────────────────────────────────────── */
 
-async function inspect(repo) {
+export async function inspect(repo) {
   const base = "/repos/" + OWNER + "/" + repo.name;
 
   /*
@@ -575,7 +592,9 @@ function readPrevious() {
   }
 }
 
-main().catch((err) => {
+/* Importable by the private pass, which reuses inspect() and the retry
+   policy; runs only when invoked directly. */
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((err) => {
   console.error(err.message);
   process.exit(1);
 });

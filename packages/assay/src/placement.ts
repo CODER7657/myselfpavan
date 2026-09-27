@@ -1,5 +1,5 @@
 import type { Assay, Rarity } from "./types";
-import { PROMOTION_FLOOR, READY_TOPIC, tierFor } from "./rubric.ts";
+import { HIDE_TOPIC, PROMOTION_FLOOR, tierFor } from "./rubric.ts";
 
 /**
  * The card rules.
@@ -12,9 +12,10 @@ import { PROMOTION_FLOOR, READY_TOPIC, tierFor } from "./rubric.ts";
  * There are exactly three outcomes, and nothing else is allowed to put a card
  * in the vault:
  *
- *   vault      Promoted. Marked ready, not a fork, not archived, not excluded,
- *              and scoring at or above the floor. It gets a card — a curated
- *              one if somebody wrote it, a generated one if not.
+ *   vault      Promoted. Public, or private and marked ready; not a fork, not
+ *              archived, not excluded, not hidden, and scoring at or above the
+ *              floor. It gets a card — a curated one if somebody wrote it, a
+ *              generated one if not.
  *
  *   withdrawn  It had a card, or would have had one, and no longer clears the
  *              gate. The card comes out of the grid and is named underneath it
@@ -22,8 +23,8 @@ import { PROMOTION_FLOOR, READY_TOPIC, tierFor } from "./rubric.ts";
  *              is just a stale portfolio with extra steps.
  *
  *   unlisted   Never a card. Forks, archives, coursework, infrastructure, and
- *              anything nobody has marked ready — unfinished work is not judged
- *              at all, so it is not shown as having failed.
+ *              anything deliberately hidden — those are not shown as having
+ *              failed, because they were never offered.
  */
 export type Placement = "vault" | "withdrawn" | "unlisted";
 
@@ -55,14 +56,14 @@ export function placementFor(a: Assay): Placed {
 
     /*
      * Not-ready only reaches here for a repository somebody already wrote a
-     * card for — the topic was removed, or it was never added. The card is
-     * pulled rather than left standing on a grade nobody asked for.
+     * card for and has since hidden. The card is pulled rather than left
+     * standing on a grade nobody asked for.
      */
     case "not-ready":
       return {
         placement: "withdrawn",
-        reason: 'Not marked ready — the "' + READY_TOPIC + '" topic is not set.',
-        route: 'Add the "' + READY_TOPIC + '" topic on GitHub to have it graded again.',
+        reason: a.reason ?? 'Hidden with the "' + HIDE_TOPIC + '" topic.',
+        route: 'Remove the "' + HIDE_TOPIC + '" topic on GitHub to have it graded again.',
       };
 
     case "excluded":

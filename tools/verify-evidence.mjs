@@ -139,6 +139,52 @@ if (collapses.length > 0) {
   );
 }
 
+/* ── private grades say nothing private ──────────────────────────────────── */
+
+/*
+ * sealed.json is written by a separate pass that reads private repositories.
+ * That pass already refuses to write anything outside its allow-list; this is
+ * the same rule checked again from the outside, immediately before publish,
+ * so a mistake in either file cannot put a private description, topic, path
+ * or link on a public page on its own.
+ */
+const SEALED = resolve(REPO_ROOT, "apps/web/public/data/sealed.json");
+const leaks = [];
+if (existsSync(SEALED)) {
+  const allowed = new Set(["name", "score", "tier", "verdict", "reason", "commits", "pushedAt", "bands"]);
+  const bandAllowed = new Set(["id", "label", "earned", "max"]);
+  let sealed;
+  try {
+    sealed = JSON.parse(readFileSync(SEALED, "utf8"));
+  } catch {
+    leaks.push("sealed.json is not valid JSON.");
+  }
+  for (const r of sealed?.records ?? []) {
+    const extra = Object.keys(r).filter((k) => !allowed.has(k));
+    const bandExtra = (r.bands ?? []).flatMap((b) => Object.keys(b).filter((k) => !bandAllowed.has(k)));
+    if (extra.length || bandExtra.length) {
+      leaks.push("sealed record " + r.name + " carries private fields: " + [...extra, ...bandExtra].join(", ") + ".");
+    }
+    if (/https?:\/\//i.test(JSON.stringify(r))) {
+      leaks.push("sealed record " + r.name + " contains a URL.");
+    }
+  }
+}
+
+/*
+ * A leak is not a judgement call, so --allow does not apply to it. The other
+ * complaints are about whether a collapse is real, which only the owner can
+ * know; this one is about publishing private work, which is never right.
+ */
+if (leaks.length > 0) {
+  console.error("This would publish private detail. Nothing has been published.");
+  console.error("");
+  for (const l of leaks) console.error("  - " + l);
+  console.error("");
+  console.error("--allow does not override this. Fix tools/collect-sealed.mjs.");
+  process.exit(1);
+}
+
 /* ── verdict ──────────────────────────────────────────────────────────────── */
 
 const carried = now.carriedForward ?? [];

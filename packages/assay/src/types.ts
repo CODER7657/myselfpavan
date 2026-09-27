@@ -90,7 +90,10 @@ export type Verdict = "promoted" | "held" | "not-ready" | "excluded";
 
 export interface Assay {
   name: string;
+  /** Blank for a sealed (private) grade: there is no public page to link to. */
   url: string;
+  /** True when this grade came from a private repository via sealed.json. */
+  sealed?: boolean;
   score: number;
   tier: Rarity;
   verdict: Verdict;

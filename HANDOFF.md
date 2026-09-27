@@ -217,21 +217,40 @@ deliberate — a claim without a link is not evidence, and the band is capped at
 
 ---
 
-## 7. THE READY SWITCH — YOUR WORK IN PROGRESS STAYS HIDDEN
+## 7. WHAT GETS GRADED — PUBLIC AUTOMATICALLY, PRIVATE ON REQUEST
 
-Nothing is graded until you say so.
+Rubric 3.1.0 turned the gate around (27 Sep 2026).
 
-A repository is skipped entirely until it carries the GitHub topic:
+PUBLIC REPOSITORIES are graded automatically. Create one, push to it, and the
+next run finds it — no tagging. The promotion floor of 34 is what keeps
+unfinished work off the page. The opt-in topic used to do that job, and in
+practice it hid finished work instead: charkha scored 75.7, mythic, above
+PRAMANA, and sat invisible for a fortnight because nobody had tagged it.
+
+To keep a public repository out anyway, give it the topic:
+
+    foundry-hide
+
+PRIVATE REPOSITORIES are opt-in, because grading one makes its name and
+activity public. Give it the topic:
 
     foundry-ready
 
-Add it in the repo's About panel when you consider the work finished. Remove
-it and the repo disappears from the assay again. Unmarked repos are reported
-as "not marked" — they are not scored and not penalised, because judging
-unfinished work and then marking it down for being unfinished is a rigged gate.
+and the workflow reads it with your token, scores it with the same rubric,
+and publishes only: name, score, tier, commit count, last push and the band
+totals. No code, README, description, topics, file list or link — ever. That
+promise is enforced twice: tools/collect-sealed.mjs refuses to write any other
+field, and tools/verify-evidence.mjs refuses to publish one, with no --allow
+override. Results live in apps/web/public/data/sealed.json.
 
-Eight existing repositories are grandfathered in and graded without the topic.
-Everything new goes through the switch.
+This needs a token the workflow's own token cannot provide. Create a
+fine-grained personal access token (github.com → Settings → Developer settings
+→ Fine-grained tokens) with access to your repositories and read-only
+"Contents" and "Metadata", then add it as the repository secret ASSAY_TOKEN.
+Without it the private pass does nothing and changes nothing.
+
+A private repository whose name matches a hand-written card binds to that card:
+Raksha AI keeps its prose and swaps PROVISIONAL for its real score.
 
 ---
 

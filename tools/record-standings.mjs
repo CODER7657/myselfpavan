@@ -18,6 +18,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assess, RUBRIC_VERSION } from "../packages/assay/src/rubric.ts";
+import { withSealed } from "../packages/assay/src/sealed.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = resolve(HERE, "../apps/web/public/data");
@@ -38,13 +39,23 @@ if (!existsSync(EVIDENCE)) {
 
 const { repos, collectedAt } = JSON.parse(readFileSync(EVIDENCE, "utf8"));
 
+/* Private grades, published separately and merged in so a private repository's
+   rank can move like any other. Absent or unreadable means there are none. */
+function readSealed(file) {
+  try {
+    const parsed = JSON.parse(readFileSync(file, "utf8"));
+    return Array.isArray(parsed?.records) ? parsed.records : [];
+  } catch {
+    return [];
+  }
+}
+
 /*
  * Only the repositories the gate actually judges. Excluded work has no rank to
- * move, and unmarked work is deliberately not scored — recording a number for
+ * move, and hidden work is deliberately kept out — recording a number for
  * it here would be scoring it by the back door.
  */
-const graded = repos
-  .map((r) => assess(r))
+const graded = withSealed(repos.map((r) => assess(r)), readSealed(resolve(DATA, "sealed.json")))
   .filter((a) => a.verdict === "promoted" || a.verdict === "held");
 
 const scores = Object.fromEntries(

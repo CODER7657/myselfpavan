@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { PROMOTION_FLOOR, READY_TOPIC, type Assay as AssayRow } from "@foundry/assay";
+import { HIDE_TOPIC, PROMOTION_FLOOR, READY_TOPIC, type Assay as AssayRow } from "@foundry/assay";
 import { reveal } from "@/lib/gsap";
 import { useAssay } from "@/lib/useAssay";
 import a from "./Assay.module.css";
@@ -11,8 +11,8 @@ type Lens = "promoted" | "held" | "not-ready" | "all";
 
 const LENSES: { id: Lens; label: string; blurb: string }[] = [
   { id: "promoted", label: "Promoted", blurb: "Cleared the floor. These earn a card." },
-  { id: "held", label: "Held", blurb: "Marked ready, but not scoring high enough yet." },
-  { id: "not-ready", label: "Not marked", blurb: "Work in progress — deliberately not graded." },
+  { id: "held", label: "Held", blurb: "Graded, but not scoring high enough for a card yet." },
+  { id: "not-ready", label: "Hidden", blurb: "Deliberately kept out — never offered, so never judged." },
   { id: "all", label: "Everything", blurb: "Every repository the assay looked at." },
 ];
 
@@ -79,9 +79,11 @@ export function Assay() {
         </p>
 
         <p className={a.gate}>
-          <strong>Nothing is graded until it is marked.</strong> A repository is skipped
-          entirely until it carries the <code>{READY_TOPIC}</code> topic on GitHub — so work
-          in progress stays invisible until you decide it is finished.
+          <strong>Everything public is graded, automatically.</strong> A new repository
+          appears on the next run with no tagging, and the floor is what keeps unfinished
+          work off the page. A <code>{HIDE_TOPIC}</code> topic keeps one out. Private work is
+          the exception: it is only graded if it carries <code>{READY_TOPIC}</code>, and
+          then only its score is published — never its code.
         </p>
 
         <div className={a.lenses} role="group" aria-label="Filter by verdict">
@@ -235,9 +237,16 @@ function Row({
             </div>
           )}
 
-          <a className={a.link} href={row.url} target="_blank" rel="noopener noreferrer">
-            Open {row.name} on GitHub ↗
-          </a>
+          {row.sealed ? (
+            <span className={a.link}>
+              Private repository — graded with the owner’s access; only the totals are
+              published.
+            </span>
+          ) : (
+            <a className={a.link} href={row.url} target="_blank" rel="noopener noreferrer">
+              Open {row.name} on GitHub ↗
+            </a>
+          )}
         </div>
       )}
     </li>
