@@ -1,6 +1,32 @@
 {
   "rubricVersion": "3.1.0",
   "current": {
+    "ranAt": "2026-10-01T10:10:10.592Z",
+    "scores": {
+      "AURA-GUARD": 36.5,
+      "charkha": 75.7,
+      "complylite": 51.1,
+      "CRAFTATHON": 55.3,
+      "Finverse": 37.4,
+      "fix-broken-Terminal-Bench-2-Harbor-": 20.7,
+      "genex-prj": 50.6,
+      "globetrotter": 69.5,
+      "gtu-ai-attendance-system": 37.2,
+      "HASHHAWKS": 36.9,
+      "HashHawks1": 26.9,
+      "KISAN_MITRA2": 1,
+      "port_stock": 18.7,
+      "pramana": 75.3,
+      "roadside-app": 59.2,
+      "shoes.store": 41.2,
+      "traveloop_hh": 29.6,
+      "twenty": 26.6,
+      "VeriServe_block": 21.1,
+      "voice-emotion-detection": 24,
+      "VortiFi": 35.7
+    }
+  },
+  "previous": {
     "ranAt": "2026-09-27T17:06:40.242Z",
     "scores": {
       "AURA-GUARD": 36.5,
@@ -24,6 +50,5 @@
       "voice-emotion-detection": 24,
       "VortiFi": 35.7
     }
-  },
-  "previous": null
+  }
 }
