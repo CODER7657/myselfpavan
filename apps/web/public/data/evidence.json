@@ -1,15 +1,10 @@
 {
-  "collectedAt": "2026-11-06T10:15:13.932Z",
+  "collectedAt": "2026-11-06T10:20:24.409Z",
   "owner": "CODER7657",
-  "apiCalls": 208,
+  "apiCalls": 207,
   "includesPrivate": false,
   "carriedForward": [],
-  "departed": [
-    {
-      "name": "roadside-app",
-      "why": "not-found"
-    }
-  ],
+  "departed": [],
   "repos": [
     {
       "name": "myselfpavan",
@@ -29,10 +24,10 @@
       "isPrivate": false,
       "stars": 0,
       "sizeKb": 3158,
-      "pushedAt": "2026-11-06T10:14:58Z",
+      "pushedAt": "2026-11-06T10:20:05Z",
       "createdAt": "2025-08-12T13:18:52Z",
       "licence": "MIT",
-      "commits": 47,
+      "commits": 50,
       "releases": 0,
       "topLevelDirs": [
         "apps",
