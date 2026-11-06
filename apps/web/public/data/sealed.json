@@ -163,12 +163,12 @@
     },
     {
       "name": "raksha-ai",
-      "score": 65.9,
+      "score": 66.1,
       "tier": "legendary",
       "verdict": "promoted",
       "reason": null,
-      "commits": 124,
-      "pushedAt": "2026-11-06T10:09:23Z",
+      "commits": 126,
+      "pushedAt": "2026-11-06T10:37:55Z",
       "bands": [
         {
           "id": "depth",
@@ -179,13 +179,13 @@
         {
           "id": "verification",
           "label": "Verification",
-          "earned": 18.8,
+          "earned": 18.9,
           "max": 22
         },
         {
           "id": "completeness",
           "label": "Completeness",
-          "earned": 11.9,
+          "earned": 12,
           "max": 16
         },
         {
