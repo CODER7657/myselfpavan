@@ -44,6 +44,8 @@ concurrency:
 
 permissions:
   contents: write
+  # To open an issue when a run fails, and close it when one succeeds.
+  issues: write
 
 jobs:
   assay:
@@ -51,9 +53,9 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
 
@@ -62,7 +64,7 @@ jobs:
           # Lifts the anonymous 60/hour limit; the account needs roughly 150
           # calls for a full pass.
           GITHUB_TOKEN: ${{ secrets.ASSAY_TOKEN || secrets.GITHUB_TOKEN }}
-        run: node tools/collect-evidence.mjs
+        run: node --experimental-strip-types tools/collect-evidence.mjs
 
       # `collectedAt` changes on every run, so a pass where nothing actually
       # happened still rewrites the file. Putting it back here — before anything
@@ -216,3 +218,34 @@ jobs:
       - name: Summary
         if: always()
         run: node --experimental-strip-types tools/assay-summary.ts >> "$GITHUB_STEP_SUMMARY"
+
+      # A failed assay must be impossible to miss.
+      #
+      # It failed every day from 11 October to 6 November and nobody knew: the
+      # only sign was a red cross in a tab nobody opens. A failure now opens a
+      # single issue — reused, not duplicated, on later failures — and the next
+      # successful run closes it.
+      - name: Raise an issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          gh label create assay-failure --color B60205 --description "The daily assay could not publish" 2>/dev/null || true
+          open=$(gh issue list --label assay-failure --state open --json number --jq '.[0].number // empty')
+          body="The assay failed and nothing was published. Run: $RUN_URL"
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body "$body"
+          else
+            gh issue create --title "Assay is failing" --label assay-failure --body "$body"
+          fi
+
+      - name: Close the failure issue on success
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --label assay-failure --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "Recovered: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          done

@@ -1,44 +1,31 @@
 /**
- * Refuses to publish a snapshot that would take work off the site.
+ * Refuses to publish a snapshot that would take work off the site, or put
+ * private detail on it.
  *
  *   node --experimental-strip-types tools/verify-evidence.mjs [--allow]
  *
- * The collector already retries and carries a failed repository forward, so
- * most bad snapshots never get this far. This is the second line, and it exists
- * because the failure it guards against is invisible: a snapshot where a
- * repository has quietly lost its files scores lower, looks entirely plausible,
- * and withdraws real cards from the vault. By the time anyone notices, it is
- * deployed.
+ * The rules live in packages/assay/src/snapshot.ts, where they are tested;
+ * this only reads the committed and the fresh snapshot and reports.
  *
- * So the new snapshot is compared against the one currently committed, and the
- * run stops if anything moved in a way work cannot actually move:
+ * A repository that left the listing is fine when the collector confirmed
+ * with GitHub that it really went — transferred, renamed, made private or
+ * deleted. Treating every disappearance as a bad read is what froze the
+ * assay for a month after roadside-app moved to the Hash-Hawks organisation.
  *
- *   - a repository that was there and is now missing
- *   - the collection shrinking by more than a repository or two
- *   - a score collapsing while the repository itself did not change
- *
- * That last rule is the important one. A score is allowed to fall — that is
- * the entire point of a gate — but it falls because somebody changed something.
- * A fall with no push behind it and no change of topics is not a demotion, it
- * is a bad read.
- *
- * `--allow` publishes anyway, for the case where the collapse is real.
+ * `--allow` publishes despite the complaints, for when a collapse is real. It
+ * never overrides a privacy leak.
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { assess } from "../packages/assay/src/rubric.ts";
+import { checkSealed, checkSnapshot } from "../packages/assay/src/snapshot.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..");
 const TRACKED = "apps/web/public/data/evidence.json";
 const EVIDENCE = resolve(REPO_ROOT, TRACKED);
-
-/** A fall this big with nothing behind it is a bad read, not a demotion. */
-const COLLAPSE = 15;
-/** Losing more than this many repositories at once is a collection failure. */
-const SHRINK = 2;
+const SEALED = resolve(REPO_ROOT, "apps/web/public/data/sealed.json");
 
 const allow = process.argv.includes("--allow");
 
@@ -47,135 +34,17 @@ if (!existsSync(EVIDENCE)) {
   process.exit(1);
 }
 
-const now = JSON.parse(readFileSync(EVIDENCE, "utf8"));
+/* ── privacy first, and unconditionally ─────────────────────────────────── */
 
-/* The committed snapshot, read from git rather than from disk — disk is what
-   the collector has just overwritten. */
-let before = null;
-try {
-  const raw = execFileSync("git", ["show", "HEAD:" + TRACKED], {
-    cwd: REPO_ROOT,
-    encoding: "utf8",
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  before = JSON.parse(raw);
-} catch {
-  console.log("No committed evidence to compare against — nothing to verify.");
-  process.exit(0);
-}
-
-const wasByName = new Map(before.repos.map((r) => [r.name.toLowerCase(), r]));
-const nowByName = new Map(now.repos.map((r) => [r.name.toLowerCase(), r]));
-
-const complaints = [];
-
-/* ── the collection did not shrink ────────────────────────────────────────── */
-
-const missing = [...wasByName.keys()].filter((k) => !nowByName.has(k));
-if (missing.length > 0) {
-  complaints.push(
-    missing.length + " repositor" + (missing.length === 1 ? "y" : "ies") +
-      " vanished from the snapshot: " + missing.join(", ") +
-      ". A repository that still exists cannot disappear from a good collection."
-  );
-}
-
-const shrank = before.repos.length - now.repos.length;
-if (shrank > SHRINK) {
-  complaints.push(
-    "the collection shrank by " + shrank + " repositories (" +
-      before.repos.length + " → " + now.repos.length + ")."
-  );
-}
-
-/* ── no score collapsed without the repository changing ───────────────────── */
-
-const sameTopics = (a, b) =>
-  [...(a.topics ?? [])].sort().join(",") === [...(b.topics ?? [])].sort().join(",");
-
-const collapses = [];
-
-for (const [key, fresh] of nowByName) {
-  const old = wasByName.get(key);
-  if (!old) continue;
-
-  /* An entry that is openly last run's is not a new observation to compare. */
-  if (fresh.carriedForward) continue;
-
-  const wasScore = assess(old).score;
-  const nowScore = assess(fresh).score;
-  const drop = wasScore - nowScore;
-
-  if (drop < COLLAPSE) continue;
-
-  /* A push or a change of topics is a real reason for a real fall. */
-  if (fresh.pushedAt !== old.pushedAt) continue;
-  if (!sameTopics(fresh, old)) continue;
-
-  collapses.push({
-    name: fresh.name,
-    wasScore,
-    nowScore,
-    drop: Math.round(drop * 10) / 10,
-    detail:
-      "sourceFiles " + old.sourceFiles + " → " + fresh.sourceFiles +
-      ", tests " + old.testFiles + " → " + fresh.testFiles +
-      ", ci " + (old.hasCi ? "yes" : "no") + " → " + (fresh.hasCi ? "yes" : "no"),
-  });
-}
-
-if (collapses.length > 0) {
-  complaints.push(
-    collapses.length + " score" + (collapses.length === 1 ? "" : "s") +
-      " collapsed with no push and no change of topics behind " +
-      (collapses.length === 1 ? "it" : "them") + ":\n" +
-      collapses
-        .map(
-          (c) =>
-            "      " + c.name + ": " + c.wasScore + " → " + c.nowScore +
-            "  (−" + c.drop + ")   " + c.detail
-        )
-        .join("\n")
-  );
-}
-
-/* ── private grades say nothing private ──────────────────────────────────── */
-
-/*
- * sealed.json is written by a separate pass that reads private repositories.
- * That pass already refuses to write anything outside its allow-list; this is
- * the same rule checked again from the outside, immediately before publish,
- * so a mistake in either file cannot put a private description, topic, path
- * or link on a public page on its own.
- */
-const SEALED = resolve(REPO_ROOT, "apps/web/public/data/sealed.json");
-const leaks = [];
+let sealed;
 if (existsSync(SEALED)) {
-  const allowed = new Set(["name", "score", "tier", "verdict", "reason", "commits", "pushedAt", "bands"]);
-  const bandAllowed = new Set(["id", "label", "earned", "max"]);
-  let sealed;
   try {
     sealed = JSON.parse(readFileSync(SEALED, "utf8"));
   } catch {
-    leaks.push("sealed.json is not valid JSON.");
-  }
-  for (const r of sealed?.records ?? []) {
-    const extra = Object.keys(r).filter((k) => !allowed.has(k));
-    const bandExtra = (r.bands ?? []).flatMap((b) => Object.keys(b).filter((k) => !bandAllowed.has(k)));
-    if (extra.length || bandExtra.length) {
-      leaks.push("sealed record " + r.name + " carries private fields: " + [...extra, ...bandExtra].join(", ") + ".");
-    }
-    if (/https?:\/\//i.test(JSON.stringify(r))) {
-      leaks.push("sealed record " + r.name + " contains a URL.");
-    }
+    sealed = "unparseable";
   }
 }
-
-/*
- * A leak is not a judgement call, so --allow does not apply to it. The other
- * complaints are about whether a collapse is real, which only the owner can
- * know; this one is about publishing private work, which is never right.
- */
+const leaks = checkSealed(sealed);
 if (leaks.length > 0) {
   console.error("This would publish private detail. Nothing has been published.");
   console.error("");
@@ -185,34 +54,48 @@ if (leaks.length > 0) {
   process.exit(1);
 }
 
-/* ── verdict ──────────────────────────────────────────────────────────────── */
+/* ── then the snapshot against the one already published ────────────────── */
+
+const now = JSON.parse(readFileSync(EVIDENCE, "utf8"));
+
+/* Read from git rather than disk: disk is what the collector just overwrote. */
+let before;
+try {
+  before = JSON.parse(
+    execFileSync("git", ["show", "HEAD:" + TRACKED], {
+      cwd: REPO_ROOT,
+      encoding: "utf8",
+      maxBuffer: 64 * 1024 * 1024,
+    })
+  );
+} catch {
+  console.log("No committed evidence to compare against — nothing to verify.");
+  process.exit(0);
+}
+
+const { complaints, departures } = checkSnapshot(before, now);
+
+for (const d of departures) console.log("Departed, confirmed by GitHub: " + d);
 
 const carried = now.carriedForward ?? [];
 if (carried.length > 0) {
-  console.log(
-    "Note: " + carried.length + " entr" + (carried.length === 1 ? "y is" : "ies are") +
-      " carried forward from the last run (" + carried.join(", ") + ")."
-  );
+  console.log("Note: carried forward from the last run: " + carried.join(", ") + ".");
 }
 
 if (complaints.length === 0) {
-  console.log(
-    "Evidence verified: " + now.repos.length + " repositories, nothing collapsed."
-  );
+  console.log("Evidence verified: " + now.repos.length + " repositories, nothing collapsed.");
   process.exit(0);
 }
 
-console.error("This snapshot would remove work from the site.\n");
+console.error("This snapshot would remove work from the site.");
+console.error("");
 for (const c of complaints) console.error("  - " + c);
+console.error("");
 
 if (allow) {
-  console.error("\n--allow was passed, so it is being published anyway.");
+  console.error("--allow was passed, so it is being published anyway.");
   process.exit(0);
 }
 
-console.error(
-  "\nNothing has been published. If the collapse is real — files genuinely " +
-    "deleted,\na repository genuinely emptied — re-run with --allow. Otherwise " +
-    "press the button\nagain: this is almost always a bad read of the API."
-);
+console.error("Nothing has been published. If the loss is real, re-run with --allow.");
 process.exit(1);
