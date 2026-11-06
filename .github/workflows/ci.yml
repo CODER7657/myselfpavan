@@ -1,0 +1,53 @@
+name: CI
+
+# The checks every change has to pass before it reaches the live site.
+#
+# Until this existed the only workflow was the daily assay, so nothing ran on
+# a code change at all: a broken build or a failing rule went straight to
+# Vercel. `pnpm ci:local` runs the same steps on a laptop, for when Actions
+# minutes run out.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # Reads the version from package.json#packageManager.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      # The pipeline scripts are plain ESM run by Node directly; a syntax error
+      # in one would otherwise only surface at 3am in the assay.
+      - name: Pipeline scripts parse
+        run: |
+          for f in tools/*.mjs; do node --check "$f"; done
+
+      - name: Build
+        run: pnpm build

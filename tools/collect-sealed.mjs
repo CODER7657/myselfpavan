@@ -23,7 +23,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gh, inspect } from "./collect-evidence.mjs";
-import { assess, EXCLUDED, READY_TOPIC, RUBRIC_VERSION } from "../packages/assay/src/rubric.ts";
+import { assess, EXCLUDED, HIDE_TOPIC, RUBRIC_VERSION } from "../packages/assay/src/rubric.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(HERE, "../apps/web/public/data");
@@ -136,14 +136,15 @@ async function main() {
       !r.fork &&
       !r.archived &&
       !EXCLUDED.has(r.name) &&
-      (r.topics ?? []).includes(READY_TOPIC)
+      /* Every private repository is graded unless deliberately hidden — the
+         owner asked for all of their work to count. */
+      !(r.topics ?? []).includes(HIDE_TOPIC)
   );
-  const unmarked = listed.filter((r) => r.private && !r.fork && !(r.topics ?? []).includes(READY_TOPIC));
+  const hidden = listed.filter((r) => r.private && !r.fork && (r.topics ?? []).includes(HIDE_TOPIC));
 
   console.log(
-    "  " + listed.length + " private repositories visible · " + eligible.length +
-      " marked " + READY_TOPIC +
-      (unmarked.length ? " · not graded: " + unmarked.map((r) => r.name).join(", ") : "")
+    "  " + listed.length + " private repositories visible · " + eligible.length + " graded" +
+      (hidden.length ? " · hidden: " + hidden.map((r) => r.name).join(", ") : "")
   );
 
   const previous = new Map(readPrevious().records.map((r) => [r.name.toLowerCase(), r]));

@@ -13,10 +13,10 @@ import type { Rarity } from "@foundry/tokens";
  * Bump this when the rules change; a stored score always names the rubric that
  * produced it, so an old number is never silently compared against new rules.
  *
- * 3.1.0 turned the gate around. Scoring is unchanged; what changed is which
- * repositories are allowed to be scored.
+ * 3.1.0 turned the gate around: every public repository is graded unless hidden.
+ * 3.2.0 awards "Live deployment" only to a homepage that actually answers.
  */
-export const RUBRIC_VERSION = "3.1.0";
+export const RUBRIC_VERSION = "3.2.0";
 
 /**
  * Topic that keeps a public repository out of the assay.
@@ -34,11 +34,12 @@ export const RUBRIC_VERSION = "3.1.0";
 export const HIDE_TOPIC = "foundry-hide";
 
 /**
- * Topic that lets a private repository be graded.
+ * No longer required for anything.
  *
- * Private work is still opt-in, because being graded means its name, score and
- * activity become public — a decision about a private repository has to be made
- * deliberately, not inferred. Public repositories do not need it.
+ * It once had to be on every repository before it was graded, then only on
+ * private ones. Since 3.2.0 everything is graded unless it carries
+ * HIDE_TOPIC. Kept so the topic is filtered out of a card's stack wherever it
+ * still lingers on a repository.
  */
 export const READY_TOPIC = "foundry-ready";
 
@@ -333,10 +334,25 @@ function shippedBand(e: RepoEvidence): Band {
     {
       id: "demo",
       label: "Live deployment",
-      earned: e.homepage ? 5 : 0,
+      /*
+       * Earned by a deployment that answers, not by a filled-in field. Evidence
+       * collected before the check existed has no reading, and is given the
+       * benefit of the doubt rather than marked down for a gap in the data.
+       */
+      earned: e.homepage && e.homepageLive !== "down" ? 5 : 0,
       max: 5,
-      detail: e.homepage ? "homepage set" : "no deployment linked",
-      ...(e.homepage ? {} : { advice: "Set the repository homepage to the deployed URL." }),
+      detail: !e.homepage
+        ? "no deployment linked"
+        : e.homepageLive === "live"
+          ? "homepage answers"
+          : e.homepageLive === "down"
+            ? "homepage set, but not answering"
+            : "homepage set",
+      ...(!e.homepage
+        ? { advice: "Set the repository homepage to the deployed URL." }
+        : e.homepageLive === "down"
+          ? { advice: "The homepage does not respond — redeploy it, or point it somewhere live." }
+          : {}),
     },
     {
       id: "recency",
@@ -481,11 +497,6 @@ export function assess(e: RepoEvidence): Assay {
   } else if (e.topics.includes(HIDE_TOPIC)) {
     verdict = "not-ready";
     reason = `Hidden — it carries the "${HIDE_TOPIC}" topic. Remove it to have it graded.`;
-  } else if (e.isPrivate && !e.topics.includes(READY_TOPIC)) {
-    /* Belt and braces: the collector never inspects an unmarked private
-       repository in the first place, so this should be unreachable. */
-    verdict = "not-ready";
-    reason = `Private. Add the "${READY_TOPIC}" topic to publish its score.`;
   } else if (score < PROMOTION_FLOOR) {
     verdict = "held";
     reason = `Scored ${score}, below the promotion floor of ${PROMOTION_FLOOR}.`;

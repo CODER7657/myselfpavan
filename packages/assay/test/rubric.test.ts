@@ -101,8 +101,41 @@ describe("assess — the gate", () => {
     for (const step of a.nextSteps) expect(step.length).toBeGreaterThan(0);
   });
 
+  it("grades a private repository with no topic, like a public one", () => {
+    expect(assess(evidence({ isPrivate: true })).verdict).toBe("promoted");
+  });
+
+  it("still hides a private repository carrying the hide topic", () => {
+    expect(assess(evidence({ isPrivate: true, topics: [HIDE_TOPIC] })).verdict).toBe("not-ready");
+  });
+
   it("keeps READY_TOPIC and HIDE_TOPIC distinct", () => {
     expect(READY_TOPIC).not.toBe(HIDE_TOPIC);
+  });
+});
+
+describe("assess — live deployment", () => {
+  const demo = (over: Parameters<typeof evidence>[0]) =>
+    assess(evidence(over)).bands.flatMap((b) => b.signals).find((s) => s.id === "demo")!;
+
+  it("pays five points for a homepage that answers", () => {
+    expect(demo({ homepage: "https://x.dev", homepageLive: "live" }).earned).toBe(5);
+  });
+
+  it("pays nothing for a homepage that does not, and says what to do", () => {
+    const s = demo({ homepage: "https://x.dev", homepageLive: "down" });
+    expect(s.earned).toBe(0);
+    expect(s.advice).toMatch(/does not respond/);
+  });
+
+  it("gives older evidence with no reading the benefit of the doubt", () => {
+    expect(demo({ homepage: "https://x.dev" }).earned).toBe(5);
+  });
+
+  it("pays nothing, and advises setting one, with no homepage", () => {
+    const s = demo({ homepage: null });
+    expect(s.earned).toBe(0);
+    expect(s.advice).toMatch(/homepage/);
   });
 });
 

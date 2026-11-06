@@ -59,6 +59,11 @@ export interface RepoEvidence {
   hasContainer: boolean;
   hasWorkspace: boolean;
 
+  /** owner/name. Differs from the account for work that now lives in an organisation. */
+  fullName?: string;
+  /** Whether the homepage answered when the collector asked. Absent on older evidence. */
+  homepageLive?: "live" | "down";
+
   /** Set when this entry is last run's, because this run could not read it. */
   carriedForward?: boolean;
 }

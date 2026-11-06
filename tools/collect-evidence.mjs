@@ -16,6 +16,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { authorship } from "../packages/assay/src/membership.ts";
+import { explainDeparture } from "../packages/assay/src/departures.ts";
+import { checkableUrl, livenessOf } from "../packages/assay/src/liveness.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(HERE, "../apps/web/public/data");
@@ -335,7 +338,9 @@ function pickLede(text) {
 /* ── per repository ───────────────────────────────────────────────────────── */
 
 export async function inspect(repo) {
-  const base = "/repos/" + OWNER + "/" + repo.name;
+  /* full_name, not OWNER/name: a repository the owner wrote may now live in an
+     organisation, as roadside-app does. */
+  const base = "/repos/" + (repo.full_name ?? OWNER + "/" + repo.name);
 
   /*
    * Nothing here is wrapped in a catch any more.
@@ -394,6 +399,7 @@ export async function inspect(repo) {
   return {
     name: repo.name,
     url: repo.html_url,
+    fullName: repo.full_name ?? OWNER + "/" + repo.name,
     description: repo.description ?? null,
     homepage: repo.homepage || null,
     language: repo.language ?? null,
@@ -470,19 +476,105 @@ async function pool(items, limit, worker) {
   return { done, failed };
 }
 
+/* ── listing, liveness, departures ────────────────────────────────────────── */
+
+/** Every page of a repository listing. Five pages is 500 repositories. */
+async function listPages(path) {
+  const out = [];
+  for (let page = 1; page <= 5; page++) {
+    const batch = await gh(path + "&per_page=100&page=" + page);
+    if (!Array.isArray(batch) || batch.length === 0) break;
+    out.push(...batch);
+    if (batch.length < 100) break;
+  }
+  return out;
+}
+
+const HOMEPAGE_TIMEOUT_MS = 10_000;
+
+/**
+ * Requests a homepage and reports whether anything answered. Two attempts,
+ * because a cold free-tier deployment can take longer than one request to
+ * wake, and a single slow start should not cost a repository five points.
+ * GET rather than HEAD: plenty of hosts answer HEAD wrongly.
+ */
+export async function probeHomepage(url, fetchImpl = fetch) {
+  let status = null;
+  for (let n = 1; n <= 2; n++) {
+    try {
+      const res = await fetchImpl(url, {
+        method: "GET",
+        redirect: "follow",
+        headers: { "User-Agent": "foundry-assay (+https://myselfpavan.vercel.app)" },
+        signal: AbortSignal.timeout(HOMEPAGE_TIMEOUT_MS),
+      });
+      status = res.status;
+      /* Only the status matters; do not download the page. */
+      await res.body?.cancel?.().catch?.(() => undefined);
+      if (livenessOf(status) === "live") return "live";
+    } catch {
+      status = null;
+    }
+  }
+  return livenessOf(status);
+}
+
+/** "https://github.com/OWNER/name" → "OWNER/name". */
+export function fullNameFromUrl(url) {
+  const m = /github\.com\/([^/]+)\/([^/?#]+)/.exec(url ?? "");
+  return m ? m[1] + "/" + m[2] : null;
+}
+
+/**
+ * Asks GitHub directly what became of a repository that left the listing.
+ * GitHub follows a rename or transfer with a redirect, so the answer names
+ * where it went. A network failure returns null: unexplained, which is the
+ * safe direction — the verifier then refuses rather than publishing a loss.
+ */
+async function confirmDeparture(expectedFullName) {
+  try {
+    const res = await attempt(API + "/repos/" + expectedFullName, false);
+    if (!res) return explainDeparture(expectedFullName, { status: "missing" });
+    const repo = await res.json();
+    return explainDeparture(expectedFullName, {
+      status: "found",
+      fullName: repo.full_name,
+      private: Boolean(repo.private),
+    });
+  } catch {
+    return null;
+  }
+}
+
 /* ── main ─────────────────────────────────────────────────────────────────── */
 
 async function main() {
   console.log("Collecting evidence for " + OWNER + (TOKEN ? " (authenticated)" : " (anonymous)"));
 
-  const repos = [];
-  for (let page = 1; page <= 5; page++) {
-    const batch = await gh(
-      "/users/" + OWNER + "/repos?per_page=100&sort=pushed&page=" + page
+  const repos = await listPages("/users/" + OWNER + "/repos?type=owner&sort=pushed");
+
+  /*
+   * Repositories that live elsewhere but are this account's work.
+   *
+   * roadside-app was transferred to the Hash-Hawks organisation and, listed by
+   * owner alone, simply vanished — which froze the assay for a month. The
+   * account is also a collaborator on several friends' repositories, which
+   * must not be claimed. Authorship decides: a repository counts if this
+   * account wrote at least half of its human commits.
+   */
+  const owned = new Set(repos.map((r) => r.name.toLowerCase()));
+  const elsewhere = (await listPages("/users/" + OWNER + "/repos?type=member&sort=pushed"))
+    .filter((r) => r.owner?.login?.toLowerCase() !== OWNER.toLowerCase())
+    .filter((r) => !owned.has(r.name.toLowerCase()));
+
+  for (const r of elsewhere) {
+    const contributors = await gh("/repos/" + r.full_name + "/contributors?per_page=100").catch(() => null);
+    const a = authorship(OWNER, Array.isArray(contributors) ? contributors : []);
+    console.log(
+      "  " + (a.mine ? "+" : "·") + " " + r.full_name + " — " + Math.round(a.share * 100) +
+        "% of commits by " + OWNER + (a.mine ? ", graded" : ", not this account's work")
     );
-    if (!Array.isArray(batch) || batch.length === 0) break;
-    repos.push(...batch);
-    if (batch.length < 100) break;
+    if (a.mine) repos.push(r);
   }
 
   /*
@@ -534,6 +626,35 @@ async function main() {
     }
   }
 
+  /* ── is each deployment actually there? ─────────────────────────────── */
+
+  await pool(
+    evidence.filter((e) => !e.carriedForward && checkableUrl(e.homepage)),
+    CONCURRENCY,
+    async (e) => {
+      e.homepageLive = await probeHomepage(checkableUrl(e.homepage));
+      return e;
+    }
+  );
+  const down = evidence.filter((e) => e.homepageLive === "down").map((e) => e.name);
+  if (down.length) console.log("  homepage not answering: " + down.join(", "));
+
+  /* ── what left, and why ──────────────────────────────────────────────── */
+
+  const present = new Set(evidence.map((e) => e.name.toLowerCase()));
+  const departed = [];
+  for (const [key, before] of previous.byName) {
+    if (present.has(key)) continue;
+    const expected = before.fullName ?? fullNameFromUrl(before.url) ?? OWNER + "/" + before.name;
+    const d = await confirmDeparture(expected);
+    if (d) {
+      departed.push(d);
+      console.log("  departed: " + d.name + " (" + d.why + (d.now ? " → " + d.now : "") + ")");
+    } else {
+      console.warn("  ! " + before.name + " is missing from the listing but GitHub says it is still here");
+    }
+  }
+
   evidence.sort((a, b) => b.pushedAt.localeCompare(a.pushedAt));
 
   const payload = {
@@ -544,6 +665,8 @@ async function main() {
     includesPrivate: false,
     /** Entries that are last run's, because this run could not read them. */
     carriedForward: carried,
+    /** Repositories GitHub confirmed have really gone, and how. */
+    departed,
     repos: evidence,
   };
 

@@ -28,12 +28,8 @@ try {
   sharp = require("sharp");
 } catch {
   console.error(
-    "This script needs sharp, which is not a project dependency.
-" +
-      "Install it just for this run:
-
-  npm i --no-save sharp
-"
+    "This script needs sharp, which is not a project dependency.\n" +
+      "Install it just for this run:\n\n  npm i --no-save sharp\n"
   );
   process.exit(1);
 }
