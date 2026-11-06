@@ -74,7 +74,9 @@ say();
 say("| Score | Tier | Repository | Movement |");
 say("|---:|---|---|---|");
 for (const a of promoted) {
-  say("| " + a.score + " | " + a.tier + " | [" + a.name + "](" + a.url + ") |" + (arrow(a) || " — ") + " |");
+  /* A private repository has no public page, so it is named, not linked. */
+  const label = a.sealed ? a.name + " _(private)_" : "[" + a.name + "](" + a.url + ")";
+  say("| " + a.score + " | " + a.tier + " | " + label + " |" + (arrow(a) || " — ") + " |");
 }
 say();
 
