@@ -2,7 +2,7 @@
   "name": "agent-foundry",
   "private": true,
   "version": "1.0.0",
-  "description": "PAVAN//FOUNDRY — an agentic operating system disguised as a portfolio.",
+  "description": "PAVAN//FOUNDRY \u2014 an agentic operating system disguised as a portfolio.",
   "packageManager": "pnpm@11.22.0",
   "type": "module",
   "scripts": {
@@ -17,11 +17,13 @@
     "assay:score": "node --experimental-strip-types tools/score-preview.ts",
     "gen:mountains": "node tools/generate-mountains.mjs",
     "clean": "turbo run clean && rimraf node_modules",
-    "gen:ridge": "node tools/extract-ridge-plate.mjs"
+    "gen:ridge": "node tools/extract-ridge-plate.mjs",
+    "test": "vitest run"
   },
   "devDependencies": {
     "turbo": "^2.5.4",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.7"
   },
   "engines": {
     "node": "22.x"

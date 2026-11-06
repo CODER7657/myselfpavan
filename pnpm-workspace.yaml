@@ -7,6 +7,8 @@ packages:
 # ERR_PNPM_IGNORED_BUILDS. Answering it is what makes `pnpm build` work on a
 # clean clone.
 allowBuilds:
+  # Vitest's bundler, whose native binary arrives by post-install script.
+  esbuild: true
   sharp: true
 
 # sharp is an optional dependency of Next.js (image optimisation) and ships a
@@ -15,3 +17,4 @@ allowBuilds:
 # ERR_PNPM_IGNORED_BUILDS. Mirrored in package.json#pnpm for pnpm 10.
 onlyBuiltDependencies:
   - sharp
+  - esbuild
