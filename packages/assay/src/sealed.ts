@@ -87,3 +87,18 @@ export function withSealed(publicAssays: Assay[], sealed: SealedRecord[] | undef
     .map(fromSealed);
   return [...publicAssays, ...extra];
 }
+
+/**
+ * Whether a private listing looks like lost access rather than lost work.
+ *
+ * The first CI run with ASSAY_TOKEN listed zero private repositories — the
+ * fine-grained token had not been granted any — and wrote an empty sealed
+ * file over seven real grades. A token that can see none of the repositories
+ * graded last time has lost its view; an owner does not delete or publish
+ * every private repository at once. In that case the previous grades stand.
+ */
+export function lostAccess(previous: SealedRecord[], listedPrivateNames: string[]): boolean {
+  if (previous.length === 0) return false;
+  const listed = new Set(listedPrivateNames.map((n) => n.toLowerCase()));
+  return previous.every((r) => !listed.has(r.name.toLowerCase()));
+}

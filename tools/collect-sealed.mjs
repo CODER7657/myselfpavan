@@ -24,6 +24,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gh, inspect } from "./collect-evidence.mjs";
 import { assess, EXCLUDED, HIDE_TOPIC, RUBRIC_VERSION } from "../packages/assay/src/rubric.ts";
+import { lostAccess } from "../packages/assay/src/sealed.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(HERE, "../apps/web/public/data");
@@ -147,7 +148,16 @@ async function main() {
       (hidden.length ? " · hidden: " + hidden.map((r) => r.name).join(", ") : "")
   );
 
-  const previous = new Map(readPrevious().records.map((r) => [r.name.toLowerCase(), r]));
+  const prior = readPrevious().records;
+  if (lostAccess(prior, listed.filter((r) => r.private).map((r) => r.name))) {
+    console.log(
+      "  This token can see none of the " + prior.length + " private repositories graded last time.\n" +
+        "  That is lost access, not lost work: grant the token those repositories\n" +
+        "  (Repository access → All repositories). sealed.json left as it was."
+    );
+    return;
+  }
+  const previous = new Map(prior.map((r) => [r.name.toLowerCase(), r]));
   const records = [];
 
   for (const repo of eligible) {
