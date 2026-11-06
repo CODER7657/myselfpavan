@@ -22,7 +22,7 @@
  *
  * Environment
  *   GROQ_API_KEY   required to write anything. Absent means the step no-ops.
- *   GROQ_MODEL     default llama-3.3-70b-versatile
+ *   GROQ_MODEL     preferred model; otherwise the best one Groq offers
  *   GROQ_BASE_URL  default https://api.groq.com/openai/v1
  *   GITHUB_TOKEN   optional; only used to read READMEs at a higher rate limit
  */
@@ -39,7 +39,49 @@ const EVIDENCE = resolve(DATA, "evidence.json");
 const CARDS = resolve(DATA, "cards.json");
 
 const KEY = process.env.GROQ_API_KEY ?? "";
-const MODEL = process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile";
+/*
+ * The model is resolved at run time, not fixed here.
+ *
+ * Groq retires models. llama-3.3-70b-versatile, the original default, was
+ * withdrawn, and every card request after that came back "model not found"
+ * while the key itself was perfectly valid. So the writer asks Groq which
+ * models exist and takes the first of these it actually offers. GROQ_MODEL,
+ * if set, goes to the front of the queue.
+ */
+export const PREFERRED_MODELS = [
+  "openai/gpt-oss-120b",
+  "llama-3.3-70b-versatile",
+  "openai/gpt-oss-20b",
+  "llama-3.1-8b-instant",
+];
+let MODEL = process.env.GROQ_MODEL || PREFERRED_MODELS[0];
+
+/**
+ * The first preferred model that is on offer; otherwise any chat model the
+ * account can use, skipping speech and guard models that cannot write a card;
+ * otherwise null, which means there is nothing to write with.
+ */
+export function pickModel(available, preferred) {
+  const offered = new Set(available);
+  const choice = preferred.find((m) => m && offered.has(m));
+  if (choice) return choice;
+  return available.find((m) => !/whisper|tts|guard|orpheus|playai/i.test(m)) ?? null;
+}
+
+async function resolveModel() {
+  try {
+    const res = await fetch(BASE + "/models", {
+      headers: { Authorization: "Bearer " + KEY },
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) return MODEL;
+    const ids = ((await res.json())?.data ?? []).map((m) => m.id).filter(Boolean);
+    return pickModel(ids, [process.env.GROQ_MODEL, ...PREFERRED_MODELS]) ?? MODEL;
+  } catch {
+    /* A listing failure is not a reason to give up; try the configured one. */
+    return MODEL;
+  }
+}
 const BASE = (process.env.GROQ_BASE_URL ?? "https://api.groq.com/openai/v1").replace(/\/$/, "");
 const GH_TOKEN = process.env.GITHUB_TOKEN ?? "";
 const OWNER = process.env.ASSAY_OWNER ?? "CODER7657";
@@ -307,6 +349,11 @@ async function main() {
         "the generated template for these, which is the intended behaviour."
     );
     return;
+  }
+
+  if (KEY) {
+    MODEL = await resolveModel();
+    console.log("  writing with " + MODEL);
   }
 
   const cards = { ...existing.cards };
