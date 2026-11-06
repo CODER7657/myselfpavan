@@ -91,8 +91,11 @@ const dryRun = process.argv.includes("--dry-run");
 
 /** How long one card is allowed to take before it is abandoned. */
 const TIMEOUT_MS = 45_000;
+/** Stop starting new cards after this; the rest are picked up tomorrow. */
+const BUDGET_MS = 6 * 60_000;
+const DEADLINE = Date.now() + BUDGET_MS;
 /** How much README the model is shown. Enough to understand it, not a novel. */
-const README_CHARS = 6_000;
+const README_CHARS = 4_000;
 
 /* ── house rules ──────────────────────────────────────────────────────────── */
 
@@ -217,11 +220,46 @@ function evidenceKey(a, e) {
 
 /* ── the call ─────────────────────────────────────────────────────────────── */
 
+/**
+ * How long Groq asks us to wait before trying again, in ms, or null if this
+ * failure is not worth retrying.
+ *
+ * The free tier limits tokens per minute, and five cards in a row exceed it;
+ * the first run with a working model lost three cards to a 429 because the
+ * writer waited two seconds and gave up. Groq says how long to wait — in a
+ * retry-after header, or "try again in 12.3s" in the message — so that is
+ * honoured, capped so one card cannot hold the job open.
+ */
+export function retryDelayMs(status, retryAfter, body) {
+  const CAP = 30_000;
+  if (status === 429) {
+    const header = Number(retryAfter);
+    if (Number.isFinite(header) && header > 0) return Math.min(CAP, header * 1000 + 250);
+    const m = /try again in ([\d.]+)\s*(ms|s)/i.exec(body ?? "");
+    if (m) return Math.min(CAP, Number(m[1]) * (m[2].toLowerCase() === "ms" ? 1 : 1000) + 250);
+    return 10_000;
+  }
+  if (status >= 500) return 3_000;
+  /* A reply that did not fit the schema is worth one more draw. */
+  if (status === 400 && /json_(validate|generate)_failed|failed to (validate|generate) json/i.test(body ?? "")) {
+    return 500;
+  }
+  return null;
+}
+
 async function ask(prompt) {
+  const reasoning = /gpt-oss|qwen3|deepseek-r1/i.test(MODEL);
   const body = {
     model: MODEL,
     temperature: 0.2,
-    max_completion_tokens: 900,
+    /*
+     * Reasoning models spend completion tokens thinking before they answer.
+     * At 900 the reasoning ate the budget and the JSON was cut off mid-object,
+     * which Groq reports as "failed to validate JSON". Low effort and a larger
+     * budget leave room for the answer.
+     */
+    max_completion_tokens: reasoning ? 3000 : 900,
+    ...(reasoning ? { reasoning_effort: "low" } : {}),
     messages: [
       { role: "system", content: SYSTEM },
       { role: "user", content: prompt },
@@ -232,9 +270,7 @@ async function ask(prompt) {
     },
   };
 
-  /* One retry, because a rate limit or a 502 is usually momentary, and then it
-     gives up rather than holding a deploy open. */
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  for (let attempt = 1; attempt <= 4; attempt++) {
     const res = await fetch(BASE + "/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + KEY },
@@ -249,11 +285,12 @@ async function ask(prompt) {
       return JSON.parse(content);
     }
 
-    const detail = (await res.text().catch(() => "")).slice(0, 160).replace(/\s+/g, " ");
-    if (attempt === 2 || (res.status < 500 && res.status !== 429)) {
-      throw new Error("HTTP " + res.status + (detail ? " — " + detail : ""));
+    const text = await res.text().catch(() => "");
+    const wait = retryDelayMs(res.status, res.headers.get("retry-after"), text);
+    if (wait === null || attempt === 4 || Date.now() + wait > DEADLINE) {
+      throw new Error("HTTP " + res.status + " — " + text.slice(0, 160).replace(/\s+/g, " "));
     }
-    await new Promise((r) => setTimeout(r, 2_000));
+    await new Promise((r) => setTimeout(r, wait));
   }
 }
 
@@ -360,6 +397,13 @@ async function main() {
   let written = 0;
 
   for (const { a, e } of stale) {
+    /* A daily job must not be held open by a slow day at Groq. Anything left
+       is still stale tomorrow, and gets written then. */
+    if (Date.now() > DEADLINE) {
+      console.log("  time budget spent — the rest will be written on the next run");
+      break;
+    }
+
     const key = e.name.toLowerCase();
     const facts = digest(a, e, await readme(e.name));
 
