@@ -1,5 +1,377 @@
 {
   "rubricVersion": "3.2.0",
   "owner": "CODER7657",
-  "records": []
+  "records": [
+    {
+      "name": "cyber-web3-bloom",
+      "score": 34.8,
+      "tier": "common",
+      "verdict": "promoted",
+      "reason": null,
+      "commits": 6,
+      "pushedAt": "2025-08-14T08:49:32Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 11.9,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 3,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 5.9,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 8,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 1,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 5,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    },
+    {
+      "name": "friday",
+      "score": 54.1,
+      "tier": "epic",
+      "verdict": "promoted",
+      "reason": null,
+      "commits": 4,
+      "pushedAt": "2026-10-26T11:39:39Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 11.7,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 14.5,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 13.9,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 9,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 3,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 2,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    },
+    {
+      "name": "kisan_mitra",
+      "score": 55.8,
+      "tier": "epic",
+      "verdict": "promoted",
+      "reason": null,
+      "commits": 73,
+      "pushedAt": "2026-11-06T10:14:20Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 14.6,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 15.9,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 12.3,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 5,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 8,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 0,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    },
+    {
+      "name": "raksha-ai",
+      "score": 65.9,
+      "tier": "legendary",
+      "verdict": "promoted",
+      "reason": null,
+      "commits": 124,
+      "pushedAt": "2026-11-06T10:09:23Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 17.7,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 18.8,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 11.9,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 5,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 8,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 4.5,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    },
+    {
+      "name": "saakshi",
+      "score": 66.7,
+      "tier": "legendary",
+      "verdict": "promoted",
+      "reason": null,
+      "commits": 167,
+      "pushedAt": "2026-09-07T10:38:47Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 18,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 18.8,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 13,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 11,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 3,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 2.9,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    },
+    {
+      "name": "tradex",
+      "score": 23.3,
+      "tier": "common",
+      "verdict": "held",
+      "reason": "Scored 23.3, below the promotion floor of 34.",
+      "commits": 4,
+      "pushedAt": "2026-06-18T14:02:25Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 10.4,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 5.9,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 0,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 5,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 2,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 0,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    },
+    {
+      "name": "trinetra",
+      "score": 67.9,
+      "tier": "legendary",
+      "verdict": "promoted",
+      "reason": null,
+      "commits": 53,
+      "pushedAt": "2026-09-10T19:05:56Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 17.1,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 18.5,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 12.6,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 7,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 8,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 4.7,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    }
+  ]
 }

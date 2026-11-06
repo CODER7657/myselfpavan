@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { assess } from "../src/rubric";
-import { fromSealed, withSealed, type SealedRecord } from "../src/sealed";
+import { fromSealed, lostAccess, withSealed, type SealedRecord } from "../src/sealed";
 import { ageOf, pushedSince } from "../src/freshness";
 import { evidence, NOW } from "./fixtures";
 
@@ -94,5 +94,26 @@ describe("pushedSince", () => {
   it("is false when either side is missing", () => {
     expect(pushedSince(undefined, "2026-10-02")).toBe(false);
     expect(pushedSince("2026-10-01T00:00:00Z", undefined)).toBe(false);
+  });
+});
+
+describe("lostAccess", () => {
+  const prior = [record({ name: "trinetra" }), record({ name: "saakshi" })];
+
+  it("reproduces the wipe: a token that sees none of last run's repositories has lost access", () => {
+    expect(lostAccess(prior, [])).toBe(true);
+    expect(lostAccess(prior, ["some-other-private-repo"])).toBe(true);
+  });
+
+  it("is a real change when at least one previous repository is still visible", () => {
+    expect(lostAccess(prior, ["trinetra"])).toBe(false);
+  });
+
+  it("matches names case-insensitively", () => {
+    expect(lostAccess(prior, ["SAAKSHI"])).toBe(false);
+  });
+
+  it("never blocks a first run with nothing graded before", () => {
+    expect(lostAccess([], [])).toBe(false);
   });
 });
