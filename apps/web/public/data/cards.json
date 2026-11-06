@@ -1,4 +1,17 @@
 {
-  "model": null,
-  "cards": {}
+  "model": "openai/gpt-oss-120b",
+  "cards": {
+    "aura-guard": {
+      "repo": "AURA-GUARD",
+      "classification": "Air‑Quality Forecasting",
+      "tagline": "Gradient‑boosting forecasts improve on persistence by up to 30 % at the six‑hour horizon.",
+      "plain": "The app delivers short‑term NO₂ forecasts for US monitors and a question‑answering agent that only returns numbers that can be traced to those forecasts.",
+      "summary": "AURA‑GUARD combines a React front‑end with a Node API and a Python gradient‑boosting model trained on EPA hourly NO₂ data from twenty US monitors. The model is back‑tested with walk‑forward validation, achieving a 30 % MAE reduction over persistence at six‑hour ahead forecasts. The repository contains 99 source files, a CI workflow, nine test files and an LLM‑driven analyst that is constrained by a deterministic checker to ensure every numeric claim is grounded in the model output.",
+      "highlight": "The difficult part was building a deterministic grounding checker that forces the LLM to cite only model‑derived values and to reject or correct answers about missing monitors, preventing untraceable or false statements.",
+      "model": "openai/gpt-oss-120b",
+      "writtenAt": "2026-11-06T10:43:20.911Z",
+      "scoreAtWriting": 57.1,
+      "evidenceKey": "0c2e94d42a75"
+    }
+  }
 }
