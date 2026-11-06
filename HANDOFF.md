@@ -231,23 +231,24 @@ To keep a public repository out anyway, give it the topic:
 
     foundry-hide
 
-PRIVATE REPOSITORIES are opt-in, because grading one makes its name and
-activity public. Give it the topic:
+PRIVATE REPOSITORIES are graded too (since 6 Nov 2026), unless they carry
+foundry-hide. The workflow reads them with your token, scores them with the
+same rubric, and publishes only: name, score, tier, commit count, last push
+and the band totals. No code, README, description, topics, file list or link
+— ever. That is enforced twice: tools/collect-sealed.mjs refuses to write any
+other field, and tools/verify-evidence.mjs refuses to publish one, with no
+--allow override. Results live in apps/web/public/data/sealed.json.
 
-    foundry-ready
+It needs the ASSAY_TOKEN secret: a fine-grained token with Repository access
+set to All repositories and read-only Contents and Metadata. If the token
+ever loses its view (it sees none of the repositories graded last time), the
+previous grades are kept rather than wiped.
 
-and the workflow reads it with your token, scores it with the same rubric,
-and publishes only: name, score, tier, commit count, last push and the band
-totals. No code, README, description, topics, file list or link — ever. That
-promise is enforced twice: tools/collect-sealed.mjs refuses to write any other
-field, and tools/verify-evidence.mjs refuses to publish one, with no --allow
-override. Results live in apps/web/public/data/sealed.json.
+REPOSITORIES OWNED ELSEWHERE count only if you wrote at least half their
+human commits. roadside-app (now Hash-Hawks/roadside-app) is 43%, so it is
+not claimed.
 
-This needs a token the workflow's own token cannot provide. Create a
-fine-grained personal access token (github.com → Settings → Developer settings
-→ Fine-grained tokens) with access to your repositories and read-only
-"Contents" and "Metadata", then add it as the repository secret ASSAY_TOKEN.
-Without it the private pass does nothing and changes nothing.
+LIVE DEPLOYMENT points require the homepage to actually answer (rubric 3.2.0).
 
 A private repository whose name matches a hand-written card binds to that card:
 Raksha AI keeps its prose and swaps PROVISIONAL for its real score.
