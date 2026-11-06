@@ -58,6 +58,10 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+          # v5 caches with whatever package.json#packageManager names — pnpm here —
+          # and fails when that is not installed. This job installs nothing; the
+          # scripts run on Node alone, so there is nothing to cache.
+          package-manager-cache: false
 
       - name: Collect evidence
         env:
