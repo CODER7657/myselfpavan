@@ -58,6 +58,9 @@ export interface RepoEvidence {
   hasManifest: boolean;
   hasContainer: boolean;
   hasWorkspace: boolean;
+
+  /** Set when this entry is last run's, because this run could not read it. */
+  carriedForward?: boolean;
 }
 
 /** One line of the score, kept so the total can always be explained. */
