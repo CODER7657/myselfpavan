@@ -1,5 +1,9 @@
-# Normalise to LF in the repository; Git checks out native endings on Windows.
+# Store text with LF in the repository, whatever the committer's OS or git
+# settings; check out Windows scripts with CRLF. Binary files are detected.
 * text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
 
 # Binary assets must never be touched.
 *.png binary
