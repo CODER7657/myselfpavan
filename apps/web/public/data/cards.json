@@ -49,6 +49,18 @@
       "scoreAtWriting": 36.9,
       "evidenceKey": "f4fecc47cc3b"
     },
+    "raksha-ai": {
+      "repo": "raksha-ai",
+      "classification": "Verification Gate",
+      "tagline": "Every verdict includes a full trace of rules, retrieved patterns and the model that produced it.",
+      "plain": "It analyses messages, calls and payment IDs to flag potential scams and explains why, supporting English, Hindi and Gujarati.",
+      "summary": "The repository contains a FastAPI backend, a React frontend, an Android client in Kotlin and supporting design assets. Tests comprise 57 backend files, 12 Android unit suites and 13 frontend checks, run via GitHub Actions. The detection pipeline applies offline rule tables, URL feed digests, pgvector similarity search and a grounded LLM, with fallbacks to Gemini and rule‑only results. All routes, migrations and CI workflows are documented, and the licence is MIT.",
+      "highlight": "The system must decide a verdict even when the large language model is unavailable, so it layers instant offline rules, link checks and vector‑based retrieval before invoking the LLM, and records every rule, pattern and model that contributed to the final risk score.",
+      "model": "openai/gpt-oss-120b",
+      "writtenAt": "2026-11-07T10:13:28.701Z",
+      "scoreAtWriting": 70.1,
+      "evidenceKey": "aece8e2216b0"
+    },
     "voice-emotion-detection": {
       "repo": "voice-emotion-detection",
       "classification": "Verification Gate",
