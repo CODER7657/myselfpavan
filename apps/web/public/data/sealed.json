@@ -110,23 +110,23 @@
     },
     {
       "name": "kisan_mitra",
-      "score": 58.2,
-      "tier": "epic",
+      "score": 61.6,
+      "tier": "legendary",
       "verdict": "promoted",
       "reason": null,
-      "commits": 79,
-      "pushedAt": "2026-11-07T05:57:13Z",
+      "commits": 99,
+      "pushedAt": "2026-11-08T10:02:22Z",
       "bands": [
         {
           "id": "depth",
           "label": "Depth of work",
-          "earned": 16.1,
+          "earned": 16.7,
           "max": 18
         },
         {
           "id": "verification",
           "label": "Verification",
-          "earned": 16.8,
+          "earned": 17.6,
           "max": 22
         },
         {
@@ -150,7 +150,7 @@
         {
           "id": "craft",
           "label": "Craft",
-          "earned": 0,
+          "earned": 2,
           "max": 8
         },
         {

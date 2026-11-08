@@ -1,6 +1,31 @@
 {
   "rubricVersion": "3.2.0",
   "current": {
+    "ranAt": "2026-11-08T10:25:08.552Z",
+    "scores": {
+      "AURA-GUARD": 63.1,
+      "charkha": 73.8,
+      "complylite": 60.2,
+      "cyber-web3-bloom": 34.8,
+      "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
+      "friday": 54.1,
+      "genex-prj": 59.5,
+      "globetrotter": 73.7,
+      "kisan_mitra": 61.6,
+      "pavan-infra": 33.2,
+      "pavanpatel-portfolio": 48.3,
+      "pramana": 81,
+      "raksha-ai": 73.4,
+      "roadmap": 5,
+      "saakshi": 66.7,
+      "tradex": 23.3,
+      "trinetra": 67.9,
+      "twenty": 31.1,
+      "twinkal-ashay": 21.9,
+      "voice-emotion-detection": 51.5
+    }
+  },
+  "previous": {
     "ranAt": "2026-11-07T10:13:28.701Z",
     "scores": {
       "AURA-GUARD": 62.9,
@@ -23,39 +48,6 @@
       "twenty": 30.5,
       "twinkal-ashay": 21.9,
       "voice-emotion-detection": 51.2
-    }
-  },
-  "previous": {
-    "ranAt": "2026-11-06T16:51:28.113Z",
-    "scores": {
-      "AURA-GUARD": 57.1,
-      "charkha": 70.7,
-      "complylite": 59.8,
-      "CRAFTATHON": 50.3,
-      "cyber-web3-bloom": 34.8,
-      "Finverse": 37.4,
-      "fix-broken-Terminal-Bench-2-Harbor-": 19.7,
-      "friday": 54.1,
-      "genex-prj": 56.5,
-      "globetrotter": 70.6,
-      "gtu-ai-attendance-system": 37.2,
-      "HASHHAWKS": 36.9,
-      "HashHawks1": 26.9,
-      "kisan_mitra": 55.8,
-      "pavanpatel-portfolio": 45,
-      "port_stock": 18.7,
-      "pramana": 75.3,
-      "raksha-ai": 66.1,
-      "saakshi": 66.7,
-      "shoes.store": 41.2,
-      "tradex": 23.3,
-      "traveloop_hh": 29.6,
-      "trinetra": 67.9,
-      "twenty": 26.6,
-      "twinkal-ashay": 21.9,
-      "VeriServe_block": 21.1,
-      "voice-emotion-detection": 51.2,
-      "VortiFi": 35.7
     }
   }
 }
