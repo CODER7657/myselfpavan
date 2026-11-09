@@ -28,18 +28,18 @@ export const timeline: TimelineEntry[] = [
     org: "Self-directed",
     kind: "build",
     detail:
-      "Verifiable on-chain elections, certificate settlement on Polygon Amoy, a compliance surveillance engine over DuckDB, and a CNN classifier over live audio. Four unrelated domains, one recurring question: what makes an automated verdict defensible?",
-    tags: ["VortiFi", "ComplyLite", "VeriServe", "Voice Emotion"],
+      "On-chain verification experiments, a compliance surveillance engine over DuckDB, a CNN classifier over live audio and a first air-quality forecaster. Unrelated domains, one recurring question: what makes an automated verdict defensible?",
+    tags: ["ComplyLite", "Voice Emotion", "AURA-GUARD"],
   },
   {
     id: "hackathons",
     period: "2026",
-    title: "Hackathon builds",
-    org: "Craftathon · Odoo · HashHawks",
+    title: "Team lead, gtu-radar",
+    org: "HashHawks",
     kind: "build",
     detail:
-      "POCSO Shield, a three-layer child-safety platform with jurisdiction scoping enforced in the API. GlobeTrotter, an offline-first planner with contracts shared across the wire and layering enforced by lint.",
-    tags: ["POCSO Shield", "GlobeTrotter"],
+      "A Telegram bot that sends each GTU student only the notices for their course, semester and branch: an 8-agent pipeline on Redis Streams with 1,000+ tests and 1,346 of 1,346 live timetable rows parsed correctly. Lead and top human contributor.",
+    tags: ["gtu-radar", "Team lead", "Redis Streams"],
   },
   {
     id: "evals",
@@ -58,7 +58,7 @@ export const timeline: TimelineEntry[] = [
     org: "Independent research",
     kind: "build",
     detail:
-      "A deterministic verification gate for agent-initiated payments. 671 tests, 94% coverage, and a type-level distinction between an obligation that passed and one that was never checked.",
+      "A deterministic verification gate for agent-initiated payments. 711 tests, a 65.3% mutation score, and a type-level distinction between an obligation that passed and one that was never checked.",
     tags: ["AP2", "Policy-as-code", "Apache-2.0"],
   },
   {

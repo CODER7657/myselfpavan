@@ -73,26 +73,26 @@ export const domains: Domain[] = [
   {
     label: "Agent systems & evals",
     note: "Task graphs planned at runtime, and graders built so an agent cannot score by doing nothing.",
-    examples: ["Eval harness", "open-multi-agent", "This console"],
+    examples: ["CHARKHA", "Terminal-Bench tasks", "This console"],
   },
   {
     label: "Applied ML",
     note: "Retrieval, classification and signal work — with the confidence kept attached to the claim.",
-    examples: ["Raksha AI", "Voice emotion CNN", "Wellness companion"],
+    examples: ["Raksha AI", "AURA-GUARD", "Voice emotion"],
   },
   {
-    label: "Blockchain",
-    note: "Settlement on-chain where verification should not depend on whoever ran the process.",
-    examples: ["VortiFi", "VeriServe", "POCSO Shield"],
+    label: "Safety-gated AI",
+    note: "A deterministic guard after the model, so an unsafe answer cannot ship.",
+    examples: ["Kisan Mitra", "GENEX", "Raksha AI"],
   },
   {
     label: "Backend & data",
     note: "Schemas as contracts, migrations owned by the repo, tests against a real database.",
-    examples: ["GlobeTrotter", "ComplyLite", "Tradex"],
+    examples: ["ComplyLite", "AURA-GUARD", "CHARKHA"],
   },
   {
     label: "Product surface",
     note: "Android and web clients, motion systems, design tokens gated on contrast in CI.",
-    examples: ["Sole Vault", "Raksha AI", "GlobeTrotter"],
+    examples: ["Raksha AI", "Voice emotion", "This console"],
   },
 ];
