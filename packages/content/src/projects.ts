@@ -1,12 +1,12 @@
 import type { Project } from "./types";
 
 /**
- * Ten builds.
+ * Nine builds, agentic work first.
  *
  * Chosen by inspecting the repositories rather than by reading their READMEs:
  * commit count, presence of a real test suite, CI configuration, and whether
  * the layout is a project or a folder of loose files. Rarity follows that
- * inspection — the flat five-commit DApp is marked common and the 671-test
+ * inspection — the flat five-commit DApp is marked common and the 711-test
  * verification gate is marked mythic, because that is what they are.
  * Exploratory forks and coursework repositories were left out entirely.
  *
@@ -29,16 +29,96 @@ export const projects: Project[] = [
     agent: "cipher",
     stack: ["Python 3.13", "AP2", "SD-JWT", "Policy-as-code", "Pydantic", "pytest"],
     metrics: [
-      { label: "Tests", value: "671 passing" },
-      { label: "Coverage", value: "94%" },
-      { label: "Commits", value: "42" },
+      { label: "Tests", value: "711 passing" },
+      { label: "Mutation score", value: "65.3%" },
+      { label: "Attack success", value: "53.8% → 0%" },
       { label: "Licence", value: "Apache-2.0" },
     ],
     repo: "https://github.com/CODER7657/pramana",
-    demo: null,
+    demo: "https://pramana-gate.vercel.app",
     year: 2026,
     stats: { depth: 96, rigor: 98, surface: 54, novelty: 92 },
     featured: true,
+  },
+
+  {
+    slug: "raksha-ai",
+    name: "RAKSHA AI",
+    classification: "Fraud Interception",
+    tagline: "Rules first, retrieval second, model last.",
+    plain:
+      "An app that spots scam messages and calls in English, Hindi and Gujarati, and tells you which warning sign it saw.",
+    summary:
+      "A fraud-interception system on Android and the web, by text or voice. Detection runs in a fixed order: deterministic rules, then retrieval over past cases, then an LLM verdict grounded in that evidence, so a verdict is explained rather than invented.",
+    highlight:
+      "The ordering is the design: common scams never reach the model, every explanation traces to a rule or a retrieved precedent, and the rules alone still catch all 48 offline test scams.",
+    rarity: "legendary",
+    agent: "warden",
+    stack: ["Kotlin", "React", "FastAPI", "pgvector", "Groq", "PostgreSQL"],
+    metrics: [
+      { label: "Held-out recall", value: "1.000" },
+      { label: "Precision", value: "0.950" },
+      { label: "Backend tests", value: "1,092" },
+      { label: "Offline rules", value: "48 / 48" },
+    ],
+    repo: "https://github.com/CODER7657/raksha-ai",
+    demo: "https://frontend-one-sage-77.vercel.app",
+    year: 2026,
+    stats: { depth: 88, rigor: 88, surface: 82, novelty: 80 },
+    featured: true,
+  },
+
+  {
+    slug: "charkha",
+    name: "CHARKHA",
+    classification: "Agent Mesh",
+    tagline: "Crop fire to carbon credit, one task id.",
+    plain:
+      "Satellites spot crop residue burning; agents route it to a conversion unit, verify the work and issue a carbon credit anyone can check.",
+    summary:
+      "Five agents over Google's Agent2Agent protocol, from satellite fire detections to signed W3C verifiable credentials. Every decision is one row in an append-only, hash-chained ledger.",
+    highlight:
+      "Refusal is a feature: an unauthenticated agent call is rejected before the protocol handler runs, and six attacks a reviewer can run against it show each one refused.",
+    rarity: "legendary",
+    agent: "ledger",
+    stack: ["TypeScript", "A2A", "W3C VC", "PostgreSQL"],
+    metrics: [
+      { label: "Tests", value: "754" },
+      { label: "Agents", value: "5" },
+      { label: "Ledger", value: "hash-chained" },
+      { label: "Attacks shown", value: "6" },
+    ],
+    repo: "https://github.com/CODER7657/charkha",
+    demo: null,
+    year: 2026,
+    stats: { depth: 90, rigor: 88, surface: 70, novelty: 86 },
+    featured: true,
+  },
+
+  {
+    slug: "aura-guard",
+    name: "AURA-GUARD",
+    classification: "Live Forecaster",
+    tagline: "Air-quality forecasts that score themselves.",
+    plain:
+      "Hourly NO2 forecasts for US air monitors from live EPA data, with honest uncertainty, checked against what actually happened.",
+    summary:
+      "Gradient boosting with split-conformal 90% intervals, trained on 2024 and tested on all of 2025. An hourly job pulls live AirNow readings, publishes forecasts, and scores earlier forecasts against the readings that followed. A tool-only analyst agent answers questions from those numbers.",
+    highlight:
+      "The live page compares every forecast with the reading that later arrived and with persistence, and reports how many forecasts could not be scored.",
+    rarity: "epic",
+    agent: "oracle",
+    stack: ["Python", "scikit-learn", "GitHub Actions", "Groq"],
+    metrics: [
+      { label: "vs persistence", value: "−33% error at 12 h" },
+      { label: "Interval", value: "90% conformal" },
+      { label: "Test year", value: "2025" },
+      { label: "Refresh", value: "hourly" },
+    ],
+    repo: "https://github.com/CODER7657/AURA-GUARD",
+    demo: "https://aura-guard-live.vercel.app",
+    year: 2026,
+    stats: { depth: 82, rigor: 90, surface: 76, novelty: 74 },
   },
 
   {
@@ -69,213 +149,107 @@ export const projects: Project[] = [
   },
 
   {
-    slug: "raksha-ai",
-    name: "RAKSHA AI",
-    classification: "Fraud Interception",
-    tagline: "Rules first on device, retrieval second, model last.",
+    slug: "voice-emotion",
+    name: "VOICE EMOTION",
+    classification: "Honest Evaluation",
+    tagline: "I caught my own model cheating.",
     plain:
-      "An app that spots scam messages and calls before they reach you, in twelve Indian languages — and always tells you which specific warning sign it saw.",
+      "Speech emotion recognition that reports its real accuracy, which turned out lower than the first version claimed.",
     summary:
-      "A fraud-interception system across Android and web. Detection runs in a fixed order — deterministic rules on the device, then retrieval over past cases, and only then a model — so a verdict is explained from evidence rather than invented. Case history is isolated per user with row-level security.",
+      "The original evaluation leaked speakers between training and test. Re-tested on unseen speakers, the old CNN fell to 0.43 macro-F1; a WavLM model reaches 0.75. It runs live as an ONNX model behind a browser app.",
     highlight:
-      "The ordering is the design. Putting the model last means the common cases never reach it, the explanation is always traceable to a rule or a retrieved precedent, and the system degrades to something still useful when the network is gone.",
-    rarity: "legendary",
-    agent: "warden",
-    stack: ["Kotlin", "React 19", "FastAPI", "pgvector", "PostgreSQL", "Supabase"],
+      "The headline number went down on purpose: the honest split is the result, and the README leads with the leak it found.",
+    rarity: "epic",
+    agent: "forge",
+    stack: ["WavLM", "ONNX Runtime", "FastAPI", "TypeScript"],
     metrics: [
-      { label: "Commits", value: "82" },
-      { label: "Languages", value: "12" },
-      { label: "Surfaces", value: "Android + web" },
-      { label: "Isolation", value: "Row-level security" },
+      { label: "Macro-F1, unseen speakers", value: "0.75" },
+      { label: "Original CNN, honest", value: "0.43" },
+      { label: "Leak found", value: "speakers" },
+      { label: "Status", value: "live" },
     ],
-    repo: null,
-    demo: null,
-    private: true,
+    repo: "https://github.com/CODER7657/voice-emotion-detection",
+    demo: "https://vemo-api.vercel.app",
     year: 2026,
-    stats: { depth: 88, rigor: 84, surface: 82, novelty: 80 },
-    featured: true,
+    stats: { depth: 80, rigor: 92, surface: 78, novelty: 72 },
+  },
+
+  {
+    slug: "kisan-mitra",
+    name: "KISAN MITRA",
+    classification: "Safety-gated Assistant",
+    tagline: "Crop advice that never gives a dose.",
+    plain:
+      "Farmers in Gujarat ask by voice and get next steps; any pesticide dose or brand is removed and they are sent to the local KVK.",
+    summary:
+      "Speech to text and an LLM answer, behind a deterministic guard that removes any pesticide dose or brand before the answer is spoken.",
+    highlight:
+      "The guard is code, not a prompt: 0 doses and 0 brands in 28 red-team attempts.",
+    rarity: "rare",
+    agent: "atlas",
+    stack: ["FastAPI", "Groq", "Voice"],
+    metrics: [
+      { label: "Doses leaked", value: "0 / 28" },
+      { label: "Brands leaked", value: "0 / 28" },
+      { label: "Backend tests", value: "195" },
+      { label: "Status", value: "live" },
+    ],
+    repo: "https://github.com/CODER7657/kisan_mitra",
+    demo: "https://kisan-mitra-gilt.vercel.app",
+    year: 2026,
+    stats: { depth: 72, rigor: 84, surface: 80, novelty: 64 },
   },
 
   {
     slug: "complylite",
     name: "COMPLYLITE",
     classification: "Surveillance Co-pilot",
-    tagline: "Compliance alerts that can show their working.",
+    tagline: "Compliance alerts that show their working.",
     plain:
-      "Software for stockbrokers that watches trades for suspicious patterns, and shows exactly which rule fired so a human can argue with it.",
+      "Software for a stockbroker's compliance analyst: a short daily queue of the trades most likely to be manipulation, with the reasons shown.",
     summary:
-      "A hybrid rules-plus-ML detection engine over CSV and SFTP ingestion, with DuckDB for in-process analytics and a React dashboard for triage. Backend, frontend, sample data and a Docker Compose stack all live in the repository, with detectors tested in CI.",
+      "Rules plus LightGBM rank every client and symbol each day; the top 50 go to the analyst with the rules fired, red flags and top model reasons. Measured on a simulated market with planted patterns, and it says so.",
     highlight:
-      "Every alert carries the rule or feature weight that produced it, and audit reports are generated from the same records the analyst worked from — so what reaches a regulator is not a second, prettier version of events.",
+      "A live demo shows the real ranked queue on ten holdout days the model never saw, with the reasons behind every alert.",
     rarity: "epic",
     agent: "warden",
-    stack: ["FastAPI", "DuckDB", "Pandas", "React 18", "Ant Design", "Recharts", "Docker"],
+    stack: ["FastAPI", "DuckDB", "LightGBM", "pandas"],
     metrics: [
-      { label: "Commits", value: "35" },
-      { label: "Detection", value: "Rules + ML" },
-      { label: "Analytics", value: "DuckDB (OLAP)" },
-      { label: "Licence", value: "MIT" },
+      { label: "PR-AUC", value: "0.97 vs 0.38 rules" },
+      { label: "Precision, top 50", value: "0.50 (best 0.51)" },
+      { label: "False alarms / 10k", value: "101 vs 161" },
+      { label: "Data", value: "simulated" },
     ],
     repo: "https://github.com/CODER7657/complylite",
-    demo: null,
-    year: 2025,
-    stats: { depth: 78, rigor: 82, surface: 74, novelty: 62 },
-  },
-
-  {
-    slug: "globetrotter",
-    name: "GLOBETROTTER",
-    classification: "Offline-first Platform",
-    tagline: "A travel planner that keeps working without a signal.",
-    plain:
-      "A multi-city trip planner you can keep using on a plane or in a dead zone — it syncs back up when the connection returns.",
-    summary:
-      "A pnpm monorepo: a Fastify 5 modular monolith, a Vite and React 19 client, a shared Zod contracts package and a generated design system. Migrations and seeds are owned by the repository, applied by a one-shot container, and tested against a real Postgres 18 rather than a mock.",
-    highlight:
-      "Layering is enforced by ESLint rules rather than by convention — the lint step fails if the web app reaches past the contracts package into server internals.",
-    rarity: "epic",
-    agent: "atlas",
-    stack: ["Fastify 5", "React 19", "PostgreSQL 18", "Zod", "TanStack Router", "Vitest", "Docker"],
-    metrics: [
-      { label: "Commits", value: "31" },
-      { label: "Workspaces", value: "4 packages" },
-      { label: "Tests", value: "Real Postgres" },
-      { label: "Built for", value: "Odoo Hackathon '26" },
-    ],
-    repo: "https://github.com/CODER7657/globetrotter",
-    demo: null,
+    demo: "https://complylite-demo.vercel.app",
     year: 2026,
-    stats: { depth: 84, rigor: 86, surface: 72, novelty: 66 },
+    stats: { depth: 78, rigor: 86, surface: 70, novelty: 62 },
   },
 
   {
-    slug: "pocso-shield",
-    name: "POCSO SHIELD",
-    classification: "Safety Platform",
-    tagline: "Anonymous child-safety reporting with an on-chain audit trail.",
-    plain:
-      "A way to report child-safety incidents anonymously, where the record of what officials did about it cannot be quietly edited afterwards.",
-    summary:
-      "Three layers in one workspace: a FastAPI backend with Celery workers, Next.js reporter and authority portals, and a Hardhat contract project. Reports are classified by an AI pipeline, persisted in Postgres, pinned to IPFS, and mirrored to Sepolia. Deployed, with the container and proxy configuration in the repository.",
-    highlight:
-      "Jurisdiction scoping is enforced in API logic rather than in the UI — a case is visible only to authorities whose key maps to the same jurisdiction code, so hiding a button is never mistaken for access control.",
-    rarity: "epic",
-    agent: "warden",
-    stack: ["FastAPI", "Next.js 14", "PostgreSQL", "Celery", "Redis", "IPFS", "Solidity", "Hardhat"],
-    metrics: [
-      { label: "Layers", value: "API · Web · Chain" },
-      { label: "Network", value: "Ethereum Sepolia" },
-      { label: "Status", value: "Deployed" },
-      { label: "Built for", value: "Craftathon '26" },
-    ],
-    repo: "https://github.com/CODER7657/CRAFTATHON",
-    demo: "https://craftathon-eight.vercel.app",
-    year: 2026,
-    stats: { depth: 82, rigor: 78, surface: 86, novelty: 74 },
-  },
-
-  {
-    slug: "vortifi",
-    name: "VORTIFI",
-    classification: "On-chain Elections",
-    tagline: "Verifiable elections, settled on-chain.",
-    plain:
-      "An online voting system where anyone can check the count for themselves, because every vote is recorded publicly and permanently.",
-    summary:
-      "A Solidity contract set with a React client, Hardhat Ignition deployment modules and a contract test suite. Ballots and tallies settle on-chain, so the result can be independently recomputed rather than taken on trust.",
-    highlight:
-      "The point of putting an election on-chain is not novelty — it is that verification stops depending on the same party that ran the vote.",
-    rarity: "rare",
-    agent: "ledger",
-    stack: ["Solidity", "Hardhat", "Ignition", "React", "ethers.js"],
-    metrics: [
-      { label: "Commits", value: "18" },
-      { label: "Contracts", value: "Tested" },
-      { label: "Deployment", value: "Hardhat Ignition" },
-      { label: "Property", value: "Publicly verifiable" },
-    ],
-    repo: "https://github.com/CODER7657/VortiFi",
-    demo: null,
-    year: 2025,
-    stats: { depth: 68, rigor: 70, surface: 62, novelty: 66 },
-  },
-
-  {
-    slug: "mental-wellness",
-    name: "MENTAL WELLNESS AI",
+    slug: "genex",
+    name: "GENEX",
     classification: "Crisis-aware Companion",
-    tagline: "Crisis detection in front of the model.",
+    tagline: "Crisis messages get a helpline, not a chatbot.",
     plain:
-      "A mental-health chat companion that recognises when someone is in real danger and hands them to professional help instead of carrying on the conversation.",
+      "A wellness chat companion where a message that may signal suicide risk gets a fixed safety reply and a helpline.",
     summary:
-      "A three-tier application — React Native client, Express and SQLite backend, Socket.IO for live sessions — with mood tracking, context retention and a crisis-detection path that routes to professional resources. Backend, frontend, devops and test directories are all present in the repository.",
+      "A React and Express companion. With an LLM risk judge added to phrase rules, crisis recall on a sealed held-out set rose from 3/35 to 26/35, and a CI gate fails if it drops.",
     highlight:
-      "The constraint worth solving was knowing when the model must stop being the interface. Detection triggers a hand-off, not a better reply — the same rule as the fraud work, applied where the stakes are personal rather than financial.",
+      "Measured, with its weakness stated: some crisis messages still get an ordinary reply, and the README says so.",
     rarity: "rare",
     agent: "oracle",
-    stack: ["React Native", "Express", "SQLite", "Socket.IO", "Gemini"],
+    stack: ["React", "Express", "Groq"],
     metrics: [
-      { label: "Commits", value: "10" },
-      { label: "Tiers", value: "App · API · AI" },
-      { label: "Realtime", value: "Socket.IO" },
-      { label: "Safety", value: "Crisis routing" },
+      { label: "Crisis recall", value: "3/35 → 26/35" },
+      { label: "Held-out set", value: "sealed" },
+      { label: "CI gate", value: "recall may not drop" },
+      { label: "Crisis reply", value: "fixed, no LLM" },
     ],
     repo: "https://github.com/CODER7657/genex-prj",
     demo: null,
-    year: 2025,
-    stats: { depth: 58, rigor: 56, surface: 72, novelty: 60 },
-  },
-
-  {
-    slug: "sole-vault",
-    name: "SOLE VAULT",
-    classification: "Commerce Interface",
-    tagline: "A storefront built as an animation problem.",
-    plain:
-      "A high-end sneaker shop where the product turns as you scroll — proof that making something feel good is its own skill.",
-    summary:
-      "A premium storefront in React 18, TypeScript and Vite. The hero is a scroll-driven 360° sequence, the grid is a bento of material close-ups, and the whole surface runs on spring-based kinetics with a glassmorphic detail modal and a global cart drawer. Deployed and live.",
-    highlight:
-      "Every other card here argues about correctness. This one is the counterweight: interface craft is its own discipline, and a portfolio that only shows verification logic is hiding half the job.",
-    rarity: "rare",
-    agent: "forge",
-    stack: ["React 18", "TypeScript", "Vite", "Tailwind", "Framer Motion"],
-    metrics: [
-      { label: "Hero", value: "Scroll-driven 360°" },
-      { label: "Motion", value: "Spring kinetics" },
-      { label: "State", value: "Context API" },
-      { label: "Status", value: "Live" },
-    ],
-    repo: "https://github.com/CODER7657/shoes.store",
-    demo: "https://shoes-store-one-coral.vercel.app",
     year: 2026,
-    stats: { depth: 44, rigor: 50, surface: 94, novelty: 68 },
-  },
-
-  {
-    slug: "veriserve",
-    name: "VERISERVE",
-    classification: "Certificate DApp",
-    tagline: "Certificates anyone can verify without an account.",
-    plain:
-      "A way to issue digital certificates that an employer can check instantly, without having to phone the institution that issued them.",
-    summary:
-      "A Solidity contract on Polygon Amoy storing a certificate id, its hash and its recipient, with a React client where an admin issues through MetaMask and anyone can verify publicly. The smallest project here, and listed as such.",
-    highlight:
-      "No private key is ever stored or read by the application — every state-changing call is signed in the wallet, which makes the admin panel a convenience rather than a trust boundary.",
-    rarity: "common",
-    agent: "ledger",
-    stack: ["Solidity", "Polygon Amoy", "ethers.js", "React", "MetaMask"],
-    metrics: [
-      { label: "Network", value: "Polygon Amoy" },
-      { label: "Contract", value: "VeriServe.sol" },
-      { label: "Verification", value: "Public, keyless" },
-      { label: "Custody", value: "Wallet-only" },
-    ],
-    repo: "https://github.com/CODER7657/VeriServe_block",
-    demo: null,
-    year: 2025,
-    stats: { depth: 60, rigor: 62, surface: 58, novelty: 50 },
+    stats: { depth: 68, rigor: 82, surface: 66, novelty: 62 },
   },
 ];
 
