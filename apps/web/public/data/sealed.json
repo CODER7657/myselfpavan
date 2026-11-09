@@ -109,59 +109,6 @@
       ]
     },
     {
-      "name": "kisan_mitra",
-      "score": 61.6,
-      "tier": "legendary",
-      "verdict": "promoted",
-      "reason": null,
-      "commits": 99,
-      "pushedAt": "2026-11-08T10:02:22Z",
-      "bands": [
-        {
-          "id": "depth",
-          "label": "Depth of work",
-          "earned": 16.7,
-          "max": 18
-        },
-        {
-          "id": "verification",
-          "label": "Verification",
-          "earned": 17.6,
-          "max": 22
-        },
-        {
-          "id": "completeness",
-          "label": "Completeness",
-          "earned": 12.3,
-          "max": 16
-        },
-        {
-          "id": "structure",
-          "label": "Structure",
-          "earned": 5,
-          "max": 13
-        },
-        {
-          "id": "shipped",
-          "label": "Shipped",
-          "earned": 8,
-          "max": 13
-        },
-        {
-          "id": "craft",
-          "label": "Craft",
-          "earned": 2,
-          "max": 8
-        },
-        {
-          "id": "attested",
-          "label": "Attested",
-          "earned": 0,
-          "max": 10
-        }
-      ]
-    },
-    {
       "name": "pavan-infra",
       "score": 33.2,
       "tier": "common",
@@ -216,17 +163,17 @@
     },
     {
       "name": "pavanpatel-portfolio",
-      "score": 48.3,
+      "score": 48.6,
       "tier": "epic",
       "verdict": "promoted",
       "reason": null,
-      "commits": 7,
-      "pushedAt": "2026-11-07T04:37:43Z",
+      "commits": 8,
+      "pushedAt": "2026-11-09T09:46:21Z",
       "bands": [
         {
           "id": "depth",
           "label": "Depth of work",
-          "earned": 10.8,
+          "earned": 11.1,
           "max": 18
         },
         {
