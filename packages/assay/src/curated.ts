@@ -14,17 +14,17 @@
 /** Card slug → repository name, exactly as GitHub spells it. */
 export const CARD_TO_REPO: Record<string, string> = {
   pramana: "pramana",
+  "raksha-ai": "raksha-ai",
+  charkha: "charkha",
+  "aura-guard": "AURA-GUARD",
+  "voice-emotion": "voice-emotion-detection",
+  "kisan-mitra": "kisan_mitra",
   complylite: "complylite",
-  globetrotter: "globetrotter",
-  "pocso-shield": "CRAFTATHON",
-  vortifi: "VortiFi",
-  veriserve: "VeriServe_block",
-  "mental-wellness": "genex-prj",
-  "sole-vault": "shoes.store",
+  genex: "genex-prj",
 };
 
 /** Cards with no repository of their own — an upstream filing, private work. */
-export const NO_REPO: ReadonlySet<string> = new Set(["ap2-findings", "raksha-ai"]);
+export const NO_REPO: ReadonlySet<string> = new Set(["ap2-findings"]);
 
 /** Repository names that already have a written card, lowercased. */
 export const CURATED_REPOS: ReadonlySet<string> = new Set(

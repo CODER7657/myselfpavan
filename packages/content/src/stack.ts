@@ -4,10 +4,8 @@ import type { StackGroup } from "./types";
  * The stack, assembled from evidence rather than from memory.
  *
  * Every entry below was taken from a dependency manifest in one of the public
- * repositories — `pramana/pyproject.toml`, `CRAFTATHON/requirements.txt` and
- * its Hardhat `package.json`, `globetrotter/package.json`,
- * `genex-prj/backend/package.json`, `VortiFi`, `shoes.store`,
- * `open-multi-agent` — or from the profile README's own stack block.
+ * repositories — `pramana/pyproject.toml`, `raksha-ai`, `charkha`,
+ * `AURA-GUARD`, `complylite`, `genex-prj/backend/package.json` — or from the profile README's own stack block.
  *
  * Grouped by what the tool is for, not by language, so a reader can find the
  * part of the stack they care about without reading all of it.
