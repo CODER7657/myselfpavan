@@ -129,7 +129,8 @@ export function useAssay(): AssayState {
     if (!file) return EMPTY;
 
     const all = withSealed(
-      file.repos.map((r) => assess(r)),
+      // Archived repositories are retired work; the board lists only live repos.
+      file.repos.filter((r) => !r.isArchived).map((r) => assess(r)),
       sealed
     ).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 
