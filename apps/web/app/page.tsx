@@ -1,20 +1,28 @@
+import dynamic from "next/dynamic";
 import { Suspense, type ReactNode } from "react";
-import { Assay } from "@/components/Assay";
 import { Boot } from "@/components/Boot";
-import { Console } from "@/components/Console";
-import { Dossier } from "@/components/Dossier";
-import { Explainer } from "@/components/Explainer";
 import { ExternalLinks } from "@/components/ExternalLinks";
 import { Hero } from "@/components/Hero";
 import { Hud } from "@/components/Hud";
 import { Konami } from "@/components/Konami";
-import { Log } from "@/components/Log";
-import { Roster } from "@/components/Roster";
-import { Shell } from "@/components/Shell";
-import { Signal } from "@/components/Signal";
 import { Toasts } from "@/components/Toasts";
-import { Tree } from "@/components/Tree";
-import { Vault } from "@/components/Vault";
+
+/*
+ * Everything below the hero is a chunk of its own. The server still renders
+ * each section into the page; only its script is split out, so the code for
+ * the vault, the tree and the terminal is no longer parsed and run in the
+ * same task as the hero.
+ */
+const Assay = dynamic(() => import("@/components/Assay").then((m) => m.Assay));
+const Console = dynamic(() => import("@/components/Console").then((m) => m.Console));
+const Dossier = dynamic(() => import("@/components/Dossier").then((m) => m.Dossier));
+const Explainer = dynamic(() => import("@/components/Explainer").then((m) => m.Explainer));
+const Log = dynamic(() => import("@/components/Log").then((m) => m.Log));
+const Roster = dynamic(() => import("@/components/Roster").then((m) => m.Roster));
+const Shell = dynamic(() => import("@/components/Shell").then((m) => m.Shell));
+const Signal = dynamic(() => import("@/components/Signal").then((m) => m.Signal));
+const Tree = dynamic(() => import("@/components/Tree").then((m) => m.Tree));
+const Vault = dynamic(() => import("@/components/Vault").then((m) => m.Vault));
 
 /**
  * Hydrates one section on its own.
