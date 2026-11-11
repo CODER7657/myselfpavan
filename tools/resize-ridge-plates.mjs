@@ -33,7 +33,7 @@ try {
   }
 }
 
-export const WIDTHS = [960, 1600];
+export const WIDTHS = [768, 960, 1600];
 export const PLATES = ["ridge-plate", "ridge-plate-dark"];
 
 for (const plate of PLATES) {
