@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { assess } from "../src/rubric";
-import { fromSealed, lostAccess, withSealed, type SealedRecord } from "../src/sealed";
+import { forgetHidden, fromSealed, lostAccess, withSealed, type SealedRecord } from "../src/sealed";
 import { ageOf, pushedSince } from "../src/freshness";
 import { evidence, NOW } from "./fixtures";
 
@@ -115,5 +115,36 @@ describe("lostAccess", () => {
 
   it("never blocks a first run with nothing graded before", () => {
     expect(lostAccess([], [])).toBe(false);
+  });
+});
+
+describe("forgetHidden", () => {
+  const previous = { pramana: 81, friday: 54.1, globetrotter: 73.7, trinetra: 67.9 };
+
+  it("drops a private repository that is no longer graded", () => {
+    expect(forgetHidden(previous, ["pramana", "trinetra"], ["pramana", "globetrotter"])).toEqual({
+      pramana: 81,
+      globetrotter: 73.7,
+      trinetra: 67.9,
+    });
+  });
+
+  it("keeps a public repository that left the board, so its departure can still be shown", () => {
+    expect(forgetHidden({ globetrotter: 73.7 }, [], ["globetrotter"])).toEqual({ globetrotter: 73.7 });
+  });
+
+  it("keeps a private repository that is still graded", () => {
+    expect(forgetHidden({ trinetra: 67.9 }, ["trinetra"], [])).toEqual({ trinetra: 67.9 });
+  });
+
+  it("matches names whatever their case", () => {
+    expect(forgetHidden({ "AURA-GUARD": 56.8 }, [], ["aura-guard"])).toEqual({ "AURA-GUARD": 56.8 });
+  });
+
+  it("returns nothing when nothing is known, and leaves its input alone", () => {
+    const before = JSON.stringify(previous);
+    expect(forgetHidden(previous, [], [])).toEqual({});
+    expect(JSON.stringify(previous)).toBe(before);
+    expect(forgetHidden({}, ["pramana"], ["pramana"])).toEqual({});
   });
 });

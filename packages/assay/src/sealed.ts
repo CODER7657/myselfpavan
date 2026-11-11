@@ -102,3 +102,20 @@ export function lostAccess(previous: SealedRecord[], listedPrivateNames: string[
   const listed = new Set(listedPrivateNames.map((n) => n.toLowerCase()));
   return previous.every((r) => !listed.has(r.name.toLowerCase()));
 }
+
+/**
+ * Drops a private repository from an older standing once it stops being graded.
+ *
+ * standings.json keeps one previous standing so a card can show movement. A
+ * private repository that is later hidden left sealed.json at once but stayed
+ * named in that previous standing until some score next moved, which can be
+ * days. A name is kept only if it is still graded or is public anyway.
+ */
+export function forgetHidden(
+  scores: Record<string, number>,
+  stillGraded: Iterable<string>,
+  publicNames: Iterable<string>
+): Record<string, number> {
+  const known = new Set([...stillGraded, ...publicNames].map((n) => n.toLowerCase()));
+  return Object.fromEntries(Object.entries(scores).filter(([name]) => known.has(name.toLowerCase())));
+}
