@@ -5,6 +5,7 @@ import {
   READY_TOPIC,
   HIDE_TOPIC,
   NO_REPO,
+  compareVault,
   movementFor,
   placementFor,
   type Assay,
@@ -465,7 +466,9 @@ export function joinProjects(
    */
   if (!graded) {
     return {
-      vault: projects.map((p) => ({ ...p, pending: true, sortScore: anchorFor(p.rarity) })),
+      vault: projects
+        .map((p) => ({ ...p, pending: true, sortScore: anchorFor(p.rarity) }))
+        .sort(compareVault),
       withdrawn: [],
     };
   }
@@ -604,11 +607,11 @@ export function joinProjects(
   }
 
   /*
-   * Ranked, not authored-order. The whole point of the gate is that position
-   * is earned — a card that improves climbs past one that has not, on the next
-   * refresh, with nobody reordering anything by hand.
+   * The six flagships lead in one fixed order, the same on the profile and
+   * the portfolio. After them position is earned — a card that improves climbs
+   * past one that has not, on the next refresh, with nobody reordering it.
    */
-  vault.sort((x, y) => y.sortScore - x.sortScore || x.name.localeCompare(y.name));
+  vault.sort(compareVault);
   withdrawn.sort((x, y) => y.score - x.score || x.name.localeCompare(y.name));
 
   return { vault, withdrawn };

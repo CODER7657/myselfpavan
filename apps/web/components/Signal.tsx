@@ -8,6 +8,7 @@ import g from "./Signal.module.css";
 
 const LINKS = [
   { label: "Email", value: "pavanpatela5598@gmail.com", href: "mailto:pavanpatela5598@gmail.com" },
+  { label: "Portfolio", value: "pavanpatel.vercel.app", href: "https://pavanpatel.vercel.app" },
   { label: "GitHub", value: "github.com/CODER7657", href: profile.github },
   { label: "LinkedIn", value: "in/pavan-patel-559195261", href: profile.linkedin },
   { label: "X", value: "@pavan_pate78009", href: profile.x },
