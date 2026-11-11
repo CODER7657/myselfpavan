@@ -19,7 +19,7 @@
   --ink: #14110e;
   --ink-soft: #3b352c;
   --ink-muted: #5f574a;
-  --ink-faint: #756c5e;
+  --ink-faint: #6a6154;
   --ink-inverse: #f4f1e8;
 
   /* ── rules & edges ───────────────────────────────────────────────────── */
@@ -132,7 +132,7 @@
   --ink: #ece5d6;
   --ink-soft: #c4bcab;
   --ink-muted: #a89f8d;
-  --ink-faint: #857d6d;
+  --ink-faint: #8f8777;
   --ink-inverse: #100e0c;
 
   --rule: rgba(236, 229, 214, 0.18);

@@ -131,10 +131,15 @@
   padding: var(--s-3) var(--s-4);
   border-right: 1px solid var(--rule-strong);
   border-bottom: 1px solid var(--rule-strong);
-  opacity: 0.45;
 }
 
-.badge[data-on="true"] { opacity: 1; }
+/*
+ * A badge not yet earned is quieter, not fainter. It used to be the whole
+ * badge at 45% opacity, which took its 10px text down to a contrast of 1.8:1.
+ * The title steps down one ink and the mark fades; every word stays readable.
+ */
+.badge:not([data-on="true"]) .badgeBody b { color: var(--ink-muted); }
+.badge:not([data-on="true"]) .badgeMark { opacity: 0.55; }
 
 .badgeMark { color: var(--warn); font-size: var(--t-sm); line-height: 1.4; }
 .badge[data-on="true"] .badgeMark { color: var(--ok); }
