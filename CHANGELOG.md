@@ -11,9 +11,10 @@ and has no numbered releases, so entries are grouped by date. Daily
 - `SECURITY.md`, this changelog, Dependabot, CodeQL, and a Lighthouse check in CI.
 - The footer links the portfolio (#15).
 - Tests for the vault order, card pruning, hidden repositories and content facts
-  (120 to 144 tests; #12 to #16).
+  (120 to 152 tests; #12 to #23).
 
 ### Changed
+- Phones load a 768px copy of the ridge plate, 127 KB (#23).
 - Phones load a 960px copy of the ridge plate instead of the 2556px one, and the music
   track is fetched once the page is idle. Mobile Lighthouse performance in CI went from
   56 to 72 and the largest paint from 7.5 s to 3.6 s (#16).
@@ -22,6 +23,10 @@ and has no numbered releases, so entries are grouped by date. Daily
 - The bio and mission text name only current work and state no repository count (#13).
 
 ### Fixed
+- Small text meets 4.5:1 in both themes: the faint ink is darker in the light theme and
+  lighter in the dark one, and a badge not yet earned is no longer drawn at 45% opacity.
+  Lighthouse accessibility went from 96 with 41 low-contrast elements to 100 (#23).
+- Capability-tree buttons are named by their visible text (#23).
 - Generated cards that no repository uses are removed from `cards.json` (#12).
 - A private repository hidden with `foundry-hide` also leaves the previous standing (#14).
 - Comments said private grading was opt-in; it is opt-out (#12).

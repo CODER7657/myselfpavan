@@ -16,7 +16,7 @@ const entries = (src: string) =>
 describe("plateSrcSet", () => {
   it("lists the smaller copies first and the full plate last", () => {
     expect(plateSrcSet("/art/ridge-plate.webp")).toBe(
-      "/art/ridge-plate-960.webp 960w, /art/ridge-plate-1600.webp 1600w, /art/ridge-plate.webp 2556w"
+      "/art/ridge-plate-768.webp 768w, /art/ridge-plate-960.webp 960w, /art/ridge-plate-1600.webp 1600w, /art/ridge-plate.webp 2556w"
     );
   });
 
@@ -39,14 +39,14 @@ describe("plateSrcSet", () => {
     }
   });
 
-  it("keeps the phone copy under 300 KB", () => {
+  it("keeps the phone copy under 200 KB", () => {
     for (const plate of PLATES) {
       const file = resolve(PUBLIC, "." + entries(plate)[0]!.url);
-      expect(statSync(file).size).toBeLessThan(300 * 1024);
+      expect(statSync(file).size).toBeLessThan(200 * 1024);
     }
   });
 
   it("only rewrites the .webp ending", () => {
-    expect(plateSrcSet("/art/a.webp.b.webp").startsWith("/art/a.webp.b-960.webp 960w")).toBe(true);
+    expect(plateSrcSet("/art/a.webp.b.webp").startsWith("/art/a.webp.b-768.webp 768w")).toBe(true);
   });
 });

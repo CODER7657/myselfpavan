@@ -245,12 +245,16 @@ export function Tree() {
                     onBlur={() => setHover(null)}
                     tabIndex={0}
                     role="button"
-                    aria-label={`${n.label}, level ${n.level} of 100, ${agent.discipline}. ${n.note}`}
                   >
                     <span className={t.nTop}>
                       <span className={t.nDot} aria-hidden="true" />
                       <span className={t.nLabel}>{n.label}</span>
-                      <span className={t.nLevel}>{n.level}</span>
+                      <span className={t.nLevel} aria-hidden="true">{n.level}</span>
+                      {/* The name a screen reader hears starts with the words on
+                          screen, then adds what the bar and colour show. */}
+                      <span className="sr-only">
+                        , level {n.level} of 100, {agent.discipline}. {n.note}
+                      </span>
                     </span>
                     <span className={t.nBar} style={{ ["--fill" as string]: n.level + "%" }} />
                   </div>
