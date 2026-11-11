@@ -1,7 +1,7 @@
 {
   "rubricVersion": "3.2.0",
   "current": {
-    "ranAt": "2026-11-11T06:20:32.830Z",
+    "ranAt": "2026-11-11T06:27:54.879Z",
     "scores": {
       "AURA-GUARD": 56.9,
       "charkha": 73.8,
@@ -20,21 +20,18 @@
     }
   },
   "previous": {
-    "ranAt": "2026-11-11T06:10:52.194Z",
+    "ranAt": "2026-11-11T06:20:32.830Z",
     "scores": {
       "AURA-GUARD": 56.9,
       "charkha": 73.8,
       "complylite": 71.5,
-      "cyber-web3-bloom": 34.8,
       "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
-      "friday": 54.1,
       "genex-prj": 61,
       "kisan_mitra": 72.8,
       "pavanpatel-portfolio": 49.2,
       "pramana": 85.9,
       "raksha-ai": 76.4,
       "saakshi": 66.7,
-      "tradex": 23.3,
       "trinetra": 67.9,
       "twenty": 31.1,
       "twinkal-ashay": 21.9,
