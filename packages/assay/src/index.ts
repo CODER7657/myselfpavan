@@ -9,7 +9,7 @@ export {
   EXCLUDED,
 } from "./rubric";
 export { CARD_TO_REPO, NO_REPO, CURATED_REPOS } from "./curated";
-export { fromSealed, withSealed, lostAccess, type SealedRecord, type SealedFile } from "./sealed";
+export { fromSealed, withSealed, lostAccess, forgetHidden, type SealedRecord, type SealedFile } from "./sealed";
 export { ageOf, pushedSince, type Age, type Freshness } from "./freshness";
 export {
   placementFor,

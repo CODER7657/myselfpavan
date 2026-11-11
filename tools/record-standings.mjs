@@ -18,7 +18,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assess, RUBRIC_VERSION } from "../packages/assay/src/rubric.ts";
-import { withSealed } from "../packages/assay/src/sealed.ts";
+import { forgetHidden, withSealed } from "../packages/assay/src/sealed.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = resolve(HERE, "../apps/web/public/data");
@@ -103,7 +103,13 @@ if (!force && !rubricChanged && !moved(before, scores)) {
 const next = {
   rubricVersion: RUBRIC_VERSION,
   current: { ranAt: collectedAt, scores },
-  previous: rubricChanged || !existing?.current ? null : existing.current,
+  previous:
+    rubricChanged || !existing?.current
+      ? null
+      : {
+          ...existing.current,
+          scores: forgetHidden(existing.current.scores ?? {}, Object.keys(scores), repos.map((r) => r.name)),
+        },
 };
 
 mkdirSync(DATA, { recursive: true });
