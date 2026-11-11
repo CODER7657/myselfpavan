@@ -49,11 +49,12 @@ No model runs when a visitor opens the site. The cards are built ahead of time:
 
 ## Checks
 
-CI runs the typecheck, 144 unit tests, a syntax check of the pipeline scripts, the build,
-and mobile Lighthouse on the built site. Accessibility may not drop below 95 (measured 96).
-Performance measured 72 on the CI runner, up from 56 before the ridge plate was resized;
-the gate is a regression guard at 65, and reaching 85 is open work (the boot sequence
-blocks the main thread for about 700 ms). Dependabot and CodeQL run weekly. See [SECURITY.md](SECURITY.md) to report a
+CI runs the typecheck, 152 unit tests, a syntax check of the pipeline scripts, the build,
+and mobile Lighthouse on the built site. Accessibility may not drop below 95 (measured
+100, with no failing audit). Performance is the median of three runs and measured 76 to
+78 on the CI runner, up from 56; single runs ranged from 68 to 86. The gate is a
+regression guard at 70. A steady 85 is open work: the first task after the scripts
+arrive still runs for 340 to 470 ms on the throttled phone profile. Dependabot and CodeQL run weekly. See [SECURITY.md](SECURITY.md) to report a
 vulnerability and [CHANGELOG.md](CHANGELOG.md) for what changed.
 
 ---

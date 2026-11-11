@@ -52,8 +52,9 @@ jobs:
       - name: Build
         run: pnpm build
 
-  # Mobile Lighthouse on the built site. Performance measured 72 on this runner
-  # (the target of 85 is open work), so the gate is a regression guard at 65;
+  # Mobile Lighthouse on the built site. Performance measured a median of 76 to
+  # 78 on this runner (a steady 85 is open work), so the gate is a regression
+  # guard at 70;
   # accessibility (Lighthouse runs axe-core's rules) may not drop below 95.
   lighthouse:
     runs-on: ubuntu-latest
