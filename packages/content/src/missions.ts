@@ -27,7 +27,7 @@ export const missions: Mission[] = [
         thought: [
           "Reading the identity record off the local index.",
           "Two concurrent degree programmes — BITS Pilani and LJIET. Not a typo; both are live.",
-          "Primary handle CODER7657. 29 public repositories.",
+          "Primary handle CODER7657. Every public repository is graded daily by the assay.",
         ],
       },
       {

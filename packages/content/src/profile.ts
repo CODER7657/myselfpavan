@@ -42,17 +42,17 @@ export const profile: Profile = {
   plain: [
     "I build software that gets trusted to decide something on its own — clear a payment, flag a scam, grade another program's work.",
     "Systems like that fail quietly. Nobody gets an error; the fraud just goes through, or a test reports a pass for something that never ran. So most of my work is the checking layer — the part that has to be convinced before anything actually happens. Two of those checks turned up real bugs in Google's payment software, now filed publicly on their repository.",
-    "The subject matter moves around a lot: payments, elections, compliance, child safety, mental health, voice, travel. The question underneath never changes — how do you know this thing is right?",
+    "The subject matter moves around a lot: payments, scams, compliance, crop advice, mental health, voice, air quality. The question underneath never changes — how do you know this thing is right?",
   ],
 
   /**
-   * Sharp version. Written to show the spread across roughly thirty
+   * Sharp version. Written to show the spread across the
    * repositories rather than to restate the three headline projects.
    */
   bio: [
     "I work at the point where software stops advising and starts acting. That is where failures go silent, so that is where I build.",
     "Concretely: a verification gate for agent-initiated payments where an unchecked obligation is treated as harshly as a failed one; a fraud-interception stack ordered rules → retrieval → model, so a verdict is always traceable to evidence; and twenty-two sealed benchmark tasks whose graders I proved sound three ways before trusting a single score.",
-    "Around those sits a wider set — on-chain elections and certificate settlement in Solidity, compliance surveillance over DuckDB, an offline-first planner with its layering enforced by lint, a child-safety platform with jurisdiction checks in the API rather than the UI, a crisis-routing wellness companion, a CNN over live audio. Different domains, one habit: decide what must not fail silently, then make that structural rather than remembered.",
+    "Around those sits a wider set — compliance surveillance over DuckDB, crop advice whose guard removes every pesticide dose, hourly air-quality forecasts scored against live readings, agents that carry a satellite fire detection through to a signed carbon credential, a crisis-routing wellness companion, a speech-emotion model re-tested after I found my own data leaks. Different domains, one habit: decide what must not fail silently, then make that structural rather than remembered.",
     "Python, TypeScript, Rust, Kotlin, Solidity. Two undergraduate degrees in parallel — BS Computer Science at BITS Pilani, BTech Computer Engineering at GTU.",
   ],
 };
