@@ -108,7 +108,8 @@ export function useAssay(): AssayState {
     fetch("/data/sealed.json", { signal: ac.signal, cache: "no-cache" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json: { records?: SealedRecord[] } | null) => {
-        if (!ac.signal.aborted && Array.isArray(json?.records)) startTransition(() => setSealed(json.records));
+        const records = json?.records;
+        if (!ac.signal.aborted && Array.isArray(records)) startTransition(() => setSealed(records));
       })
       .catch(() => undefined);
 
