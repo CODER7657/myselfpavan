@@ -84,8 +84,9 @@ export function Vault() {
         <h2 className="plate-title">THE VAULT</h2>
         <p className="plate-sub">
           {catalogue.length} builds — the ones worth defending, drawn from the public
-          repositories plus two private ones. Ranked by how much of the work survives
-          questioning rather than by stars, and rarity follows that ranking. Turn a card over
+          repositories plus private ones shown as a score only. The six flagships lead in a
+          fixed order; the rest are ranked by how much of the work survives questioning rather
+          than by stars. Rarity follows the score on every card. Turn a card over
           for the argument and the numbers.
         </p>
 
