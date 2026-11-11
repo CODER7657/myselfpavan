@@ -10,9 +10,10 @@
  * the name, the score and tier, the commit count, the last push, and each
  * band's total. The evidence those numbers came from never leaves memory.
  *
- * Private work is opt-in. A private repository is read only if it carries the
- * "foundry-ready" topic, because being graded means its name and activity
- * become public, and that is a decision to be made on purpose.
+ * Private work is opt-out. Every private repository is graded unless it
+ * carries the "foundry-hide" topic or is named in EXCLUDED. Being graded
+ * means its name and activity become public, so anything whose name should
+ * stay private needs that topic before the next run.
  *
  * It needs a token that belongs to the owner and can see private
  * repositories — the ASSAY_TOKEN secret in CI. The workflow's built-in token

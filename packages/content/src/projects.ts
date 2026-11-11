@@ -58,7 +58,7 @@ export const projects: Project[] = [
     metrics: [
       { label: "Held-out recall", value: "1.000" },
       { label: "Precision", value: "0.950" },
-      { label: "Backend tests", value: "1,092" },
+      { label: "Backend tests", value: "1,104" },
       { label: "Offline rules", value: "48 / 48" },
     ],
     repo: "https://github.com/CODER7657/raksha-ai",
@@ -191,7 +191,7 @@ export const projects: Project[] = [
     metrics: [
       { label: "Doses leaked", value: "0 / 28" },
       { label: "Brands leaked", value: "0 / 28" },
-      { label: "Backend tests", value: "195" },
+      { label: "Backend tests", value: "224" },
       { label: "Status", value: "live" },
     ],
     repo: "https://github.com/CODER7657/kisan_mitra",

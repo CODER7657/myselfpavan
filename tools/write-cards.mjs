@@ -337,6 +337,26 @@ export function validate(card, facts) {
   return problems;
 }
 
+/**
+ * Drops prose for a repository that no longer gets a generated card.
+ *
+ * A card was only ever added. One written for a repository that was later
+ * archived, or given a hand-written card, stayed in cards.json for good — and
+ * the file is served publicly, so its stale numbers were still readable by
+ * anyone who opened it. Only repositories that are promoted and not curated
+ * right now keep their prose.
+ */
+export function prune(cards, keep) {
+  const wanted = new Set([...keep].map((name) => name.toLowerCase()));
+  const kept = {};
+  const dropped = [];
+  for (const [key, card] of Object.entries(cards ?? {})) {
+    if (wanted.has(key.toLowerCase())) kept[key] = card;
+    else dropped.push(key);
+  }
+  return { kept, dropped: dropped.sort() };
+}
+
 /* ── main ─────────────────────────────────────────────────────────────────── */
 
 async function main() {
@@ -353,11 +373,6 @@ async function main() {
     .filter(({ e }) => !CURATED_REPOS.has(e.name.toLowerCase()))
     .sort((x, y) => y.a.score - x.a.score);
 
-  if (candidates.length === 0) {
-    console.log("Every promoted repository already has a written card. Nothing to do.");
-    return;
-  }
-
   let existing = { cards: {} };
   if (existsSync(CARDS)) {
     try {
@@ -366,6 +381,18 @@ async function main() {
     } catch {
       console.warn("cards.json is unreadable — starting a fresh one.");
     }
+  }
+
+  const { kept, dropped } = prune(existing.cards, candidates.map(({ e }) => e.name));
+  if (dropped.length && !dryRun) {
+    existing = { ...existing, cards: kept };
+    writeFileSync(CARDS, JSON.stringify({ model: existing.model ?? MODEL, cards: kept }, null, 2) + "\n");
+    console.log("Removed " + dropped.length + " card(s) no repository uses any more: " + dropped.join(", "));
+  }
+
+  if (candidates.length === 0) {
+    console.log("Every promoted repository already has a written card. Nothing to do.");
+    return;
   }
 
   const stale = candidates.filter(({ a, e }) => {
