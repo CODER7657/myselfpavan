@@ -1,6 +1,28 @@
 {
   "rubricVersion": "3.2.0",
   "current": {
+    "ranAt": "2026-11-11T06:10:52.194Z",
+    "scores": {
+      "AURA-GUARD": 56.9,
+      "charkha": 73.8,
+      "complylite": 71.5,
+      "cyber-web3-bloom": 34.8,
+      "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
+      "friday": 54.1,
+      "genex-prj": 61,
+      "kisan_mitra": 72.8,
+      "pavanpatel-portfolio": 49.2,
+      "pramana": 85.9,
+      "raksha-ai": 76.4,
+      "saakshi": 66.7,
+      "tradex": 23.3,
+      "trinetra": 67.9,
+      "twenty": 31.1,
+      "twinkal-ashay": 21.9,
+      "voice-emotion-detection": 74.7
+    }
+  },
+  "previous": {
     "ranAt": "2026-11-09T10:02:24.558Z",
     "scores": {
       "AURA-GUARD": 56.8,
@@ -22,31 +44,6 @@
       "twenty": 31.1,
       "twinkal-ashay": 21.9,
       "voice-emotion-detection": 74.6
-    }
-  },
-  "previous": {
-    "ranAt": "2026-11-08T10:25:08.552Z",
-    "scores": {
-      "AURA-GUARD": 63.1,
-      "charkha": 73.8,
-      "complylite": 60.2,
-      "cyber-web3-bloom": 34.8,
-      "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
-      "friday": 54.1,
-      "genex-prj": 59.5,
-      "globetrotter": 73.7,
-      "kisan_mitra": 61.6,
-      "pavan-infra": 33.2,
-      "pavanpatel-portfolio": 48.3,
-      "pramana": 81,
-      "raksha-ai": 73.4,
-      "roadmap": 5,
-      "saakshi": 66.7,
-      "tradex": 23.3,
-      "trinetra": 67.9,
-      "twenty": 31.1,
-      "twinkal-ashay": 21.9,
-      "voice-emotion-detection": 51.5
     }
   }
 }
