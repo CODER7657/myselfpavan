@@ -3,7 +3,7 @@
 Written 25 August 2026. Plain text, no jargon where it can be avoided.
 
 Live: https://myselfpavan.vercel.app
-Repo: https://github.com/CODER7657/myselfpavan (private)
+Repo: https://github.com/CODER7657/myselfpavan (public)
 Old site: preserved on the `legacy-terminal-portfolio` branch — nothing was lost.
 
 ---
