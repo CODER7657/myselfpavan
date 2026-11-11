@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 /**
  * Reads the prose written for cards nobody wrote by hand.
@@ -63,7 +63,7 @@ export function useCards(): CardsState {
     fetch("/data/cards.json", { signal: ac.signal, cache: "no-cache" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json: CardsFile | null) => {
-        if (!ac.signal.aborted && json) startTransition(() => setFile(json));
+        if (!ac.signal.aborted && json) setFile(json);
       })
       /* Absent means no card has been written yet, which is the normal case. */
       .catch(() => undefined);

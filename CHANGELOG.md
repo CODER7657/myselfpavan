@@ -14,11 +14,7 @@ and has no numbered releases, so entries are grouped by date. Daily
   (120 to 152 tests; #12 to #23).
 
 ### Changed
-- Each section below the hero is its own chunk and hydrates in its own task; data that
-  arrives after load re-renders as a transition; the window load, the fonts and late
-  images share one scroll-trigger refresh. Mobile Lighthouse performance in CI went from
-  72 to a median of 76 to 78 (#23).
-- Phones load a 768px copy of the ridge plate (#23).
+- Phones load a 768px copy of the ridge plate, 127 KB (#23).
 - Phones load a 960px copy of the ridge plate instead of the 2556px one, and the music
   track is fetched once the page is idle. Mobile Lighthouse performance in CI went from
   56 to 72 and the largest paint from 7.5 s to 3.6 s (#16).

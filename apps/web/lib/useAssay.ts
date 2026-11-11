@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   assess,
   RUBRIC_VERSION,
@@ -108,14 +108,13 @@ export function useAssay(): AssayState {
     fetch("/data/sealed.json", { signal: ac.signal, cache: "no-cache" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json: { records?: SealedRecord[] } | null) => {
-        const records = json?.records;
-        if (!ac.signal.aborted && Array.isArray(records)) startTransition(() => setSealed(records));
+        if (!ac.signal.aborted && Array.isArray(json?.records)) setSealed(json.records);
       })
       .catch(() => undefined);
 
     load()
       .then((json) => {
-        if (!ac.signal.aborted) startTransition(() => setFile(json));
+        if (!ac.signal.aborted) setFile(json);
       })
       .catch((e: Error) => {
         if (e.name === "AbortError" || ac.signal.aborted) return;
