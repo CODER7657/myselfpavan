@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 
 /**
  * Reads the previous standing, so a card can say how it got where it is.
@@ -40,7 +40,7 @@ export function useStandings(): StandingsState {
     fetch("/data/standings.json", { signal: ac.signal, cache: "no-cache" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json: StandingsFile | null) => {
-        if (!ac.signal.aborted && json) setFile(json);
+        if (!ac.signal.aborted && json) startTransition(() => setFile(json));
       })
       /* Absent or malformed means "no comparison available", not a failure. */
       .catch(() => undefined);

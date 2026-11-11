@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import type { RepoRow } from "@foundry/content";
 
 /**
@@ -123,12 +123,10 @@ export function useLiveRepos(): LiveState {
       .then((repos) => {
         if (ac.signal.aborted) return;
         const authored = repos.filter((r) => !r.fork);
-        setState({
-          repos,
-          error: null,
-          lastPush: authored[0]?.pushed ?? null,
-          byName: new Map(repos.map((r) => [r.name.toLowerCase(), r])),
-        });
+        const byName = new Map(repos.map((r) => [r.name.toLowerCase(), r]));
+        startTransition(() =>
+          setState({ repos, error: null, lastPush: authored[0]?.pushed ?? null, byName })
+        );
       })
       .catch((err: Error) => {
         if (err.name === "AbortError" || ac.signal.aborted) return;

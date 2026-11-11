@@ -21,7 +21,22 @@ if (typeof window !== "undefined" && !registered) {
 
   ScrollTrigger.config({ ignoreMobileResize: true });
 
-  const refresh = () => ScrollTrigger.refresh();
+  /*
+   * One refresh for a burst of reasons.
+   *
+   * The window load, the fonts settling and each late image used to refresh
+   * separately, and every refresh re-measures the whole page — on a throttled
+   * phone that was several long tasks in a row. They now share one refresh,
+   * run shortly after the last of them asks.
+   */
+  let pending: ReturnType<typeof setTimeout> | undefined;
+  const refresh = () => {
+    if (pending !== undefined) clearTimeout(pending);
+    pending = setTimeout(() => {
+      pending = undefined;
+      ScrollTrigger.refresh();
+    }, 150);
+  };
 
   window.addEventListener("load", refresh);
   if ("fonts" in document) document.fonts.ready.then(refresh).catch(() => {});
