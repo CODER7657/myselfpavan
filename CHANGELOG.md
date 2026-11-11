@@ -11,9 +11,12 @@ and has no numbered releases, so entries are grouped by date. Daily
 - `SECURITY.md`, this changelog, Dependabot, CodeQL, and a Lighthouse check in CI.
 - The footer links the portfolio (#15).
 - Tests for the vault order, card pruning, hidden repositories and content facts
-  (120 to 139 tests; #12 to #15).
+  (120 to 144 tests; #12 to #16).
 
 ### Changed
+- Phones load a 960px copy of the ridge plate instead of the 2556px one, and the music
+  track is fetched once the page is idle. Mobile Lighthouse performance in CI went from
+  56 to 72 and the largest paint from 7.5 s to 3.6 s (#16).
 - The six flagships lead the vault in one fixed order; every other card is still ranked
   by its assay score (#15).
 - The bio and mission text name only current work and state no repository count (#13).
