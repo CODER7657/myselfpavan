@@ -101,9 +101,10 @@ jobs:
       # Reads only the ASSAY_TOKEN secret — never the workflow's own token,
       # which cannot see private repositories and would only produce a 403.
       # With no ASSAY_TOKEN set this does nothing and leaves sealed.json as it
-      # was. A private repository is read only if it carries the foundry-ready
-      # topic, and nothing but its name, score, tier, commit count, last push
-      # and band totals is written. Never blocks the public assay.
+      # was. Every private repository is read unless it carries the
+      # foundry-hide topic or is excluded in the rubric, and nothing but its
+      # name, score, tier, commit count, last push and band totals is written.
+      # Never blocks the public assay.
       - name: Grade private repositories (sealed)
         continue-on-error: true
         env:

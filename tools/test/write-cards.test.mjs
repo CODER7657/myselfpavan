@@ -29,6 +29,41 @@ describe("pickModel", () => {
   });
 });
 
+import { prune } from "../write-cards.mjs";
+
+describe("prune", () => {
+  const cards = { finverse: { repo: "Finverse" }, "raksha-ai": { repo: "raksha-ai" }, twenty: { repo: "twenty" } };
+
+  it("keeps only cards whose repository still gets generated prose", () => {
+    expect(prune(cards, ["twenty"])).toEqual({ kept: { twenty: { repo: "twenty" } }, dropped: ["finverse", "raksha-ai"] });
+  });
+
+  it("matches names whatever their case, as cards.json keys are lowercased", () => {
+    expect(prune({ "aura-guard": { repo: "AURA-GUARD" } }, ["AURA-GUARD"]).dropped).toEqual([]);
+  });
+
+  it("drops everything when no repository needs a generated card", () => {
+    expect(prune(cards, [])).toEqual({ kept: {}, dropped: ["finverse", "raksha-ai", "twenty"] });
+  });
+
+  it("changes nothing when every card is still wanted", () => {
+    const out = prune(cards, ["Finverse", "raksha-ai", "twenty"]);
+    expect(out.kept).toEqual(cards);
+    expect(out.dropped).toEqual([]);
+  });
+
+  it("does not modify the cards it was given", () => {
+    const before = JSON.stringify(cards);
+    prune(cards, []);
+    expect(JSON.stringify(cards)).toBe(before);
+  });
+
+  it("treats a missing or empty file as nothing to drop", () => {
+    expect(prune(undefined, ["twenty"])).toEqual({ kept: {}, dropped: [] });
+    expect(prune({}, [])).toEqual({ kept: {}, dropped: [] });
+  });
+});
+
 import { retryDelayMs } from "../write-cards.mjs";
 
 describe("retryDelayMs", () => {
