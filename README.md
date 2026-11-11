@@ -49,7 +49,7 @@ No model runs when a visitor opens the site. The cards are built ahead of time:
 
 ## Checks
 
-CI runs the typecheck, 139 unit tests, a syntax check of the pipeline scripts, the build,
+CI runs the typecheck, 144 unit tests, a syntax check of the pipeline scripts, the build,
 and mobile Lighthouse on the built site (performance at least 85, accessibility at least
 95). Dependabot and CodeQL run weekly. See [SECURITY.md](SECURITY.md) to report a
 vulnerability and [CHANGELOG.md](CHANGELOG.md) for what changed.

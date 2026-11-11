@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, reducedMotion } from "@/lib/gsap";
+import { PLATE_SIZES, plateSrcSet } from "@/lib/plate";
 import s from "./Ridge.module.css";
 
 /**
@@ -49,6 +50,8 @@ export function Ridge({ variant = "hero" }: { variant?: "hero" | "footer" }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/art/ridge-plate.webp"
+          srcSet={plateSrcSet("/art/ridge-plate.webp")}
+          sizes={PLATE_SIZES}
           alt=""
           className={`${s.plate} ${s.plateLight}`}
           loading={variant === "hero" ? "eager" : "lazy"}
@@ -58,6 +61,8 @@ export function Ridge({ variant = "hero" }: { variant?: "hero" | "footer" }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/art/ridge-plate-dark.webp"
+          srcSet={plateSrcSet("/art/ridge-plate-dark.webp")}
+          sizes={PLATE_SIZES}
           alt=""
           className={`${s.plate} ${s.plateDark}`}
           loading="lazy"

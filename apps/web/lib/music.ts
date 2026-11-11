@@ -445,9 +445,18 @@ export function startWhenAllowed(onFinished?: () => void): () => void {
     });
   }
 
-  /* Fetch, decode and stitch now — none of which needs permission — so the
-     first gesture only has to open a context and play. */
-  void prepare();
+  /* Fetch, decode and stitch ahead of the first gesture — none of which needs
+     permission — so that gesture only has to open a context and play. It
+     waits for the page to finish loading and go idle first: the track is half
+     a megabyte and was competing with the first paint. A gesture that arrives
+     sooner still works, because startMusic prepares on its own. */
+  const warm = () => {
+    if (!cancelled) void prepare();
+  };
+  const whenIdle = () =>
+    "requestIdleCallback" in window ? window.requestIdleCallback(warm, { timeout: 4000 }) : setTimeout(warm, 2000);
+  if (document.readyState === "complete") whenIdle();
+  else window.addEventListener("load", whenIdle, { once: true });
 
   /*
    * Started here only if this page has already been interacted with, which is
