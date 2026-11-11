@@ -32,3 +32,6 @@ assets/_check/
 # vendored design skill installed by `npx skills add` — not project source
 .claude/skills/
 skills-lock.json
+
+# lighthouse reports
+.lighthouseci/

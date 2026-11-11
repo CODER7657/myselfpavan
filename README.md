@@ -29,6 +29,35 @@ pretending it succeeded.
 
 ---
 
+## Where the cards come from
+
+No model runs when a visitor opens the site. The cards are built ahead of time:
+
+- **A daily assay** (`.github/workflows/assay.yml`) reads every non-archived, non-fork
+  repository on the account, scores it with the rubric in `packages/assay`, and commits
+  the result to `apps/web/public/data/`. The site reads those files.
+- **Private repositories** are scored too, unless they carry the `foundry-hide` topic.
+  Only the name, score, tier, commit count, last push and band totals are published.
+- **The flagship cards are written by hand** in `packages/content/src/projects.ts`, and
+  every number on them is taken from that repository's README.
+- **A promoted repository with no hand-written card** gets its prose from a model,
+  `openai/gpt-oss-120b` on Groq, during the assay. The card names the model, and any card
+  that states a number not found in the evidence is rejected. Today every promoted
+  repository has a hand-written card, so no generated card is shown.
+- **Order:** the six flagships lead in one fixed order, the same as on the profile and
+  the portfolio. Every other card is placed by its score.
+
+## Checks
+
+CI runs the typecheck, 144 unit tests, a syntax check of the pipeline scripts, the build,
+and mobile Lighthouse on the built site. Accessibility may not drop below 95 (measured 96).
+Performance measured 72 on the CI runner, up from 56 before the ridge plate was resized;
+the gate is a regression guard at 65, and reaching 85 is open work (the boot sequence
+blocks the main thread for about 700 ms). Dependabot and CodeQL run weekly. See [SECURITY.md](SECURITY.md) to report a
+vulnerability and [CHANGELOG.md](CHANGELOG.md) for what changed.
+
+---
+
 ## Layout
 
 ```

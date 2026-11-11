@@ -51,3 +51,38 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  # Mobile Lighthouse on the built site. Performance measured 72 on this runner
+  # (the target of 85 is open work), so the gate is a regression guard at 65;
+  # accessibility (Lighthouse runs axe-core's rules) may not drop below 95.
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Lighthouse
+        run: npx --yes @lhci/cli@0.15 autorun --config=lighthouserc.json
+
+      - name: Keep the reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: .lighthouseci
+          include-hidden-files: true
+          retention-days: 7

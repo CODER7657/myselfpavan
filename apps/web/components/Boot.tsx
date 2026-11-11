@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import { profile } from "@foundry/content";
 import { gsap, reducedMotion, ScrollTrigger } from "@/lib/gsap";
 import { useFoundry } from "@/lib/store";
+import { PLATE_SIZES, plateSrcSet } from "@/lib/plate";
 import s from "./Boot.module.css";
 
 const WORDMARK = "PAVAN//FOUNDRY";
@@ -61,6 +62,8 @@ export function Boot() {
           const img = new Image();
           img.onload = () => resolve();
           img.onerror = () => resolve();
+          img.sizes = PLATE_SIZES;
+          img.srcset = plateSrcSet(src);
           img.src = src;
         })
     );
@@ -296,12 +299,20 @@ export function Boot() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/art/ridge-plate.webp"
+          srcSet={plateSrcSet("/art/ridge-plate.webp")}
+          sizes={PLATE_SIZES}
           alt=""
           className={`${s.plate} ${s.plateLight}`}
           fetchPriority="high"
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/art/ridge-plate-dark.webp" alt="" className={`${s.plate} ${s.plateDark}`} />
+        <img
+          src="/art/ridge-plate-dark.webp"
+          srcSet={plateSrcSet("/art/ridge-plate-dark.webp")}
+          sizes={PLATE_SIZES}
+          alt=""
+          className={`${s.plate} ${s.plateDark}`}
+        />
         <span className={s.veil} />
       </div>
 
