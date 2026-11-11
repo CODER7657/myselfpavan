@@ -3,59 +3,6 @@
   "owner": "CODER7657",
   "records": [
     {
-      "name": "pavanpatel-portfolio",
-      "score": 49.2,
-      "tier": "epic",
-      "verdict": "promoted",
-      "reason": null,
-      "commits": 10,
-      "pushedAt": "2026-11-11T05:59:08Z",
-      "bands": [
-        {
-          "id": "depth",
-          "label": "Depth of work",
-          "earned": 11.5,
-          "max": 18
-        },
-        {
-          "id": "verification",
-          "label": "Verification",
-          "earned": 16.1,
-          "max": 22
-        },
-        {
-          "id": "completeness",
-          "label": "Completeness",
-          "earned": 8.6,
-          "max": 16
-        },
-        {
-          "id": "structure",
-          "label": "Structure",
-          "earned": 9,
-          "max": 13
-        },
-        {
-          "id": "shipped",
-          "label": "Shipped",
-          "earned": 3,
-          "max": 13
-        },
-        {
-          "id": "craft",
-          "label": "Craft",
-          "earned": 1,
-          "max": 8
-        },
-        {
-          "id": "attested",
-          "label": "Attested",
-          "earned": 0,
-          "max": 10
-        }
-      ]
-    },
-    {
       "name": "saakshi",
       "score": 66.7,
       "tier": "legendary",

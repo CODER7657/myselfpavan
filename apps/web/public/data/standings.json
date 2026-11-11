@@ -1,15 +1,14 @@
 {
   "rubricVersion": "3.2.0",
   "current": {
-    "ranAt": "2026-11-11T06:27:54.879Z",
+    "ranAt": "2026-11-11T06:49:43.200Z",
     "scores": {
-      "AURA-GUARD": 56.9,
+      "AURA-GUARD": 57.1,
       "charkha": 73.8,
       "complylite": 71.5,
       "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
       "genex-prj": 61,
       "kisan_mitra": 72.8,
-      "pavanpatel-portfolio": 49.2,
       "pramana": 85.9,
       "raksha-ai": 76.4,
       "saakshi": 66.7,
@@ -20,7 +19,7 @@
     }
   },
   "previous": {
-    "ranAt": "2026-11-11T06:20:32.830Z",
+    "ranAt": "2026-11-11T06:27:54.879Z",
     "scores": {
       "AURA-GUARD": 56.9,
       "charkha": 73.8,
@@ -28,7 +27,6 @@
       "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
       "genex-prj": 61,
       "kisan_mitra": 72.8,
-      "pavanpatel-portfolio": 49.2,
       "pramana": 85.9,
       "raksha-ai": 76.4,
       "saakshi": 66.7,
