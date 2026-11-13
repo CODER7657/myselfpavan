@@ -191,7 +191,7 @@ export const projects: Project[] = [
     metrics: [
       { label: "Doses leaked", value: "0 / 28" },
       { label: "Brands leaked", value: "0 / 28" },
-      { label: "Backend tests", value: "224" },
+      { label: "Backend tests", value: "379" },
       { label: "Status", value: "live" },
     ],
     repo: "https://github.com/CODER7657/kisan_mitra",

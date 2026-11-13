@@ -10,6 +10,8 @@ console is a way in, not a gate. Everything remains reachable by plain scrolling
 
 Live: <https://myselfpavan.vercel.app>
 
+![The FOUNDRY home screen: the headline Deterministic by design, the mission, vault and GitHub buttons, and the ridge plate](docs/screenshot.png)
+
 ---
 
 ## What is actually real
