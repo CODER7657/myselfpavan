@@ -1,6 +1,24 @@
 {
   "rubricVersion": "3.2.0",
   "current": {
+    "ranAt": "2026-11-13T16:37:29.958Z",
+    "scores": {
+      "AURA-GUARD": 62.4,
+      "charkha": 73.8,
+      "complylite": 71.5,
+      "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
+      "genex-prj": 62,
+      "kisan_mitra": 72.8,
+      "pramana": 85.9,
+      "raksha-ai": 76.4,
+      "saakshi": 66.7,
+      "trinetra": 67.9,
+      "twenty": 31.1,
+      "twinkal-ashay": 21.9,
+      "voice-emotion-detection": 74.9
+    }
+  },
+  "previous": {
     "ranAt": "2026-11-12T11:14:59.500Z",
     "scores": {
       "AURA-GUARD": 62.4,
@@ -16,24 +34,6 @@
       "twenty": 31.1,
       "twinkal-ashay": 21.9,
       "voice-emotion-detection": 74.9
-    }
-  },
-  "previous": {
-    "ranAt": "2026-11-11T11:03:00.118Z",
-    "scores": {
-      "AURA-GUARD": 57.1,
-      "charkha": 73.8,
-      "complylite": 71.5,
-      "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
-      "genex-prj": 61.2,
-      "kisan_mitra": 72.8,
-      "pramana": 85.9,
-      "raksha-ai": 76.4,
-      "saakshi": 66.7,
-      "trinetra": 67.9,
-      "twenty": 31.1,
-      "twinkal-ashay": 21.9,
-      "voice-emotion-detection": 74.7
     }
   }
 }
