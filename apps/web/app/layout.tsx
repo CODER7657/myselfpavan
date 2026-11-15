@@ -20,7 +20,8 @@ const micro = Silkscreen({
 
 const mono = IBM_Plex_Mono({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  // 300 was loaded and never used: no rule asks for it.
+  weight: ["400", "500", "600"],
   variable: "--font-mono-loaded",
   display: "swap",
 });
