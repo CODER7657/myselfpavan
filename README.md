@@ -53,11 +53,14 @@ No model runs when a visitor opens the site. The cards are built ahead of time:
 
 CI runs the typecheck, 152 unit tests, a syntax check of the pipeline scripts, the build,
 and mobile Lighthouse on the built site. Accessibility may not drop below 95 (measured
-100, with no failing audit). Performance is about 70, up from 56 before the ridge plate
-was resized. The CI runner is noisy: the same commit scored between 62 and 86 in single
-runs, so the gate is a regression guard at 60. Reaching 85 is open work and needs a
-throttled trace on a quiet machine; the first task after the scripts arrive runs for
-several hundred milliseconds on the throttled phone profile. Dependabot and CodeQL run weekly. See [SECURITY.md](SECURITY.md) to report a
+100, with no failing audit). Performance is measured with the throttling applied to the browser (slow 4G, a CPU four
+times slower), not with Lighthouse's simulated model: the simulated score for one commit
+ranged from 62 to 86, while three applied runs gave 57, 59 and 60. The gate is a
+regression guard at 55. Measured on that profile: first paint 2.1 s, largest paint 3.8 s,
+about 1.5 s of blocking time. Two things hold the score down, and 85 needs both fixed:
+the hero plate shares the slow link with the fonts, the styles and the scripts (about
+430 KB before it finishes), and hydrating the whole page with its scroll animations is
+one task of about 0.9 s. Dependabot and CodeQL run weekly. See [SECURITY.md](SECURITY.md) to report a
 vulnerability and [CHANGELOG.md](CHANGELOG.md) for what changed.
 
 ---
