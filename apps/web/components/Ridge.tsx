@@ -55,7 +55,10 @@ export function Ridge({ variant = "hero" }: { variant?: "hero" | "footer" }) {
           alt=""
           className={`${s.plate} ${s.plateLight}`}
           loading={variant === "hero" ? "eager" : "lazy"}
-          decoding="async"
+          // The hero plate is the largest thing on the first screen. Decoded in
+          // step with the frame it arrives in, it paints before hydration starts
+          // instead of waiting behind it.
+          decoding={variant === "hero" ? "sync" : "async"}
           fetchPriority={variant === "hero" ? "high" : "low"}
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
