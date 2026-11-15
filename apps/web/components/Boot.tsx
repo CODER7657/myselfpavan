@@ -312,6 +312,8 @@ export function Boot() {
           sizes={PLATE_SIZES}
           alt=""
           className={`${s.plate} ${s.plateDark}`}
+          // Hidden on the light stock: lazy keeps it from being fetched there.
+          loading="lazy"
         />
         <span className={s.veil} />
       </div>

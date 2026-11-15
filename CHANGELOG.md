@@ -14,6 +14,12 @@ and has no numbered releases, so entries are grouped by date. Daily
   (120 to 152 tests; #12 to #23).
 
 ### Changed
+- Lighthouse in CI applies its throttling to the browser instead of simulating it. The
+  simulated score moved between 62 and 86 for one commit; applied, three runs gave 57, 59
+  and 60. The gate is 55 (#25).
+- The boot screen no longer fetches the dark ridge plate on the light stock (162 KB), and
+  IBM Plex Mono 300, which no rule used, is no longer loaded. The first load went from
+  1,205 KB to 1,020 KB (#25).
 - Phones load a 768px copy of the ridge plate, 127 KB (#23).
 - Phones load a 960px copy of the ridge plate instead of the 2556px one, and the music
   track is fetched once the page is idle. Mobile Lighthouse performance in CI went from
