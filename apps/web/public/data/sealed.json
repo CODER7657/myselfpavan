@@ -3,6 +3,59 @@
   "owner": "CODER7657",
   "records": [
     {
+      "name": "himkara-manali",
+      "score": 50,
+      "tier": "epic",
+      "verdict": "promoted",
+      "reason": null,
+      "commits": 3,
+      "pushedAt": "2026-11-16T16:49:06Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 11.3,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 9.7,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 9,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 9,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 8,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 3,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    },
+    {
       "name": "saakshi",
       "score": 66.7,
       "tier": "legendary",
