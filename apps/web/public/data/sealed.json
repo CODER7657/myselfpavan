@@ -4,17 +4,70 @@
   "records": [
     {
       "name": "himkara-manali",
-      "score": 50,
+      "score": 50.4,
       "tier": "epic",
       "verdict": "promoted",
       "reason": null,
-      "commits": 3,
-      "pushedAt": "2026-11-16T16:49:06Z",
+      "commits": 4,
+      "pushedAt": "2026-11-18T10:21:36Z",
       "bands": [
         {
           "id": "depth",
           "label": "Depth of work",
-          "earned": 11.3,
+          "earned": 11.7,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 9.7,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 9,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 9,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 8,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 3,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    },
+    {
+      "name": "marealta-goa",
+      "score": 46.4,
+      "tier": "rare",
+      "verdict": "promoted",
+      "reason": null,
+      "commits": 2,
+      "pushedAt": "2026-11-18T11:35:35Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 7.7,
           "max": 18
         },
         {

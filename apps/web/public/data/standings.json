@@ -1,7 +1,7 @@
 {
   "rubricVersion": "3.2.0",
   "current": {
-    "ranAt": "2026-11-17T11:54:18.598Z",
+    "ranAt": "2026-11-18T11:44:56.594Z",
     "scores": {
       "AURA-GUARD": 62.4,
       "charkha": 73.9,
@@ -9,8 +9,9 @@
       "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
       "genex-prj": 61.7,
       "git-workflow-assignment": 9.4,
-      "himkara-manali": 50,
+      "himkara-manali": 50.4,
       "kisan_mitra": 72.9,
+      "marealta-goa": 46.4,
       "pramana": 85.9,
       "raksha-ai": 76.4,
       "saakshi": 66.7,
@@ -22,7 +23,7 @@
     }
   },
   "previous": {
-    "ranAt": "2026-11-16T11:22:03.399Z",
+    "ranAt": "2026-11-17T11:54:18.598Z",
     "scores": {
       "AURA-GUARD": 62.4,
       "charkha": 73.9,
@@ -30,6 +31,7 @@
       "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
       "genex-prj": 61.7,
       "git-workflow-assignment": 9.4,
+      "himkara-manali": 50,
       "kisan_mitra": 72.9,
       "pramana": 85.9,
       "raksha-ai": 76.4,
