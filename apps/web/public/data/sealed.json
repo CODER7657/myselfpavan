@@ -3,6 +3,59 @@
   "owner": "CODER7657",
   "records": [
     {
+      "name": "clip-radar",
+      "score": 38.8,
+      "tier": "rare",
+      "verdict": "promoted",
+      "reason": null,
+      "commits": 1,
+      "pushedAt": "2026-11-19T11:21:41Z",
+      "bands": [
+        {
+          "id": "depth",
+          "label": "Depth of work",
+          "earned": 5.4,
+          "max": 18
+        },
+        {
+          "id": "verification",
+          "label": "Verification",
+          "earned": 12,
+          "max": 22
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "earned": 13.4,
+          "max": 16
+        },
+        {
+          "id": "structure",
+          "label": "Structure",
+          "earned": 5,
+          "max": 13
+        },
+        {
+          "id": "shipped",
+          "label": "Shipped",
+          "earned": 3,
+          "max": 13
+        },
+        {
+          "id": "craft",
+          "label": "Craft",
+          "earned": 0,
+          "max": 8
+        },
+        {
+          "id": "attested",
+          "label": "Attested",
+          "earned": 0,
+          "max": 10
+        }
+      ]
+    },
+    {
       "name": "himkara-manali",
       "score": 50.4,
       "tier": "epic",
@@ -57,8 +110,8 @@
     },
     {
       "name": "marealta-goa",
-      "score": 46.4,
-      "tier": "rare",
+      "score": 49.4,
+      "tier": "epic",
       "verdict": "promoted",
       "reason": null,
       "commits": 2,
@@ -67,7 +120,7 @@
         {
           "id": "depth",
           "label": "Depth of work",
-          "earned": 7.7,
+          "earned": 10.7,
           "max": 18
         },
         {
