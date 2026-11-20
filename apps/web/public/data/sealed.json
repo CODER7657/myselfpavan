@@ -4,29 +4,29 @@
   "records": [
     {
       "name": "clip-radar",
-      "score": 38.8,
-      "tier": "rare",
+      "score": 49.8,
+      "tier": "epic",
       "verdict": "promoted",
       "reason": null,
-      "commits": 1,
-      "pushedAt": "2026-11-19T11:21:41Z",
+      "commits": 16,
+      "pushedAt": "2026-11-19T13:17:59Z",
       "bands": [
         {
           "id": "depth",
           "label": "Depth of work",
-          "earned": 5.4,
+          "earned": 11.4,
           "max": 18
         },
         {
           "id": "verification",
           "label": "Verification",
-          "earned": 12,
+          "earned": 16.4,
           "max": 22
         },
         {
           "id": "completeness",
           "label": "Completeness",
-          "earned": 13.4,
+          "earned": 14,
           "max": 16
         },
         {
