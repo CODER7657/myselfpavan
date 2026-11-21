@@ -1,12 +1,12 @@
 {
   "rubricVersion": "3.2.0",
   "current": {
-    "ranAt": "2026-11-20T11:42:52.043Z",
+    "ranAt": "2026-11-21T11:04:54.632Z",
     "scores": {
       "AURA-GUARD": 62.4,
       "charkha": 73.9,
       "clip-radar": 49.8,
-      "complylite": 71.5,
+      "complylite": 71.6,
       "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
       "genex-prj": 61.7,
       "git-workflow-assignment": 9.4,
@@ -24,11 +24,11 @@
     }
   },
   "previous": {
-    "ranAt": "2026-11-19T11:42:17.926Z",
+    "ranAt": "2026-11-20T11:42:52.043Z",
     "scores": {
       "AURA-GUARD": 62.4,
       "charkha": 73.9,
-      "clip-radar": 38.8,
+      "clip-radar": 49.8,
       "complylite": 71.5,
       "fix-broken-Terminal-Bench-2-Harbor-": 27.4,
       "genex-prj": 61.7,
